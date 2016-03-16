@@ -1,10 +1,13 @@
 package com.mygdx.game.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.mygdx.game.objects.Barrier;
 import com.mygdx.game.objects.Obstacle;
 import com.mygdx.game.objects.Power;
@@ -29,32 +32,42 @@ public class PlayState extends State{
     private ArrayList<Switch> switches;
     private ArrayList<Barrier> barriers;
     private ArrayList<Power> powers;
-    private int gameSpeed;
+    private long lastDropTime, endPowerTime;
+    private int gameSpeed, speedIncrement, playerSpeed, dangerZone;
+    boolean[] path;
+    boolean[] current = {false, false, false, false, false, false, false, false, false};
 
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
-        player = new Player();
-        //cam.setToOrtho(false, Gdx.graphics.getHeight()/2,Gdx.graphics.getWidth()/2);
+        //camera initialization
+        cam = new OrthographicCamera();
+        cam.setToOrtho(false, 480, 800);
+
+        //arraylist initialization
         sideWalls = new ArrayList<SideWall>();
         obstacles = new ArrayList<Obstacle>();
         barriers = new ArrayList<Barrier>();
         powers = new ArrayList<Power>();
         switches = new ArrayList<Switch>();
+
+        //object initialization
+        player = new Player();
+        joystick = new JoyStick();
+
+        //misc values initialization
         gameSpeed = 100;
+
+        //spawning initialization
+        spawnObstacle(current);
         spawnSides();
     }
-
     @Override
     protected void handleInput() {
-    }
-
-    private void processInput(){
         float relativex = 0;
         float relativey = 0;
         Vector3 touchPos = new Vector3();
         if (Gdx.input.isTouched()) {
-            joystick = new JoyStick(Gdx.input.getX(),Gdx.input.getY());
             touchPos = new Vector3();
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             cam.unproject(touchPos);
@@ -62,8 +75,8 @@ public class PlayState extends State{
             relativey = touchPos.y - (joystick.getY() + joystick.getJoystickHeight()/2);
             if (!touchHeld) {
                 joystick.setX(touchPos.x - joystick.getJoystickWidth()/2);
-                joystick.setY(touchPos.y - joystick.getJoystickHeight() / 2);
-                joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth() / 2);
+                joystick.setY(touchPos.y - joystick.getJoystickHeight()/2);
+                joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
                 joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
                 touchHeld = true;
             }
@@ -88,6 +101,7 @@ public class PlayState extends State{
             omniMove(cos, sin);
         }
     }
+
     private void omniMove(float x, float y){
         float prevx = player.x;
         float prevy = player.y;
@@ -172,7 +186,13 @@ public class PlayState extends State{
         }
         sb.draw(player.getTexture(),player.x,player.y);
         sb.end();
-        processInput();
+        handleInput();
+
+        if(TimeUtils.nanoTime() - lastDropTime > 500000000) {
+            wallCoord(path);
+            spawnObstacle(current);
+            spawnSides();
+        }
 
         Iterator<Obstacle> iter = obstacles.iterator();
         Iterator<SideWall> iter2 = sideWalls.iterator();
@@ -216,5 +236,62 @@ public class PlayState extends State{
 //		dropSound.dispose();
 //		rainMusic.dispose();
         //sb.dispose();
+    }
+    private void wallCoord(boolean[] pathin){
+        boolean test = false;
+        int out_index = 0;
+
+        while (!test) {
+            int temp = MathUtils.random(0, 8);
+            for (int i = 0; i < temp; i++) {
+                int coord = MathUtils.random(0,8);
+                current[coord] = true;
+            }
+            for (int i = 0; i < current.length; i++){
+                if (current[i] && pathin[i]){
+                    test = true;
+                    break;
+                }
+            }
+        }
+        for (int k = 0; k < current.length; k++) {
+            if (current[k] && pathin[k]) {
+                pathin[k] = true;
+                out_index = k;
+            } else {
+                pathin[k] = false;
+            }
+        }
+        for (int j = 1; j < current.length; j++) {
+            if (out_index + j < current.length) {
+                if (current[out_index + j] && pathin[out_index + j - 1]) {
+                    pathin[out_index + j] = true;
+                }
+            }
+            if (out_index - j >= 0) {
+                if (current[out_index - j] && pathin[out_index - j + 1]) {
+                    pathin[out_index - j] = true;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+        path = pathin;
+    }
+
+    private void spawnObstacle(boolean[] map) {
+        for (int i = 0; i < map.length; i++) {
+            if (!map[i]) {
+                Obstacle obstacle = new Obstacle();
+                obstacle.x = (50 * i) + 15;
+                obstacle.y = 800;
+                obstacle.width = 50;
+                obstacle.height = 50;
+                obstacles.add(obstacle);
+            }
+            current[i] = false;
+        }
+        lastDropTime = TimeUtils.nanoTime();
     }
 }
