@@ -1,5 +1,6 @@
 package com.mygdx.game.states;
 
+import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -65,8 +66,8 @@ public class PlayState extends State{
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
-        System.out.println("This is playstate");
         running = true;
+
         //camera initialization
         cam = new OrthographicCamera();
         cam.setToOrtho(false, 480, 800);
@@ -82,10 +83,10 @@ public class PlayState extends State{
         dangerZone = 400;
         powerCounter = 0;
         doorCounter = 0;
+
         //spawning initialization
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
-        System.out.println("This is end");
     }
     @Override
     protected void handleInput() {
@@ -133,17 +134,17 @@ public class PlayState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
-        System.out.println("this is render");
         handleInput();
         checkSwitchCollision();
-        System.out.println("after methods");
         this.sb=sb;
         // tell the camera to update its matrices.
         while (sideWalls.get(sideWalls.size() - 1).y < 999) {
             synchronized (mapBuffer) {
                 while (mapBuffer.size() == 0){
                     try {
+                        System.out.println("sidewalls");
                         mapBuffer.wait();
+                        System.out.println("sidewalls done");
                     } catch (InterruptedException e){
 
                     }
@@ -154,25 +155,25 @@ public class PlayState extends State{
                 powerUp = powerUpBuffer.remove(0);
                 mapBuffer.notifyAll();
             }
-
-            System.out.println("after lock");
             float temp = sideWalls.get(sideWalls.size() - 1).y + 50;
             spawnObstacle(temp);
             spawnPower();
             spawnSwitch();
             spawnDoor();
             spawnSides(temp);
-            System.out.println("after spawns");
         }
-        System.out.println("after sidewall");
         if (bg.get(bg.size() - 1).y < 1) {
             spawnBg();
         }
+        // tell the camera to update its matrices.
         cam.update();
-        sb.setProjectionMatrix(cam.combined);
-        sb.begin();
-        System.out.println("after begin");
 
+        // tell the SpriteBatch to render in the
+        // coordinate system specified by the camera.
+        sb.setProjectionMatrix(cam.combined);
+
+        // begin a new batch and draw the player and all objects
+        sb.begin();
 
         for (Background backg : bg) {
             sb.draw(backg.getImage(), backg.x, backg.y);
@@ -195,19 +196,25 @@ public class PlayState extends State{
         for (BarrierOpen barrier : barrierOpens) {
             sb.draw(barrier.getImage(), barrier.x, barrier.y);
         }
-        System.out.println("after for loops");
+
         sb.draw(player.getTexture(), player.x, player.y);
+
         if(touched){
 
             sb.draw(joystick.getJoystickImage(), joystick.getX(), joystick.getY());
             sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
         }
+
         sb.end();
+
+//		constantly check if any power/DangerZone's effect still lingers
         effectPower();
         notifyDangerZone();
+//		effectDangerZone();
 
+        // move the obstacles, remove any that are beneath the bottom edge of the screen.
 
-
+        player.y -= gameSpeed * Gdx.graphics.getDeltaTime();
 
         Iterator<Obstacle> iter = obstacles.iterator();
         Iterator<SideWall> iter2 = sideWalls.iterator();
@@ -216,9 +223,6 @@ public class PlayState extends State{
         Iterator<Barrier> iter5 = barriers.iterator();
         Iterator<BarrierOpen> iter6 = barrierOpens.iterator();
         Iterator<Background> iter7 = bg.iterator();
-
-        player.y -= gameSpeed*Gdx.graphics.getDeltaTime();
-
         while (iter.hasNext()) {
             Rectangle obstacle = iter.next();
             obstacle.y -= gameSpeed * Gdx.graphics.getDeltaTime();
@@ -254,7 +258,6 @@ public class PlayState extends State{
             bg.y -= gameSpeed * Gdx.graphics.getDeltaTime();
             if (bg.y + 800 < 0) iter7.remove();
         }
-        System.out.println("this is render end");
     }
     @Override
     public void update(float dt) {
@@ -262,9 +265,10 @@ public class PlayState extends State{
         //player.update(dt);
         //joystick.update(dt);
     }
+
     @Override
     public void dispose() {
-// dispose of all the native resources
+        // dispose of all the native resources
         for (Obstacle obstacle:obstacles) {
             obstacle.getImage().dispose();
         }
@@ -283,12 +287,10 @@ public class PlayState extends State{
         for (BarrierOpen barrier:barrierOpens) {
             barrier.getImage().dispose();
         }
-        player.getTexture().dispose();
-        joystick.getJoystickCentreImage().dispose();
+        player.getImage().dispose();
         joystick.getJoystickImage().dispose();
-//		dropSound.dispose();
-//		rainMusic.dispose();
-        sb.dispose();
+        joystick.getJoystickCentreImage().dispose();
+        //sb.dispose();
     }
     private void removeBarriers(){
 //		TODO: if notified by server (Ryan)
@@ -308,16 +310,19 @@ public class PlayState extends State{
             sideWalls.add(sideWall);
         }
     }
+    private void effectDangerZone(){
+        // if notified by server
+        gameSpeed += speedIncrement;
+    }
 
 
-
-    private void checkSwitchCollision() {
+    private void checkSwitchCollision(){
         //		collide with switch
-        for (Switch eachSwitch : switches) {
-            if (player.overlaps(eachSwitch)) {
+        for (Switch eachSwitch:switches){
+            if (player.overlaps(eachSwitch)){
                 // change this to another different switch image
                 eachSwitch.setImage(new Texture(Gdx.files.internal("switch_on.png")));
-                for (Barrier barrier : barriers) {
+                for (Barrier barrier: barriers){
                     BarrierOpen bg = new BarrierOpen();
                     bg.x = barrier.x;
                     bg.y = barrier.y;
@@ -326,6 +331,14 @@ public class PlayState extends State{
                     barrierOpens.add(bg);
                 }
                 removeBarriers();
+                // then notify server
+            }
+        }
+//		collide with power up
+        for (Power power:powers){
+            if (player.overlaps(power)){
+                player.setPower(power.getType());
+                powers.remove(power);
                 // then notify server
             }
         }
@@ -454,11 +467,13 @@ public class PlayState extends State{
             }
             doorCounter = 0;
         }
+
         synchronized (mapBuffer) {
             while (mapBuffer.size() > 3){
-                System.out.println("wallcoord");
                 try {
+                    System.out.println("wallcoord");
                     mapBuffer.wait();
+                    System.out.println("wallcoord done");
                 } catch (InterruptedException e){
 
                 }
@@ -468,11 +483,9 @@ public class PlayState extends State{
             switchBuffer.add(temp_switch);
             doorBuffer.add(temp_door);
             mapBuffer.notifyAll();
-            System.out.println("wallcoord fin");
         }
     }
-
-    public void createObstacle(boolean[] map) {
+    void createObstacle(boolean[] map) {
         for (int i = 0; i < map.length; i++) {
             if (!map[i]) {
                 Obstacle obstacle = new Obstacle();
@@ -482,12 +495,11 @@ public class PlayState extends State{
                 obstacle.height = spriteHeight;
                 obstacles.add(obstacle);
             }
-            current[i] = false;
         }
         powerCounter += 1;
         doorCounter += 1;
     }
-    public void createBg(){
+    void createBg(){
         Background backg = new Background();
         backg.x = 0;
         backg.y = 0;
@@ -495,6 +507,7 @@ public class PlayState extends State{
         backg.height = 800;
         bg.add(backg);
     }
+
     private void spawnBg(){
         Background backg = new Background();
         backg.x = 0;
@@ -561,7 +574,7 @@ public class PlayState extends State{
         }
     }
 
-    public void createSides(){
+    void createSides(){
         for (int i = 0; i < 2; i++) {
             SideWall sideWall = new SideWall();
             sideWall.x = (465*i);
@@ -576,7 +589,7 @@ public class PlayState extends State{
         float prevy = player.y;
         player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
         player.y += y * playerSpeed * Gdx.graphics.getDeltaTime();
-        if (collisionCheck()){
+        if (collidesObstacle()){
             player.x = prevx;
             player.y = prevy;
             if (x > 0) x = 1;
@@ -584,61 +597,47 @@ public class PlayState extends State{
             if (y > 0) y = 1;
             if (y < 0) y = -1;
             player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
-            if (collisionCheck()){
+            if (collidesObstacle()){
                 player.x = prevx;
             }
             player.y += y * playerSpeed * Gdx.graphics.getDeltaTime();
-            if (collisionCheck()){
+            if (collidesObstacle()){
                 player.y = prevy;
             }
-            System.out.println(player.x);
-            System.out.println(player.y);
         }
     }
-    private boolean collisionCheck(){
+    /**
+     Method handling collision. If there is an overlap over an object that should be impassable,
+     the player will be moved back to his previous position (remembered by a temporary variable)
+     */
+    private boolean collidesObstacle(){
+// collision with screen boundaries
         if (player.x > 465 - player.width ){
             player.x = 465 - player.width;
         }
+
         if (player.x < 15){
             player.x = 15;
         }
+
+        if (player.y > 750){
+            player.y = 750;
+        }
+
 //		collide with normal wall obstacle
-        for (Obstacle obstacle: obstacles) {
-            if (player.overlaps(obstacle)){
+        for (Obstacle obstacle : obstacles) {
+            if (player.overlaps(obstacle)) {
                 return true;
             }
         }
 //		collide with barriers
-        for (Barrier barrier: barriers) {
-            if (player.overlaps(barrier)){
+        for (Barrier barrier : barriers) {
+            if (player.overlaps(barrier)) {
                 return true;
-            }
-        }
-//		collide with switch
-        for (Switch eachSwitch:switches){
-            if (player.overlaps(eachSwitch)){
-                // change this to another different switch image
-                eachSwitch.setImage(new Texture(Gdx.files.internal("switch_on.png")));
-                for (Barrier barrier: barriers){
-                    BarrierOpen bg = new BarrierOpen();
-                    bg.x = barrier.x;
-                    bg.y = barrier.y;
-                    bg.width = 50;
-                    bg.height = 50;
-                    barrierOpens.add(bg);
-                }
-                removeBarriers();
-                // then notify server
-            }
-        }
-//		collide with power up
-        for (Power power:powers){
-            if (player.overlaps(power)){
-                player.setPower(power.getType());
-                powers.remove(power);
-                // then notify server
             }
         }
         return false;
     }
+
+
 }

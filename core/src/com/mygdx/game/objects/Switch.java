@@ -9,6 +9,6 @@ import com.badlogic.gdx.graphics.Texture;
 public class Switch extends Obstacle {
     public Switch(){
         super();
-        this.setImage(new Texture(Gdx.files.internal("bucket.png")));
+        this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
     }
 }

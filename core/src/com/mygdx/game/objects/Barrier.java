@@ -9,6 +9,6 @@ import com.badlogic.gdx.graphics.Texture;
 public class Barrier extends Obstacle {
     public Barrier(){
         super();
-        this.setImage(new Texture(Gdx.files.internal("bucket.png")));
+        this.setImage(new Texture(Gdx.files.internal("gate_closed.png")));
     }
 }
