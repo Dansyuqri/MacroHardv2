@@ -52,7 +52,7 @@ public class PlayState extends State{
     private ArrayList<boolean[]> powerUpBuffer = new ArrayList<boolean[]>();
 
     private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
-    private ArrayList<SideWall> sideWalls = new ArrayList<SideWall>();
+    public static ArrayList<SideWall> sideWalls = new ArrayList<SideWall>();
     private ArrayList<Switch> switches = new ArrayList<Switch>();
     private ArrayList<Barrier> barriers = new ArrayList<Barrier>();
     private ArrayList<BarrierOpen> barrierOpens = new ArrayList<BarrierOpen>();
@@ -549,11 +549,7 @@ public class PlayState extends State{
     private void spawnSwitch(){
         for (int i = 0; i < doorSwitch.length; i++) {
             if (doorSwitch[i]) {
-                Switch doorSwitch = new Switch();
-                doorSwitch.x = (spriteWidth * i) + 15;
-                doorSwitch.y = sideWalls.get(sideWalls.size()-1).y+50;
-                doorSwitch.width = spriteWidth;
-                doorSwitch.height = spriteHeight;
+                Switch doorSwitch = new Switch(spriteWidth, spriteHeight, i);
                 switches.add(doorSwitch);
             }
         }
