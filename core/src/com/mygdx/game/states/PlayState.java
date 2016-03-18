@@ -536,11 +536,7 @@ public class PlayState extends State{
     private void spawnPower() {
         for (int i = 0; i < powerUp.length; i++) {
             if (powerUp[i]) {
-                Power power = new Power(TYPES_OF_POWER[(int)(Math.random()*TYPES_OF_POWER.length)]);
-                power.x = (spriteWidth * i) + 15;
-                power.y = sideWalls.get(sideWalls.size()-1).y+50;
-                power.width = spriteWidth;
-                power.height = spriteHeight;
+                Power power = new Power(TYPES_OF_POWER[(int)(Math.random()*TYPES_OF_POWER.length)],i);
                 powers.add(power);
             }
         }
