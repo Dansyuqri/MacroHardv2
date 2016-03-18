@@ -261,9 +261,6 @@ public class PlayState extends State{
     }
     @Override
     public void update(float dt) {
-        // handleInput();
-        //player.update(dt);
-        //joystick.update(dt);
     }
 
     @Override
@@ -292,11 +289,96 @@ public class PlayState extends State{
         joystick.getJoystickCentreImage().dispose();
         //sb.dispose();
     }
-    private void removeBarriers(){
-//		TODO: if notified by server (Ryan)
-        barriers.clear();
+
+
+
+
+
+
+/***************************************************
+*  CREATE METHODS HERE
+****************************************************
+*/
+    void createObstacle(boolean[] map) {
+        for (int i = 0; i < map.length; i++) {
+            if (!map[i]) {
+                Obstacle obstacle = new Obstacle();
+                obstacle.x = (spriteWidth * i) + 15;
+                obstacle.y = 800;
+                obstacle.width = spriteWidth;
+                obstacle.height = spriteHeight;
+                obstacles.add(obstacle);
+            }
+        }
+        powerCounter += 1;
+        doorCounter += 1;
+    }
+    void createBg(){
+        Background backg = new Background(0);
+        bg.add(backg);
+    }
+    void createSides(){
+        for (int i = 0; i < 2; i++) {
+            SideWall sideWall = new SideWall(spriteWidth,spriteHeight,800,i);
+            sideWalls.add(sideWall);
+        }
     }
 
+/***********************************************
+ *  SPAWN METHODS HERE
+ ***********************************************
+ */
+    /**
+     Method to spawn the walls using the coordinates from the wallCoord() method
+     */
+    private void spawnObstacle(float in) {
+        for (int i = 0; i < path.length; i++) {
+            if (!path[i]) {
+                Obstacle obstacle = new Obstacle();
+                obstacle.x = (spriteWidth * i) + 15;
+                obstacle.y = in;
+                obstacle.width = spriteWidth;
+                obstacle.height = spriteHeight;
+                obstacles.add(obstacle);
+            }
+        }
+        powerCounter += 1;
+        doorCounter += 1;
+    }
+    private void spawnBg(){
+        Background backg = new Background(800);
+        bg.add(backg);
+    }
+    private void spawnPower() {
+        for (int i = 0; i < powerUp.length; i++) {
+            if (powerUp[i]) {
+                Power power = new Power(TYPES_OF_POWER[(int)(Math.random()*TYPES_OF_POWER.length)],i);
+                powers.add(power);
+            }
+        }
+    }
+
+    private void spawnSwitch(){
+        for (int i = 0; i < doorSwitch.length; i++) {
+            if (doorSwitch[i]) {
+                Switch doorSwitch = new Switch(spriteWidth, spriteHeight, i);
+                switches.add(doorSwitch);
+            }
+        }
+    }
+
+    private void spawnDoor(){
+        for (int i = 0; i < barrier.length; i++) {
+            if (barrier[i]) {
+                Barrier door = new Barrier();
+                door.x = (spriteWidth * i) + 15;
+                door.y = sideWalls.get(sideWalls.size()-1).y+50;
+                door.width = spriteWidth;
+                door.height = spriteHeight;
+                barriers.add(door);
+            }
+        }
+    }
     /**
      Spawn side walls to fill up the gap between the playing field and the actual maze
      */
@@ -306,71 +388,68 @@ public class PlayState extends State{
             sideWalls.add(sideWall);
         }
     }
-    private void effectDangerZone(){
-        // if notified by server
-        gameSpeed += speedIncrement;
-    }
 
-
-    private void checkSwitchCollision(){
-        //		collide with switch
-        for (Switch eachSwitch:switches){
-            if (player.overlaps(eachSwitch)){
-                // change this to another different switch image
-                eachSwitch.setImage(new Texture(Gdx.files.internal("switch_on.png")));
-                for (Barrier barrier: barriers){
-                    BarrierOpen bg = new BarrierOpen();
-                    bg.x = barrier.x;
-                    bg.y = barrier.y;
-                    bg.width = 50;
-                    bg.height = 50;
-                    barrierOpens.add(bg);
-                }
-                removeBarriers();
-                // then notify server
+    private void omniMove(float x, float y){
+        float prevx = player.x;
+        float prevy = player.y;
+        player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
+        player.y += y * playerSpeed * Gdx.graphics.getDeltaTime();
+        if (collidesObstacle()){
+            player.x = prevx;
+            player.y = prevy;
+            if (x > 0) x = 1;
+            if (x < 0) x = -1;
+            if (y > 0) y = 1;
+            if (y < 0) y = -1;
+            player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
+            if (collidesObstacle()){
+                player.x = prevx;
             }
-        }
-//		collide with power up
-        for (Power power:powers){
-            if (player.overlaps(power)){
-                player.setPower(power.getType());
-                powers.remove(power);
-                // then notify server
+            player.y += y * playerSpeed * Gdx.graphics.getDeltaTime();
+            if (collidesObstacle()){
+                player.y = prevy;
             }
         }
     }
 
-
-    private void notifyDangerZone(){
-        if (player.y < dangerZone) {
-            //notify server
-        }
-    }
+/***********************************************
+* MISC METHODS HERE
+************************************************
+*/
 
     /**
-     Method handling power-ups
+     Method handling collision. If there is an overlap over an object that should be impassable,
+     the player will be moved back to his previous position (remembered by a temporary variable)
      */
-    boolean setPowerLock = true;
-    private void effectPower(){
-        if (System.currentTimeMillis() > endPowerTime) {
-            setPowerLock = true;
+    private boolean collidesObstacle(){
+// collision with screen boundaries
+        if (player.x > 465 - player.width ){
+            player.x = 465 - player.height;
         }
-        if (System.currentTimeMillis() <= endPowerTime){
-            if (setPowerLock) {
-                endPowerTime = System.currentTimeMillis() + 5000;
-                setPowerLock = false;
-            }
-            if (player.getPower().equals("slowGameDown")) {
-                gameSpeed -= speedIncrement;
-            } else if (player.getPower().equals("fewerObstacles")) {
 
-            } else if (player.getPower().equals("speedPlayerUp")) {
-                playerSpeed += speedIncrement;
-            } else if (player.getPower().equals("dangerZoneHigher")) {
-                dangerZone += 50;
+        if (player.x < 15){
+            player.x = 15;
+        }
+
+        if (player.y > 750){
+            player.y = 750;
+        }
+
+//		collide with normal wall obstacle
+        for (Obstacle obstacle : obstacles) {
+            if (player.overlaps(obstacle)) {
+                return true;
             }
         }
+//		collide with barriers
+        for (Barrier barrier : barriers) {
+            if (player.overlaps(barrier)) {
+                return true;
+            }
+        }
+        return false;
     }
+
     /**
      Method to calculate and randomize the wall, power, switch etc. placement. It keeps randomly
      generating a sequence until it fulfils the condition where the player can reach to the next
@@ -483,139 +562,73 @@ public class PlayState extends State{
             mapBuffer.notifyAll();
         }
     }
-    void createObstacle(boolean[] map) {
-        for (int i = 0; i < map.length; i++) {
-            if (!map[i]) {
-                Obstacle obstacle = new Obstacle();
-                obstacle.x = (spriteWidth * i) + 15;
-                obstacle.y = 800;
-                obstacle.width = spriteWidth;
-                obstacle.height = spriteHeight;
-                obstacles.add(obstacle);
-            }
-        }
-        powerCounter += 1;
-        doorCounter += 1;
-    }
-    void createBg(){
-        Background backg = new Background(0);
-        bg.add(backg);
+    private void effectDangerZone(){
+        // if notified by server
+        gameSpeed += speedIncrement;
     }
 
-    private void spawnBg(){
-        Background backg = new Background(800);
-        bg.add(backg);
+
+    private void checkSwitchCollision(){
+        //		collide with switch
+        for (Switch eachSwitch:switches){
+            if (player.overlaps(eachSwitch)){
+                // change this to another different switch image
+                eachSwitch.setImage(new Texture(Gdx.files.internal("switch_on.png")));
+                for (Barrier barrier: barriers){
+                    BarrierOpen bg = new BarrierOpen();
+                    bg.x = barrier.x;
+                    bg.y = barrier.y;
+                    bg.width = 50;
+                    bg.height = 50;
+                    barrierOpens.add(bg);
+                }
+                removeBarriers();
+                // then notify server
+            }
+        }
+//		collide with power up
+        for (Power power:powers){
+            if (player.overlaps(power)){
+                player.setPower(power.getType());
+                powers.remove(power);
+                // then notify server
+            }
+        }
+    }
+    private void removeBarriers(){
+//		TODO: if notified by server (Ryan)
+        barriers.clear();
+    }
+
+    private void notifyDangerZone(){
+        if (player.y < dangerZone) {
+            //notify server
+        }
     }
 
     /**
-     Method to spawn the walls using the coordinates from the wallCoord() method
+     Method handling power-ups
      */
-    private void spawnObstacle(float in) {
-        for (int i = 0; i < path.length; i++) {
-            if (!path[i]) {
-                Obstacle obstacle = new Obstacle();
-                obstacle.x = (spriteWidth * i) + 15;
-                obstacle.y = in;
-                obstacle.width = spriteWidth;
-                obstacle.height = spriteHeight;
-                obstacles.add(obstacle);
-            }
+    boolean setPowerLock = true;
+    private void effectPower(){
+        if (System.currentTimeMillis() > endPowerTime) {
+            setPowerLock = true;
         }
-        powerCounter += 1;
-        doorCounter += 1;
-    }
-
-    private void spawnPower() {
-        for (int i = 0; i < powerUp.length; i++) {
-            if (powerUp[i]) {
-                Power power = new Power(TYPES_OF_POWER[(int)(Math.random()*TYPES_OF_POWER.length)],i);
-                powers.add(power);
+        if (System.currentTimeMillis() <= endPowerTime){
+            if (setPowerLock) {
+                endPowerTime = System.currentTimeMillis() + 5000;
+                setPowerLock = false;
             }
-        }
-    }
+            if (player.getPower().equals("slowGameDown")) {
+                gameSpeed -= speedIncrement;
+            } else if (player.getPower().equals("fewerObstacles")) {
 
-    private void spawnSwitch(){
-        for (int i = 0; i < doorSwitch.length; i++) {
-            if (doorSwitch[i]) {
-                Switch doorSwitch = new Switch(spriteWidth, spriteHeight, i);
-                switches.add(doorSwitch);
+            } else if (player.getPower().equals("speedPlayerUp")) {
+                playerSpeed += speedIncrement;
+            } else if (player.getPower().equals("dangerZoneHigher")) {
+                dangerZone += 50;
             }
         }
     }
-
-    private void spawnDoor(){
-        for (int i = 0; i < barrier.length; i++) {
-            if (barrier[i]) {
-                Barrier door = new Barrier();
-                door.x = (spriteWidth * i) + 15;
-                door.y = sideWalls.get(sideWalls.size()-1).y+50;
-                door.width = spriteWidth;
-                door.height = spriteHeight;
-                barriers.add(door);
-            }
-        }
-    }
-
-    void createSides(){
-        for (int i = 0; i < 2; i++) {
-            SideWall sideWall = new SideWall(spriteWidth,spriteHeight,800,i);
-            sideWalls.add(sideWall);
-        }
-    }
-    private void omniMove(float x, float y){
-        float prevx = player.x;
-        float prevy = player.y;
-        player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
-        player.y += y * playerSpeed * Gdx.graphics.getDeltaTime();
-        if (collidesObstacle()){
-            player.x = prevx;
-            player.y = prevy;
-            if (x > 0) x = 1;
-            if (x < 0) x = -1;
-            if (y > 0) y = 1;
-            if (y < 0) y = -1;
-            player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
-            if (collidesObstacle()){
-                player.x = prevx;
-            }
-            player.y += y * playerSpeed * Gdx.graphics.getDeltaTime();
-            if (collidesObstacle()){
-                player.y = prevy;
-            }
-        }
-    }
-    /**
-     Method handling collision. If there is an overlap over an object that should be impassable,
-     the player will be moved back to his previous position (remembered by a temporary variable)
-     */
-    private boolean collidesObstacle(){
-// collision with screen boundaries
-        if (player.x > 465 - player.width ){
-            player.x = 465 - player.height;
-        }
-
-        if (player.x < 15){
-            player.x = 15;
-        }
-
-        if (player.y > 750){
-            player.y = 750;
-        }
-
-//		collide with normal wall obstacle
-        for (Obstacle obstacle : obstacles) {
-            if (player.overlaps(obstacle)) {
-                return true;
-            }
-        }
-//		collide with barriers
-        for (Barrier barrier : barriers) {
-            if (player.overlaps(barrier)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
 }
