@@ -498,20 +498,12 @@ public class PlayState extends State{
         doorCounter += 1;
     }
     void createBg(){
-        Background backg = new Background();
-        backg.x = 0;
-        backg.y = 0;
-        backg.width = 480;
-        backg.height = 800;
+        Background backg = new Background(0);
         bg.add(backg);
     }
 
     private void spawnBg(){
-        Background backg = new Background();
-        backg.x = 0;
-        backg.y = 800;
-        backg.width = 480;
-        backg.height = 800;
+        Background backg = new Background(800);
         bg.add(backg);
     }
 
