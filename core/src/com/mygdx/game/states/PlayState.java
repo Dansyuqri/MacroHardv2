@@ -319,7 +319,7 @@ public class PlayState extends State{
     }
     void createSides(){
         for (int i = 0; i < 2; i++) {
-            SideWall sideWall = new SideWall(spriteWidth,spriteHeight,800,i);
+            SideWall sideWall = new SideWall(spriteHeight,800,i);
             sideWalls.add(sideWall);
         }
     }
@@ -384,7 +384,7 @@ public class PlayState extends State{
      */
     private void spawnSides(float in){
         for (int i = 0; i < 2; i++) {
-            SideWall sideWall = new SideWall(spriteWidth,spriteHeight,in,i);
+            SideWall sideWall = new SideWall(spriteHeight,in,i);
             sideWalls.add(sideWall);
         }
     }
