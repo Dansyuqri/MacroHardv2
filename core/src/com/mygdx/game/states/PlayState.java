@@ -302,11 +302,7 @@ public class PlayState extends State{
      */
     private void spawnSides(float in){
         for (int i = 0; i < 2; i++) {
-            SideWall sideWall = new SideWall();
-            sideWall.x = (465*i);
-            sideWall.y = in;
-            sideWall.width = 15;
-            sideWall.height = spriteHeight;
+            SideWall sideWall = new SideWall(spriteWidth,spriteHeight,in,i);
             sideWalls.add(sideWall);
         }
     }
@@ -472,6 +468,8 @@ public class PlayState extends State{
             while (mapBuffer.size() > 3){
                 try {
                     System.out.println("wallcoord");
+                    System.out.println(player.x);
+                    System.out.println(player.width);
                     mapBuffer.wait();
                     System.out.println("wallcoord done");
                 } catch (InterruptedException e){
@@ -576,11 +574,7 @@ public class PlayState extends State{
 
     void createSides(){
         for (int i = 0; i < 2; i++) {
-            SideWall sideWall = new SideWall();
-            sideWall.x = (465*i);
-            sideWall.y = 800;
-            sideWall.width = 15;
-            sideWall.height = spriteHeight;
+            SideWall sideWall = new SideWall(spriteWidth,spriteHeight,800,i);
             sideWalls.add(sideWall);
         }
     }
@@ -613,7 +607,7 @@ public class PlayState extends State{
     private boolean collidesObstacle(){
 // collision with screen boundaries
         if (player.x > 465 - player.width ){
-            player.x = 465 - player.width;
+            player.x = 465 - player.height;
         }
 
         if (player.x < 15){

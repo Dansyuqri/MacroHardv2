@@ -10,15 +10,13 @@ import com.badlogic.gdx.math.Rectangle;
 public class Player extends GameObject {
     private String power;
     private Texture texture;
-    private Rectangle player;
     public Player(){
         super();
         texture = new Texture(Gdx.files.internal("player_temp.png"));
-        player = new Rectangle();
-        player.x = 480 / 2 - 50 / 2; // center the player horizontally
-        player.y = 400; // bottom left corner of the player is 400 pixels above the bottom screen edge
-        player.width = 40;
-        player.height = 40;
+        this.x = 480/2-50/2;
+        this.y = 400;
+        this.width = 40;
+        this.height = 40;
 
     }
 
@@ -29,7 +27,6 @@ public class Player extends GameObject {
     public String getPower() {
         return power;
     }
-
 
     public Texture getTexture(){
         return texture;

@@ -10,5 +10,6 @@ public class Obstacle extends GameObject {
     public Obstacle(){
         super();
         this.setImage(new Texture(Gdx.files.internal("wall4.1.png")));
+
     }
 }
