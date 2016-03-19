@@ -6,12 +6,8 @@ import com.mygdx.game.states.PlayState;
  * Created by Syuqri on 3/18/2016.
  */
 class MapMaker extends Thread{
-    PlayState playState;
-    public MapMaker(PlayState playState){
-        playState.wallCoord();
-        playState.createBg();
-        playState.createObstacle(playState.path);
-        playState.createSides();
+    PlayStateHost playState;
+    public MapMaker(PlayStateHost playState){
         this.playState = playState;
     }
     @Override
