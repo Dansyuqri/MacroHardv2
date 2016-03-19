@@ -1,4 +1,12 @@
 android {
+    signingConfigs {
+        config {
+            keyAlias 'macrokey'
+            keyPassword 'macrokey'
+            storeFile file('C:/Users/Nayr/Desktop/MacroHardv2/macrokey.jks')
+            storePassword 'macrokey'
+        }
+    }
     buildToolsVersion "23.0.1"
     compileSdkVersion 23
     sourceSets {
@@ -16,8 +24,13 @@ android {
     }
     defaultConfig {
         applicationId "com.mygdx.game"
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 23
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.config
+        }
     }
 }
 
@@ -123,4 +136,8 @@ idea {
             }
         }
     }
+}
+dependencies {
+    compile 'com.google.android.gms:play-services-games:8.4.0'
+    compile project(':BaseGameUtils')
 }
