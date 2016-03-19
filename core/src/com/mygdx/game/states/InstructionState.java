@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
  */
 public class InstructionState extends State{
     public InstructionState(GameStateManager gsm){
+        
         super(gsm);
     }
     @Override
