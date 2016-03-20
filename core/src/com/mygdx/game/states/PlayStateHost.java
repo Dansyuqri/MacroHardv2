@@ -100,23 +100,17 @@ public class PlayStateHost extends PlayState {
             doorCounter = 0;
         }
 
-        synchronized (mapBuffer) {
+        synchronized (this) {
             while (mapBuffer.size() > 3){
                 try {
-                    //System.out.println("wallcoord");
-                    //System.out.println(player.x);
-                    //System.out.println(player.width);
-                    mapBuffer.wait();
-                   // System.out.println("wallcoord done");
-                } catch (InterruptedException e){
-
-                }
+                    wait();
+                } catch (InterruptedException ignored){}
             }
             powerUpBuffer.add(temp_power);
             mapBuffer.add(new_row);
             switchBuffer.add(temp_switch);
             doorBuffer.add(temp_door);
-            mapBuffer.notifyAll();
+            notifyAll();
         }
     }
 }
