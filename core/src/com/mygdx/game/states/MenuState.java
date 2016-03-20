@@ -44,7 +44,7 @@ public class MenuState extends State{
             if(touchPos.x<=(Gdx.graphics.getWidth()/2)+(playBtn.getWidth()*3/2) && touchPos.x>=(Gdx.graphics.getWidth()/2)-(playBtn.getWidth()*3/2)){
                 if(touchPos.y<=(Gdx.graphics.getHeight()/2)+(playBtn.getHeight()*3/2) && touchPos.y>=(Gdx.graphics.getHeight()/2)-(playBtn.getHeight()*3/2)){
                     System.out.println("This is menustate");
-                    gsm.set(new PlayState(gsm));
+                    gsm.set(new PlayStateHost(gsm));
                     dispose();
                 }
             }

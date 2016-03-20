@@ -24,19 +24,19 @@ import java.util.Iterator;
 /**
  * Created by Syuqri on 3/7/2016.
  */
-public class PlayState extends State{
+public abstract class PlayState extends State{
 
     //objects
     private JoyStick joystick;
-    private Player player;
+    protected Player player;
     private Vector3 touchPos = new Vector3();
     private SpriteBatch sb;
     //values
-    public volatile boolean running;
+    public boolean running;
     private boolean touched;
     private boolean touchHeld;
     private long endPowerTime;
-    private int gameSpeed, speedIncrement, playerSpeed, dangerZone, powerCounter, doorCounter;
+    protected int gameSpeed, speedIncrement, playerSpeed, dangerZone, powerCounter, doorCounter;
 
     //boolean arrays
     public boolean[] path = {true, true, true, true, true, true, true, true, true};
@@ -46,10 +46,10 @@ public class PlayState extends State{
     boolean[] barrier = {false, false, false, false, false, false, false, false, false};
 
     //Arraylists
-    private ArrayList<boolean[]> mapBuffer = new ArrayList<boolean[]>();
-    private ArrayList<boolean[]> doorBuffer = new ArrayList<boolean[]>();
-    private ArrayList<boolean[]> switchBuffer = new ArrayList<boolean[]>();
-    private ArrayList<boolean[]> powerUpBuffer = new ArrayList<boolean[]>();
+    protected ArrayList<boolean[]> mapBuffer = new ArrayList<boolean[]>();
+    protected ArrayList<boolean[]> doorBuffer = new ArrayList<boolean[]>();
+    protected ArrayList<boolean[]> switchBuffer = new ArrayList<boolean[]>();
+    protected ArrayList<boolean[]> powerUpBuffer = new ArrayList<boolean[]>();
 
     private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
     public static ArrayList<SideWall> sideWalls = new ArrayList<SideWall>();
@@ -85,8 +85,9 @@ public class PlayState extends State{
         doorCounter = 0;
 
         //spawning initialization
-        MapMaker mapMaker = new MapMaker(this);
-        mapMaker.start();
+        createBg();
+        createObstacle();
+        createSides();
     }
     @Override
     protected void handleInput() {
@@ -299,9 +300,9 @@ public class PlayState extends State{
 *  CREATE METHODS HERE
 ****************************************************
 */
-    void createObstacle(boolean[] map) {
-        for (int i = 0; i < map.length; i++) {
-            if (!map[i]) {
+    private void createObstacle() {
+        for (int i = 0; i < path.length; i++) {
+            if (!path[i]) {
                 Obstacle obstacle = new Obstacle();
                 obstacle.x = (spriteWidth * i) + 15;
                 obstacle.y = 800;
@@ -313,11 +314,11 @@ public class PlayState extends State{
         powerCounter += 1;
         doorCounter += 1;
     }
-    void createBg(){
+    private void createBg(){
         Background backg = new Background(0);
         bg.add(backg);
     }
-    void createSides(){
+    private void createSides(){
         for (int i = 0; i < 2; i++) {
             SideWall sideWall = new SideWall(spriteHeight,800,i);
             sideWalls.add(sideWall);
@@ -389,6 +390,9 @@ public class PlayState extends State{
         }
     }
 
+    /**
+     * Method to move the player
+     */
     private void omniMove(float x, float y){
         float prevx = player.x;
         float prevy = player.y;
@@ -456,112 +460,7 @@ public class PlayState extends State{
      layer of walls. I.e, no dead ends. Also ensures that the power is spawned on a 'box' not
      occupied by a wall and that switches are reachable.
      */
-    void wallCoord(){
-        boolean test = false;
-        int out_index = 0;
-        boolean[] new_row = {false, false, false, false, false, false, false, false, false};
 
-        // random generator
-        while (!test) {
-            int temp = MathUtils.random(1, 9);
-            for (int i = 0; i < temp; i++) {
-                int coord = MathUtils.random(0,8);
-                new_row[coord] = true;
-            }
-            for (int i = 0; i < new_row.length; i++) {
-                if (new_row[i] && current[i]) {
-                    test = true;
-                    break;
-                }
-            }
-        }
-
-        // updating the path array (only 1 path)
-        for (int k = 0; k < new_row.length; k++) {
-            if (new_row[k] && current[k]) {
-                current[k] = true;
-                out_index = k;
-            } else {
-                current[k] = false;
-            }
-        }
-
-        // updating the path array (if there are walkable areas next to the true path then they are
-        // also true)
-        for (int j = 1; j < new_row.length; j++) {
-            if (out_index + j < new_row.length) {
-                if (new_row[out_index + j] && current[out_index + j - 1]) {
-                    current[out_index + j] = true;
-                }
-                else {
-                    break;
-                }
-            }
-            if (out_index - j >= 0) {
-                if (new_row[out_index - j] && current[out_index - j + 1]) {
-                    current[out_index - j] = true;
-                }
-                else {
-                    break;
-                }
-            }
-        }
-
-        // spawning power ups after a certain time
-        boolean[] temp_power = {false, false, false, false, false, false, false, false, false};
-        if (powerCounter > 20){
-            while (true){
-                int temp = MathUtils.random(0,8);
-                if (new_row[temp]){
-                    temp_power[temp] = true;
-                    powerCounter = 0;
-                    break;
-                }
-            }
-        }
-
-        // spawning door switch
-        boolean[] temp_switch = {false, false, false, false, false, false, false, false, false};
-        if (doorCounter == 40){
-            while (true){
-                int temp = MathUtils.random(0,8);
-                if (current[temp]){
-                    temp_switch[temp] = true;
-                    break;
-                }
-            }
-        }
-
-        // spawning door/barrier
-        boolean[] temp_door = {false, false, false, false, false, false, false, false, false};
-        if (doorCounter > 45){
-            for (int i = 0; i < current.length; i++) {
-                if (new_row[i]) {
-                    temp_door[i] = true;
-                }
-            }
-            doorCounter = 0;
-        }
-
-        synchronized (mapBuffer) {
-            while (mapBuffer.size() > 3){
-                try {
-                    System.out.println("wallcoord");
-                    System.out.println(player.x);
-                    System.out.println(player.width);
-                    mapBuffer.wait();
-                    System.out.println("wallcoord done");
-                } catch (InterruptedException e){
-
-                }
-            }
-            powerUpBuffer.add(temp_power);
-            mapBuffer.add(new_row);
-            switchBuffer.add(temp_switch);
-            doorBuffer.add(temp_door);
-            mapBuffer.notifyAll();
-        }
-    }
     private void effectDangerZone(){
         // if notified by server
         gameSpeed += speedIncrement;
