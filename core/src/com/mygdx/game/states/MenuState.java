@@ -14,12 +14,24 @@ public class MenuState extends State{
     private Texture playBtn;
     private Texture instructionBtn;
     private Vector3 touchPos = new Vector3(0,0,0);
+    private float bufferFromBottom = 200;
 
+    //Resize variables
+    private float playBtnX, playBtnY, instructionBtnX,instructionBtnY, graphicsX, graphicsY;
     public MenuState(GameStateManager gsm) {
         super(gsm);
         background = new Texture("menu_bg.png");
         playBtn = new Texture("playBtn.png");
         instructionBtn = new Texture("instructionBtn.png");
+
+        playBtnX = playBtn.getWidth()*3;
+        playBtnY = playBtn.getHeight()*3;
+
+        instructionBtnX = instructionBtn.getWidth()*3;
+        instructionBtnY = instructionBtn.getHeight()*3;
+
+        graphicsX = Gdx.graphics.getWidth();
+        graphicsY = Gdx.graphics.getHeight();
 
     }
 
@@ -27,22 +39,22 @@ public class MenuState extends State{
     public void handleInput() {
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.input.getY();
-        System.out.println(touchPos.y);
+        //System.out.println(touchPos.y);
         /****************************************************************************************
          * This is a set of conditions to handle the highlighting of the play button when pressed
          * **************************************************************************************
          */
         if(Gdx.input.isTouched()){
-            if(touchPos.x<=(Gdx.graphics.getWidth()/2)+(playBtn.getWidth()*3/2) && touchPos.x>=(Gdx.graphics.getWidth()/2)-(playBtn.getWidth()*3/2)){
-                if(touchPos.y<=(Gdx.graphics.getHeight()/2)+(playBtn.getHeight()*3/2) && touchPos.y>=(Gdx.graphics.getHeight()/2)-(playBtn.getHeight()*3/2)){
+            if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
+                if(touchPos.y<=(graphicsY/2)+(playBtnY/2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     playBtn.dispose();
                     playBtn = new Texture("playBtn_pressed.png");
                 }
             }
         }
         if(!Gdx.input.isTouched()){
-            if(touchPos.x<=(Gdx.graphics.getWidth()/2)+(playBtn.getWidth()*3/2) && touchPos.x>=(Gdx.graphics.getWidth()/2)-(playBtn.getWidth()*3/2)){
-                if(touchPos.y<=(Gdx.graphics.getHeight()/2)+(playBtn.getHeight()*3/2) && touchPos.y>=(Gdx.graphics.getHeight()/2)-(playBtn.getHeight()*3/2)){
+            if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
+                if(touchPos.y<=(graphicsY/2)+(playBtnY/2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     System.out.println("This is menustate");
                     gsm.set(new PlayStateHost(gsm));
                     dispose();
@@ -59,27 +71,27 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the instruction button when pressed
          * *********************************************************************************************
          */
-/*        if(Gdx.input.isTouched()){
-            if(touchPos.x<=(Gdx.graphics.getWidth()/2)+(instructionBtn.getWidth()*3/2) && touchPos.x>=(Gdx.graphics.getWidth()/2)-(instructionBtn.getWidth()*3/2)){
-                if(touchPos.y<=(Gdx.graphics.getHeight()/2-playBtn.getHeight()*3/2-100+instructionBtn.getHeight()*3/2) && touchPos.y>=(Gdx.graphics.getHeight()/2-playBtn.getHeight()*3/2-100-instructionBtn.getHeight()*3/2)){
-                    playBtn.dispose();
-                    playBtn = new Texture("instructionBtn_pressed.png");
+        if(Gdx.input.isTouched()){
+            if(touchPos.x<=(graphicsX/2)+(instructionBtnX/2) && touchPos.x>=(graphicsX/2)-(instructionBtnX/2)){
+                if(touchPos.y<=(graphicsY/2+playBtnY/2+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+bufferFromBottom-instructionBtnY/2)){
+                    instructionBtn.dispose();
+                    instructionBtn = new Texture("instructionBtn_pressed.png");
                 }
             }
         }
         if(!Gdx.input.isTouched()){
-            if(touchPos.x<=(Gdx.graphics.getWidth()/2)+(instructionBtn.getWidth()*3/2) && touchPos.x>=(Gdx.graphics.getWidth()/2)-(instructionBtn.getWidth()*3/2)){
-                if(touchPos.y<=(Gdx.graphics.getHeight()/2-playBtn.getHeight()*3/2-100+instructionBtn.getHeight()*3/2) && touchPos.y>=(Gdx.graphics.getHeight()/2-playBtn.getHeight()*3/2-100-instructionBtn.getHeight()*3/2)){
+            if(touchPos.x<=(graphicsX/2)+(instructionBtnX/2) && touchPos.x>=(graphicsX/2)-(instructionBtnX/2)){
+                if(touchPos.y<=(graphicsY/2+playBtnY/2+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+bufferFromBottom-instructionBtnY/2)){
                     System.out.println("This is menustate");
-                    gsm.set(new PlayState(gsm));
+                    gsm.set(new InstructionState(gsm));
                     dispose();
                 }
             }
         }
         if(!Gdx.input.isTouched()){
-            playBtn.dispose();
-            playBtn = new Texture("instructionBtn.png");
-        }*/
+            instructionBtn.dispose();
+            instructionBtn = new Texture("instructionBtn.png");
+        }
     }
 
     @Override
@@ -90,9 +102,9 @@ public class MenuState extends State{
     @Override
     public void render(SpriteBatch sb) {
         sb.begin();
-        sb.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        sb.draw(playBtn,(Gdx.graphics.getWidth()/2)-(playBtn.getWidth()*3/2),Gdx.graphics.getHeight()/2,playBtn.getWidth()*3,playBtn.getHeight()*3);
-        sb.draw(instructionBtn,(Gdx.graphics.getWidth()/2)-(instructionBtn.getWidth()*3/2),Gdx.graphics.getHeight()/2-playBtn.getHeight()*3/2-100,instructionBtn.getWidth()*3,instructionBtn.getHeight()*3);
+        sb.draw(background, 0, 0, graphicsX, graphicsY);
+        sb.draw(playBtn,(graphicsX/2)-(playBtnX/2),graphicsY/2-playBtnY/2,playBtnX,playBtnY);
+        sb.draw(instructionBtn, (graphicsX/ 2) - (instructionBtnX/2), graphicsY/2 - playBtnY/2 - bufferFromBottom, instructionBtnX, instructionBtnY);
         sb.end();
     }
 
