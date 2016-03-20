@@ -80,7 +80,7 @@ public abstract class PlayState extends State{
         gameSpeed = 50;
         speedIncrement = (float) 0.05;
         playerSpeed = 300;
-        dangerZone = 400;
+        dangerZone = 200;
         powerCounter = 0;
         doorCounter = 0;
 
@@ -487,7 +487,7 @@ public abstract class PlayState extends State{
     }
 
     private void checkDangerZone(){
-        if (player.y < 200) {
+        if (player.y < dangerZone) {
             effectDangerZone();
             System.out.println(gameSpeed);
         }
