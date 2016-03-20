@@ -103,11 +103,11 @@ public class PlayStateHost extends PlayState {
         synchronized (mapBuffer) {
             while (mapBuffer.size() > 3){
                 try {
-                    System.out.println("wallcoord");
-                    System.out.println(player.x);
-                    System.out.println(player.width);
+                    //System.out.println("wallcoord");
+                    //System.out.println(player.x);
+                    //System.out.println(player.width);
                     mapBuffer.wait();
-                    System.out.println("wallcoord done");
+                   // System.out.println("wallcoord done");
                 } catch (InterruptedException e){
 
                 }
