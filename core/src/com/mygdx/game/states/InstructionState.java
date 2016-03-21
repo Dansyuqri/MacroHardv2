@@ -58,7 +58,7 @@ public class InstructionState extends State{
             }
             touched = false;
         }
-        System.out.println(pageIndex);
+
     }
 
     @Override
