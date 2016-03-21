@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.objects.Background;
+import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Barrier;
 import com.mygdx.game.objects.BarrierOpen;
 import com.mygdx.game.objects.Obstacle;
@@ -34,9 +35,11 @@ public abstract class PlayState extends State{
     public boolean running;
     private boolean touched;
     private boolean touchHeld;
-    private long endPowerTime;
-    protected float gameSpeed, speedIncrement;
-    protected int playerSpeed, dangerZone, powerCounter, doorCounter;
+    private long endPowerTime = System.currentTimeMillis();
+    protected int gameSpeed, speedIncrement;
+    protected int playerSpeed, dangerZone, powerCounter, doorCounter, tempGameSpeed;
+    protected int dangerZoneSpeedLimit = 400;
+    public long start = System.currentTimeMillis();
 
     //boolean arrays
     public boolean[] path = {true, true, true, true, true, true, true, true, true};
@@ -58,6 +61,7 @@ public abstract class PlayState extends State{
     private ArrayList<BarrierOpen> barrierOpens = new ArrayList<BarrierOpen>();
     private ArrayList<Power> powers = new ArrayList<Power>();
     private ArrayList<Background> bg = new ArrayList<Background>();
+    private ArrayList<Overlay> effects = new ArrayList<Overlay>();
 
     //final values
     final int spriteWidth = 50;
@@ -77,8 +81,8 @@ public abstract class PlayState extends State{
         joystick = new JoyStick();
 
         //misc values initialization
-        gameSpeed = 50;
-        speedIncrement = (float) 0.05;
+        gameSpeed = 80;
+        speedIncrement = 50;
         playerSpeed = 300;
         dangerZone = 200;
         powerCounter = 0;
@@ -134,6 +138,7 @@ public abstract class PlayState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
+        long score = System.currentTimeMillis()-start;
         handleInput();
         checkSwitchCollision();
         checkDangerZone();
@@ -195,6 +200,10 @@ public abstract class PlayState extends State{
 
         sb.draw(player.getTexture(), player.x, player.y);
 
+        for (Overlay effect : effects) {
+            sb.draw(effect.getImage(), effect.x, effect.y);
+        }
+
         if(touched){
 
             sb.draw(joystick.getJoystickImage(), joystick.getX(), joystick.getY());
@@ -204,7 +213,7 @@ public abstract class PlayState extends State{
         sb.end();
 
 //		constantly check if any power/DangerZone's effect still lingers
-        effectPower();
+//        effectPower();
         notifyDangerZone();
 
         // move the obstacles, remove any that are beneath the bottom edge of the screen.
@@ -218,6 +227,7 @@ public abstract class PlayState extends State{
         Iterator<Barrier> iter5 = barriers.iterator();
         Iterator<BarrierOpen> iter6 = barrierOpens.iterator();
         Iterator<Background> iter7 = bg.iterator();
+        Iterator<Overlay> iter8 = effects.iterator();
         while (iter.hasNext()) {
             Rectangle obstacle = iter.next();
             obstacle.y -= gameSpeed * Gdx.graphics.getDeltaTime();
@@ -252,6 +262,11 @@ public abstract class PlayState extends State{
             Rectangle bg = iter7.next();
             bg.y -= gameSpeed * Gdx.graphics.getDeltaTime();
             if (bg.y + 800 < 0) iter7.remove();
+        }
+        while (iter8.hasNext()) {
+            Rectangle effect = iter8.next();
+            effect.y -= gameSpeed * Gdx.graphics.getDeltaTime();
+            if (effect.y + 800 < 0) iter8.remove();
         }
     }
     @Override
@@ -310,12 +325,18 @@ public abstract class PlayState extends State{
     }
     private void createBg(){
         Background backg = new Background(0);
+        Overlay effect = new Overlay(0);
         bg.add(backg);
+        effects.add(effect);
     }
     private void createSides(){
-        for (int i = 0; i < 2; i++) {
-            SideWall sideWall = new SideWall(spriteHeight,800,i);
-            sideWalls.add(sideWall);
+        int counter = 0;
+        while (counter*spriteHeight <= 800) {
+            for (int i = 0; i < 2; i++) {
+                SideWall sideWall = new SideWall(spriteHeight, counter*spriteHeight, i);
+                sideWalls.add(sideWall);
+            }
+            counter++;
         }
     }
 
@@ -342,7 +363,9 @@ public abstract class PlayState extends State{
     }
     private void spawnBg(){
         Background backg = new Background(800);
+        Overlay effect = new Overlay(800);
         bg.add(backg);
+        effects.add(effect);
     }
     private void spawnPower() {
         for (int i = 0; i < powerUp.length; i++) {
@@ -499,7 +522,10 @@ public abstract class PlayState extends State{
 
     private void notifyDangerZone(){
         if (player.y < dangerZone) {
-            //notify server
+            //notify server. Test effects on own game first
+            if (gameSpeed < 250) {
+                gameSpeed += 50;
+            }
         }
     }
 
@@ -510,21 +536,33 @@ public abstract class PlayState extends State{
     private void effectPower(){
         if (System.currentTimeMillis() > endPowerTime) {
             setPowerLock = true;
-        }
-        if (System.currentTimeMillis() <= endPowerTime){
-            if (setPowerLock) {
-                endPowerTime = System.currentTimeMillis() + 5000;
-                setPowerLock = false;
-            }
             if (player.getPower().equals("slowGameDown")) {
-                gameSpeed -= speedIncrement;
+                if (gameSpeed > 130) {
+                    gameSpeed -= 50;
+                }
             } else if (player.getPower().equals("fewerObstacles")) {
-
+                // TODO: undo effects (Minh)
             } else if (player.getPower().equals("speedPlayerUp")) {
                 playerSpeed += speedIncrement;
             } else if (player.getPower().equals("dangerZoneHigher")) {
                 dangerZone += 50;
             }
+        }
+        if (System.currentTimeMillis() <= endPowerTime){
+            if (setPowerLock) {
+                endPowerTime = System.currentTimeMillis() + 5000;
+                tempGameSpeed = gameSpeed;
+                if (player.getPower().equals("slowGameDown")) {
+                    gameSpeed -= 50;
+                    } else if (player.getPower().equals("fewerObstacles")) {
+                        // TODO: undo effects
+                    } else if (player.getPower().equals("speedPlayerUp")) {
+                        playerSpeed += speedIncrement;
+                    } else if (player.getPower().equals("dangerZoneHigher")) {
+                        dangerZone += 50;
+                    }
+                }
+            setPowerLock = false;
         }
     }
 
