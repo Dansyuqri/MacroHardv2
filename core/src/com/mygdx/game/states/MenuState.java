@@ -52,19 +52,20 @@ public class MenuState extends State{
                 }
             }
         }
-        if(!Gdx.input.isTouched()){
-            if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x >= (graphicsX /2)-(playBtnX/2)){
+        else if(!Gdx.input.isTouched()){
+            if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
                 if(touchPos.y<=(graphicsY/2)+(playBtnY/2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     System.out.println("This is menustate");
                     gsm.set(new PlayStateHost(gsm));
                     dispose();
                 }
             }
+            else{
+                playBtn.dispose();
+                playBtn = new Texture("playBtn.png");
+            }
         }
-        if(!Gdx.input.isTouched()){
-            playBtn.dispose();
-            playBtn = new Texture("playBtn.png");
-        }
+
 
 
         /***********************************************************************************************
@@ -79,7 +80,7 @@ public class MenuState extends State{
                 }
             }
         }
-        if(!Gdx.input.isTouched()){
+        else if(!Gdx.input.isTouched()){
             if(touchPos.x<=(graphicsX/2)+(instructionBtnX/2) && touchPos.x>=(graphicsX/2)-(instructionBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+bufferFromBottom-instructionBtnY/2)){
                     System.out.println("This is menustate");
@@ -87,11 +88,12 @@ public class MenuState extends State{
                     dispose();
                 }
             }
+            else{
+                instructionBtn.dispose();
+                instructionBtn = new Texture("instructionBtn.png");
+            }
         }
-        if(!Gdx.input.isTouched()){
-            instructionBtn.dispose();
-            instructionBtn = new Texture("instructionBtn.png");
-        }
+
     }
 
     @Override

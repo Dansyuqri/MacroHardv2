@@ -285,7 +285,7 @@ public abstract class PlayState extends State{
         player.getImage().dispose();
         joystick.getJoystickImage().dispose();
         joystick.getJoystickCentreImage().dispose();
-        //sb.dispose();
+
     }
 
 
