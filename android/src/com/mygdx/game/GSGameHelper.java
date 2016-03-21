@@ -77,7 +77,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                 activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 BaseGameUtils.showAlert(activity, "Left Room");
             }else{
-                BaseGameUtils.showAlert(activity, "Game Starting!");
+                //BaseGameUtils.showAlert(activity, "Game Starting!");
                 this.game.multiplayerGameReady();
             }
 

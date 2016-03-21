@@ -19,7 +19,7 @@ public class MenuState extends State{
     private Texture quickGameBtn;
     private Vector3 touchPos = new Vector3(0,0,0);
     private float bufferFromBottom = 200;
-    private int count = 0;
+    private boolean touched = false;
 
 
     //Resize variables
@@ -55,24 +55,27 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the play button when pressed
          * **************************************************************************************
          */
-        if(Gdx.input.isTouched()){
+        if(Gdx.input.isTouched() && touched == false){
             if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
                 if(touchPos.y<=(graphicsY/2)+(playBtnY/2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     playBtn.dispose();
                     playBtn = new Texture("playBtn_pressed.png");
+                    touched = true;
                 }
             }
         }
-        else if(!Gdx.input.isTouched()){
+        else if(!Gdx.input.isTouched() && touched == true){
             if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
-                if(touchPos.y<=(graphicsY/2)+(playBtnY/2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
+                if(touchPos.y<=(graphicsY/2) + (playBtnY / 2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     gsm.set(new PlayStateHost(gsm));
                     dispose();
+                    touched = false;
                 }
             }
             else{
                 playBtn.dispose();
                 playBtn = new Texture("playBtn.png");
+                touched = false;
             }
         }
 
@@ -82,24 +85,28 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the instruction button when pressed
          * *********************************************************************************************
          */
-        if(Gdx.input.isTouched()){
+        if(Gdx.input.isTouched() && touched == false){
             if(touchPos.x<=(graphicsX/2)+(instructionBtnX/2) && touchPos.x>=(graphicsX/2)-(instructionBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+bufferFromBottom-instructionBtnY/2)){
                     instructionBtn.dispose();
                     instructionBtn = new Texture("instructionBtn_pressed.png");
+                    touched = true;
+
                 }
             }
         }
-        else if(!Gdx.input.isTouched()){
-            if(touchPos.x<=(graphicsX/2)+(instructionBtnX/2) && touchPos.x>=(graphicsX/2)-(instructionBtnX/2)){
+        else if(!Gdx.input.isTouched() && touched == true){
+            if(touchPos.x<=(graphicsX/2)+(instructionBtnX/ 2) && touchPos.x >= (graphicsX/2)-(instructionBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+bufferFromBottom-instructionBtnY/2)){
                     gsm.set(new InstructionState(gsm));
                     dispose();
+                    touched = false;
                 }
             }
             else{
                 instructionBtn.dispose();
                 instructionBtn = new Texture("instructionBtn.png");
+                touched = false;
             }
         }
 
@@ -107,15 +114,17 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the instruction button when pressed
          * *********************************************************************************************
          */
-        if(Gdx.input.isTouched()){
+        if(Gdx.input.isTouched() && touched == false){
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+instructionBtnY+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+instructionBtnY+bufferFromBottom-quickGameBtnY/2)){
                     quickGameBtn.dispose();
                     quickGameBtn = new Texture("quickGameBtn_pressed.png");
+                    touched = true;
+
                 }
             }
         }
-        else if(!Gdx.input.isTouched()){
+        else if(!Gdx.input.isTouched() && touched == true){
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+instructionBtnY+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+instructionBtnY+bufferFromBottom-quickGameBtnY/2)){
                     //TODO: put your method call here
@@ -123,12 +132,15 @@ public class MenuState extends State{
                         MacroHardv2.actionResolver.QuickGame();
                     }
                     quickGameBtn.dispose();
+                    System.out.println("qg");
                     quickGameBtn = new Texture("quickGameBtn.png");
+                    touched = false;
                 }
             }
             else{
                 quickGameBtn.dispose();
                 quickGameBtn = new Texture("quickGameBtn.png");
+                touched = false;
             }
         }
 

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.states.GameStateManager;
 import com.mygdx.game.states.MenuState;
 import com.mygdx.game.states.PlayState;
+import com.mygdx.game.states.PlayStateHost;
 
 public class MacroHardv2 extends ApplicationAdapter {
 	public static final int WIDTH = 480;
@@ -39,23 +40,12 @@ public class MacroHardv2 extends ApplicationAdapter {
 		this.actionResolver = actionResolver;
 		actionResolver.setGame(this);
 	}
-	public void Quickgame(){
-		if(actionResolver.isSignedIn()){
-			System.out.println("Signed in");
-			actionResolver.QuickGame();
-		}
-	}
+
 	public void multiplayerGameReady(){
 		gamew = new GameWorld(this);
 		gamew.multiplayer = true;
-		long time = System.currentTimeMillis();
-		while( System.currentTimeMillis() - time < 5000){
-
-		}
-		//Gdx.app.log("EMPEZANDO", "Starting Game");
-		//gsm.set(new PlayState(gsm));
-		//dispose();
-		//this.actionResolver.sendPos((float) 6, (float) 6);
+		gsm.set(new PlayStateHost(gsm));
+		dispose();
 	}
 
 	public void updateGameWorld(float x, float y){

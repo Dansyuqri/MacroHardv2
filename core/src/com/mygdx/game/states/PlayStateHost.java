@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
  * Created by hj on 19/3/16.
  */
 public class PlayStateHost extends PlayState {
-    PlayStateHost(GameStateManager gsm){
+    public PlayStateHost(GameStateManager gsm){
         super(gsm);
         //spawning initialization
         MapMaker mapMaker = new MapMaker(this);
