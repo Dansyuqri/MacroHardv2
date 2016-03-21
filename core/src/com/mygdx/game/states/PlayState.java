@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.objects.Background;
+import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Barrier;
 import com.mygdx.game.objects.BarrierOpen;
 import com.mygdx.game.objects.Obstacle;
@@ -17,6 +18,7 @@ import com.mygdx.game.objects.SideWall;
 import com.mygdx.game.objects.Switch;
 import com.mygdx.game.objects.JoyStick;
 import com.mygdx.game.objects.Player;
+
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -61,6 +63,7 @@ public abstract class PlayState extends State{
     private ArrayList<BarrierOpen> barrierOpens = new ArrayList<BarrierOpen>();
     private ArrayList<Power> powers = new ArrayList<Power>();
     private ArrayList<Background> bg = new ArrayList<Background>();
+    private ArrayList<Overlay> effects = new ArrayList<Overlay>();
 
     //final values
     final int spriteWidth = 50;
@@ -200,6 +203,10 @@ public abstract class PlayState extends State{
 
         sb.draw(player.getTexture(), player.x, player.y);
 
+        for (Overlay effect : effects) {
+            sb.draw(effect.getImage(), effect.x, effect.y);
+            }
+
         if(touched){
 
             sb.draw(joystick.getJoystickImage(), joystick.getX(), joystick.getY());
@@ -209,7 +216,7 @@ public abstract class PlayState extends State{
         sb.end();
 
 //		constantly check if any power/DangerZone's effect still lingers
-        effectPower();
+        //effectPower();
         notifyDangerZone();
 //		effectDangerZone();
 
@@ -224,6 +231,7 @@ public abstract class PlayState extends State{
         Iterator<Barrier> iter5 = barriers.iterator();
         Iterator<BarrierOpen> iter6 = barrierOpens.iterator();
         Iterator<Background> iter7 = bg.iterator();
+        Iterator<Overlay> iter8 = effects.iterator();
         while (iter.hasNext()) {
             Rectangle obstacle = iter.next();
             obstacle.y -= gameSpeed * Gdx.graphics.getDeltaTime();
@@ -259,6 +267,11 @@ public abstract class PlayState extends State{
             bg.y -= gameSpeed * Gdx.graphics.getDeltaTime();
             if (bg.y + 800 < 0) iter7.remove();
         }
+        while (iter8.hasNext()) {
+            Rectangle effect = iter8.next();
+            effect.y -= gameSpeed * Gdx.graphics.getDeltaTime();
+            if (effect.y + 800 < 0) iter8.remove();
+            }
     }
     @Override
     public void update(float dt) {
@@ -316,12 +329,19 @@ public abstract class PlayState extends State{
     }
     private void createBg(){
         Background backg = new Background(0);
+        Overlay effect = new Overlay(0);
         bg.add(backg);
+        effects.add(effect);
     }
     private void createSides(){
-        for (int i = 0; i < 2; i++) {
-            SideWall sideWall = new SideWall(spriteHeight,800,i);
-            sideWalls.add(sideWall);
+        int counter = 0;
+        while(counter*spriteHeight <= 800){
+
+            for (int i = 0; i < 2; i++){
+                SideWall sideWall = new SideWall(spriteHeight, counter*spriteHeight, i);
+                sideWalls.add(sideWall);
+            }
+            counter++;
         }
     }
 
@@ -348,7 +368,9 @@ public abstract class PlayState extends State{
     }
     private void spawnBg(){
         Background backg = new Background(800);
+        Overlay effect = new Overlay(800);
         bg.add(backg);
+        effects.add(effect);
     }
     private void spawnPower() {
         for (int i = 0; i < powerUp.length; i++) {
@@ -506,8 +528,11 @@ public abstract class PlayState extends State{
 
     private void notifyDangerZone(){
         if (player.y < dangerZone) {
-            //notify server
-            gameSpeed +=50;
+            //notify server. Test effects on own game first
+            if (gameSpeed < 250){
+                gameSpeed +=50;
+            }
+
         }
     }
 
@@ -519,7 +544,9 @@ public abstract class PlayState extends State{
         if (System.currentTimeMillis() > endPowerTime) {
             setPowerLock = true;
             if (player.getPower().equals("slowGameDown")) {
-                gameSpeed -= 50;
+                if (gameSpeed > 130) {
+                    gameSpeed -= 50;
+                }
             } else if (player.getPower().equals("fewerObstacles")) {
                 // TODO: undo effects (Minh)
             } else if (player.getPower().equals("speedPlayerUp")) {
