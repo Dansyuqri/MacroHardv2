@@ -24,6 +24,7 @@ import com.mygdx.game.states.GameStateManager;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,7 +39,8 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     private MacroHardv2 game;
     private ArrayList<Participant> invitees = null;
     private String mRoomId = null;
-    private String mMyId = null;
+    public String mMyId = null;
+    public String host;
 
     public GSGameHelper(Activity activity, int clientsToUse) {
         super(activity, clientsToUse);
@@ -78,6 +80,8 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                 BaseGameUtils.showAlert(activity, "Left Room");
             }else{
                 //BaseGameUtils.showAlert(activity, "Game Starting!");
+                Participant host = invitees.get(0);
+                this.host = host.getParticipantId();
                 this.game.multiplayerGameReady();
             }
 
@@ -168,12 +172,13 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             this.activity.startActivityForResult(i, RC_WAITING_ROOM);
         }
 
+
     }
 
     public void sendPos(float x,float y){
         try{
             byte[] mensaje;
-            mensaje = ByteBuffer.allocate(8).putFloat(x).putFloat(y).array();
+            mensaje = ByteBuffer.allocate(12).putFloat(1).putFloat(x).putFloat(y).array();
             //Games.RealTimeMultiplayer.sendUnreliableMessageToOthers(getApiClient(), mensaje, mRoomID);
             for (Participant p : invitees) {
                 if (p.getParticipantId().equals(mMyId))
@@ -186,19 +191,61 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             }
         }
         catch(Exception e){
+        }
+    }
 
+    public void sendMap(boolean[] Map){
+        try{
+            ByteBuffer mensaje;
+            mensaje = ByteBuffer.allocate(80);
+            mensaje.putFloat(2);
+            for(int i = 0;i<Map.length;i++){
+                if (Map[i]){
+                    mensaje.putFloat(1);
+                }
+                else{
+                    mensaje.putFloat(0);
+                }
+            }
+            byte[] message;
+            message = mensaje.array();
+            for (Participant p : invitees) {
+                if (p.getParticipantId().equals(mMyId))
+                    continue;
+                if (p.getStatus() != Participant.STATUS_JOINED)
+                    continue;
+                // final score notification must be sent via reliable message
+                Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, message,
+                        mRoomId, p.getParticipantId());
+            }
+        }
+        catch(Exception e){
         }
     }
 
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
-        float x, y;
-        byte[] b = rtm.getMessageData();
-        ByteBuffer bf = ByteBuffer.wrap(b);
-        x = bf.getFloat();
-        y = bf.getFloat();
-        BaseGameUtils.showAlert(activity,"H");
-        game.updateGameWorld(x,y);
+        float id, a,b,c,d,e,f,g,h,i;
+        byte[] message = rtm.getMessageData();
+        ByteBuffer bf = ByteBuffer.wrap(message);
+        id = bf.getFloat();
+        if(id == 1){
+            a = bf.getFloat();
+            b = bf.getFloat();
+            game.updateGameWorld(a,b);
+        }
+        else if(id == 2){
+            a = bf.getFloat();
+            b = bf.getFloat();
+            c = bf.getFloat();
+            d = bf.getFloat();
+            e = bf.getFloat();
+            f = bf.getFloat();
+            g = bf.getFloat();
+            h = bf.getFloat();
+            i = bf.getFloat();
+            game.updateMapWorld(a, b, c, d, e, f, g, h, i);
+        }
     }
 
     @Override

@@ -7,7 +7,7 @@ package com.mygdx.game;
 public class GameWorld {
     public MacroHardv2 game;
     public boolean multiplayer;
-    public float x,y,px,py;
+    public float x,y,px,py,pa,pb,pc,pd,pe;
 
     public GameWorld(MacroHardv2 game){
         this.game = game;

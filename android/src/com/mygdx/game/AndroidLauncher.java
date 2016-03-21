@@ -132,4 +132,13 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 	public void sendPos(float x,float y){
 		_gameHelper.sendPos(x, y);
 	}
+	public void sendMap(boolean[] map){
+		_gameHelper.sendMap(map);
+	}
+	public String gethostid(){
+		return _gameHelper.host;
+	}
+	public String getyourid(){
+		return _gameHelper.mMyId;
+	}
 }
