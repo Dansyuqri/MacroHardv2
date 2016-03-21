@@ -19,7 +19,7 @@ public class MenuState extends State{
     private Texture quickGameBtn;
     private Vector3 touchPos = new Vector3(0,0,0);
     private float bufferFromBottom = 200;
-    private MacroHardv2 game;
+
 
     //Resize variables
     private float playBtnX, playBtnY, instructionBtnX,instructionBtnY, quickGameBtnX, quickGameBtnY, graphicsX, graphicsY;
@@ -118,7 +118,7 @@ public class MenuState extends State{
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+instructionBtnY+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+instructionBtnY+bufferFromBottom-quickGameBtnY/2)){
                     //TODO: put your method call here
-                    game.Quickgame();
+                    MacroHardv2.actionResolver.QuickGame();
                     quickGameBtn.dispose();
                     quickGameBtn = new Texture("quickGameBtn.png");
                 }
