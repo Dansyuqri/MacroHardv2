@@ -30,6 +30,8 @@ public abstract class PlayState extends State{
     private JoyStick joystick;
     protected Player player;
     private Vector3 touchPos = new Vector3();
+    private final int GAME_WIDTH = 9;
+
     //values
     public boolean running;
     private boolean touched;
@@ -39,11 +41,11 @@ public abstract class PlayState extends State{
     protected int playerSpeed, dangerZone, powerCounter, doorCounter;
 
     //boolean arrays
-    public boolean[] path = {true, true, true, true, true, true, true, true, true};
-    boolean[] current = {true, true, true, true, true, true, true, true, true};
-    boolean[] powerUp = {false, false, false, false, false, false, false, false, false};
-    boolean[] doorSwitch = {false, false, false, false, false, false, false, false, false};
-    boolean[] barrier = {false, false, false, false, false, false, false, false, false};
+    public boolean[] path = createArray(true);
+    boolean[] current = createArray(true);
+    boolean[] powerUp = createArray(false);
+    boolean[] doorSwitch = createArray(false);
+    boolean[] barrier = createArray(false);
 
     //Arraylists
     protected ArrayList<boolean[]> mapBuffer = new ArrayList<boolean[]>();
@@ -78,12 +80,13 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         gameSpeed = 50;
-        speedIncrement = (float) 0.05;
+        speedIncrement = (float) 0.5;
         playerSpeed = 300;
         dangerZone = 200;
         powerCounter = 0;
         doorCounter = 0;
 
+        //spawning initialization
         createBg();
         createObstacle();
         createSides();
@@ -143,7 +146,7 @@ public abstract class PlayState extends State{
                 while (mapBuffer.size() == 0){
                     try {
                         wait();
-                    } catch (InterruptedException ignored){}
+                    } catch (InterruptedException e){}
                 }
                 path = mapBuffer.remove(0);
                 barrier = doorBuffer.remove(0);
@@ -206,6 +209,7 @@ public abstract class PlayState extends State{
 //		constantly check if any power/DangerZone's effect still lingers
         effectPower();
         notifyDangerZone();
+//		effectDangerZone();
 
         // move the obstacles, remove any that are beneath the bottom edge of the screen.
 
@@ -282,7 +286,7 @@ public abstract class PlayState extends State{
         player.getImage().dispose();
         joystick.getJoystickImage().dispose();
         joystick.getJoystickCentreImage().dispose();
-        //sb.dispose();
+
     }
 
 
@@ -294,7 +298,6 @@ public abstract class PlayState extends State{
 *  CREATE METHODS HERE
 ****************************************************
 */
-
     private void createObstacle() {
         for (int i = 0; i < path.length; i++) {
             if (!path[i]) {
@@ -353,6 +356,7 @@ public abstract class PlayState extends State{
             }
         }
     }
+
     private void spawnSwitch(){
         for (int i = 0; i < doorSwitch.length; i++) {
             if (doorSwitch[i]) {
@@ -361,6 +365,7 @@ public abstract class PlayState extends State{
             }
         }
     }
+
     private void spawnDoor(){
         for (int i = 0; i < barrier.length; i++) {
             if (barrier[i]) {
@@ -382,8 +387,9 @@ public abstract class PlayState extends State{
             sideWalls.add(sideWall);
         }
     }
+
     /**
-     Method to move the player
+     * Method to move the player
      */
     private void omniMove(float x, float y){
         float prevx = player.x;
@@ -458,6 +464,12 @@ public abstract class PlayState extends State{
         gameSpeed += speedIncrement;
     }
 
+    private void checkDangerZone(){
+        if(player.y < dangerZone){
+            effectDangerZone();
+            System.out.println(gameSpeed);
+        }
+    }
     private void checkSwitchCollision(){
         //		collide with switch
         for (Switch eachSwitch:switches){
@@ -485,14 +497,6 @@ public abstract class PlayState extends State{
             }
         }
     }
-
-    private void checkDangerZone(){
-        if (player.y < dangerZone) {
-            effectDangerZone();
-            System.out.println(gameSpeed);
-        }
-    }
-
     private void removeBarriers(){
 //		TODO: if notified by server (Ryan)
         barriers.clear();
@@ -527,6 +531,14 @@ public abstract class PlayState extends State{
                 dangerZone += 50;
             }
         }
+    }
+
+    protected boolean[] createArray(boolean b){
+        boolean[] array = new boolean[GAME_WIDTH];
+        for (int i = 0; i < GAME_WIDTH; i++) {
+            array[i] = b;
+        }
+        return array;
     }
 
 }
