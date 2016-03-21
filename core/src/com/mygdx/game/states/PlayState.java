@@ -1,11 +1,9 @@
 package com.mygdx.game.states;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.objects.Background;
@@ -36,10 +34,13 @@ public abstract class PlayState extends State{
     private boolean touched;
     private boolean touchHeld;
     private long endPowerTime = System.currentTimeMillis();
-    protected int gameSpeed, speedIncrement;
-    protected int playerSpeed, dangerZone, powerCounter, doorCounter, tempGameSpeed;
-    protected int dangerZoneSpeedLimit = 400;
+    protected int gameSpeed;
+    protected double speedChange;
+    protected int playerSpeed, dangerZone, powerCounter, doorCounter;
+    protected int dangerZoneSpeedLimit;
     public long start = System.currentTimeMillis();
+    boolean powerState = false;
+    boolean powerEffectTaken = false;
 
     //boolean arrays
     public boolean[] path = {true, true, true, true, true, true, true, true, true};
@@ -66,7 +67,7 @@ public abstract class PlayState extends State{
     //final values
     final int spriteWidth = 50;
     final int spriteHeight = 50;
-    private final String[] TYPES_OF_POWER = {"slowGameDown","fewerObstacles","speedPlayerUp","dangerZoneHigher"};
+    private final String[] TYPES_OF_POWER = {"slowGameDown","speedPlayerUp","dangerZoneHigher"};
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
@@ -82,11 +83,12 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         gameSpeed = 80;
-        speedIncrement = 50;
+        speedChange = 0.6;
         playerSpeed = 300;
         dangerZone = 200;
         powerCounter = 0;
         doorCounter = 0;
+        dangerZoneSpeedLimit = 200;
 
         createBg();
         createObstacle();
@@ -141,7 +143,6 @@ public abstract class PlayState extends State{
         long score = System.currentTimeMillis()-start;
         handleInput();
         checkSwitchCollision();
-        checkDangerZone();
         // tell the camera to update its matrices.
         while (sideWalls.get(sideWalls.size() - 1).y < 999) {
             synchronized (this) {
@@ -213,8 +214,8 @@ public abstract class PlayState extends State{
         sb.end();
 
 //		constantly check if any power/DangerZone's effect still lingers
-//        effectPower();
-        notifyDangerZone();
+        effectPower();
+        effectDangerZone(player);
 
         // move the obstacles, remove any that are beneath the bottom edge of the screen.
 
@@ -475,11 +476,6 @@ public abstract class PlayState extends State{
      occupied by a wall and that switches are reachable.
      */
 
-    private void effectDangerZone(){
-        // if notified by server
-        gameSpeed += speedIncrement;
-    }
-
     private void checkSwitchCollision(){
         //		collide with switch
         for (Switch eachSwitch:switches){
@@ -498,72 +494,62 @@ public abstract class PlayState extends State{
                 // then notify server
             }
         }
-//		collide with power up
+//		collide with power up PASSIVE
         for (Power power:powers){
             if (player.overlaps(power)){
                 player.setPower(power.getType());
                 powers.remove(power);
-                // then notify server
+                powerState = true;
+                endPowerTime = System.currentTimeMillis()+5000;
+                System.out.println(power.getType());
             }
         }
     }
 
-    private void checkDangerZone(){
-        if (player.y < dangerZone) {
-            effectDangerZone();
-            System.out.println(gameSpeed);
-        }
-    }
 
     private void removeBarriers(){
 //		TODO: if notified by server (Ryan)
         barriers.clear();
     }
 
-    private void notifyDangerZone(){
-        if (player.y < dangerZone) {
-            //notify server. Test effects on own game first
-            if (gameSpeed < 250) {
-                gameSpeed += 50;
-            }
-        }
-    }
-
     /**
-     Method handling power-ups
+     Methods handling power-ups/affecting game attributes
      */
-    boolean setPowerLock = true;
-    private void effectPower(){
-        if (System.currentTimeMillis() > endPowerTime) {
-            setPowerLock = true;
-            if (player.getPower().equals("slowGameDown")) {
-                if (gameSpeed > 130) {
-                    gameSpeed -= 50;
-                }
-            } else if (player.getPower().equals("fewerObstacles")) {
-                // TODO: undo effects (Minh)
-            } else if (player.getPower().equals("speedPlayerUp")) {
-                playerSpeed += speedIncrement;
-            } else if (player.getPower().equals("dangerZoneHigher")) {
-                dangerZone += 50;
-            }
-        }
-        if (System.currentTimeMillis() <= endPowerTime){
-            if (setPowerLock) {
-                endPowerTime = System.currentTimeMillis() + 5000;
-                tempGameSpeed = gameSpeed;
-                if (player.getPower().equals("slowGameDown")) {
-                    gameSpeed -= 50;
-                    } else if (player.getPower().equals("fewerObstacles")) {
-                        // TODO: undo effects
-                    } else if (player.getPower().equals("speedPlayerUp")) {
-                        playerSpeed += speedIncrement;
-                    } else if (player.getPower().equals("dangerZoneHigher")) {
-                        dangerZone += 50;
-                    }
-                }
-            setPowerLock = false;
+    boolean dangerZoneEffectTaken = false;
+    private void effectDangerZone(Player p) {
+        if (p.getY()<=dangerZone && !dangerZoneEffectTaken && gameSpeed<=dangerZoneSpeedLimit) {
+            gameSpeed += 100;
+            dangerZoneEffectTaken = true;
+        } else if (p.getY()>dangerZone) {
+            dangerZoneEffectTaken = false;
         }
     }
 
+    private void effectPower(){
+        if (powerState) {
+            if (!powerEffectTaken) {
+                if (player.getPower().equals("slowGameDown")) {
+                    gameSpeed *= speedChange;
+                } else if (player.getPower().equals("speedPlayerUp")) {
+                    playerSpeed *= speedChange;
+                } else if (player.getPower().equals("dangerZoneHigher")) {
+                    dangerZone += 50;
+                }
+                powerEffectTaken = true;
+            }
+            if (System.currentTimeMillis() >= endPowerTime) {
+                if (player.getPower().equals("slowGameDown")) {
+                    gameSpeed *= speedChange;
+                } else if (player.getPower().equals("speedPlayerUp")) {
+                    playerSpeed *= speedChange;
+                } else if (player.getPower().equals("dangerZoneHigher")) {
+                    dangerZone -= 50;
+                    // change background file
+                }
+                powerState = false;
+                powerEffectTaken = false;
+            }
+        }
+    }
 }
+

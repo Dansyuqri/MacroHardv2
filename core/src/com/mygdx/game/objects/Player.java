@@ -17,7 +17,6 @@ public class Player extends GameObject {
         this.y = 400;
         this.width = 40;
         this.height = 40;
-
     }
 
     public void setPower(String power) {
