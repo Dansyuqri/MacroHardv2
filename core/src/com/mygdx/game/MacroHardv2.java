@@ -39,6 +39,12 @@ public class MacroHardv2 extends ApplicationAdapter {
 		this.actionResolver = actionResolver;
 		actionResolver.setGame(this);
 	}
+	public void Quickgame(){
+		if(actionResolver.isSignedIn()){
+			System.out.println("Signed in");
+			actionResolver.QuickGame();
+		}
+	}
 	public void multiplayerGameReady(){
 		gamew = new GameWorld(this);
 		gamew.multiplayer = true;

@@ -1,10 +1,13 @@
 package com.mygdx.game.states;
 
+import com.mygdx.game.MacroHardv2;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.mygdx.game.ActionResolver;
+import com.mygdx.game.MacroHardv2;
 
 /**
  * Created by Syuqri on 3/7/2016.
@@ -16,6 +19,7 @@ public class MenuState extends State{
     private Texture quickGameBtn;
     private Vector3 touchPos = new Vector3(0,0,0);
     private float bufferFromBottom = 200;
+    private MacroHardv2 game;
 
     //Resize variables
     private float playBtnX, playBtnY, instructionBtnX,instructionBtnY, quickGameBtnX, quickGameBtnY, graphicsX, graphicsY;
@@ -37,6 +41,7 @@ public class MenuState extends State{
 
         graphicsX = Gdx.graphics.getWidth();
         graphicsY = Gdx.graphics.getHeight();
+
 
     }
 
@@ -112,7 +117,8 @@ public class MenuState extends State{
         else if(!Gdx.input.isTouched()){
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+instructionBtnY+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+instructionBtnY+bufferFromBottom-quickGameBtnY/2)){
-                    //TODO: put your method call here (ryan)
+                    //TODO: put your method call here
+                    game.Quickgame();
                     quickGameBtn.dispose();
                     quickGameBtn = new Texture("quickGameBtn.png");
                 }

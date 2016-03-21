@@ -22,6 +22,7 @@ import com.mygdx.game.ActionResolver;
 
 public class AndroidLauncher extends AndroidApplication implements ActionResolver{
 	private GSGameHelper _gameHelper;
+	public MacroHardv2 game;
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -45,7 +46,8 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 		_gameHelper.setup(gameHelperListerner);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		config.useImmersiveMode = true;
-		initialize(new MacroHardv2(this), config);
+		this.game = new MacroHardv2(this);
+		initialize(game, config);
 		Gdx.graphics.requestRendering();
 	}
 
