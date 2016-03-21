@@ -70,6 +70,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     }
 
     public void onActivityResult(int request,int response, Intent data){
+        System.out.println("Room Created");
         if (request == GSGameHelper.RC_WAITING_ROOM){
             if (response == Activity.RESULT_CANCELED || response == GamesActivityResultCodes.RESULT_LEFT_ROOM ){
                 Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomID);
