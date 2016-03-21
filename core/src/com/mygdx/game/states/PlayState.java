@@ -30,13 +30,14 @@ public abstract class PlayState extends State{
     private JoyStick joystick;
     protected Player player;
     private Vector3 touchPos = new Vector3();
-    private SpriteBatch sb;
+
     //values
     public boolean running;
     private boolean touched;
     private boolean touchHeld;
     private long endPowerTime;
-    protected int gameSpeed, speedIncrement, playerSpeed, dangerZone, powerCounter, doorCounter;
+    protected float gameSpeed, speedIncrement;
+    protected int playerSpeed, dangerZone, powerCounter, doorCounter;
 
     //boolean arrays
     public boolean[] path = {true, true, true, true, true, true, true, true, true};
@@ -77,10 +78,10 @@ public abstract class PlayState extends State{
         joystick = new JoyStick();
 
         //misc values initialization
-        gameSpeed = 100;
-        speedIncrement = 100;
+        gameSpeed = 50;
+        speedIncrement = (float) 0.5;
         playerSpeed = 300;
-        dangerZone = 400;
+        dangerZone = 200;
         powerCounter = 0;
         doorCounter = 0;
 
@@ -137,24 +138,20 @@ public abstract class PlayState extends State{
     public void render(SpriteBatch sb) {
         handleInput();
         checkSwitchCollision();
-        this.sb=sb;
+        checkDangerZone();
         // tell the camera to update its matrices.
         while (sideWalls.get(sideWalls.size() - 1).y < 999) {
-            synchronized (mapBuffer) {
+            synchronized (this) {
                 while (mapBuffer.size() == 0){
                     try {
-                        System.out.println("sidewalls");
-                        mapBuffer.wait();
-                        System.out.println("sidewalls done");
-                    } catch (InterruptedException e){
-
-                    }
+                        wait();
+                    } catch (InterruptedException e){}
                 }
                 path = mapBuffer.remove(0);
                 barrier = doorBuffer.remove(0);
                 doorSwitch = switchBuffer.remove(0);
                 powerUp = powerUpBuffer.remove(0);
-                mapBuffer.notifyAll();
+                notifyAll();
             }
             float temp = sideWalls.get(sideWalls.size() - 1).y + 50;
             spawnObstacle(temp);
@@ -466,7 +463,12 @@ public abstract class PlayState extends State{
         gameSpeed += speedIncrement;
     }
 
-
+    private void checkDangerZone(){
+        if(player.y < dangerZone){
+            effectDangerZone();
+            System.out.println(gameSpeed);
+        }
+    }
     private void checkSwitchCollision(){
         //		collide with switch
         for (Switch eachSwitch:switches){
