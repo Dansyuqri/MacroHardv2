@@ -36,7 +36,7 @@ public abstract class PlayState extends State{
     private boolean touchHeld;
     private long endPowerTime;
     protected float gameSpeed, speedIncrement;
-    protected int playerSpeed, dangerZone, powerCounter, doorCounter;
+    private int playerSpeed, dangerZone;
 
     //boolean arrays
     public boolean[] path = createArray(true);
@@ -78,11 +78,9 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         gameSpeed = 75;
-        speedIncrement = (float) 0.01;
+        speedIncrement = (float) 0.02;
         playerSpeed = 300;
         dangerZone = 300;
-        powerCounter = 0;
-        doorCounter = 0;
 
         createBg();
         createObstacle();
@@ -307,8 +305,6 @@ public abstract class PlayState extends State{
                 obstacles.add(obstacle);
             }
         }
-        powerCounter += 1;
-        doorCounter += 1;
     }
     private void createBg(){
         Background backg = new Background(0);
@@ -339,8 +335,6 @@ public abstract class PlayState extends State{
                 obstacles.add(obstacle);
             }
         }
-        powerCounter += 1;
-        doorCounter += 1;
     }
     private void spawnBg(){
         Background backg = new Background(800);

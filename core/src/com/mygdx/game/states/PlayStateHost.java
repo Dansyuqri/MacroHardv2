@@ -6,14 +6,21 @@ import com.badlogic.gdx.math.MathUtils;
  * Created by hj on 19/3/16.
  */
 public class PlayStateHost extends PlayState {
+    private int doorCounter;
+    private int powerCounter;
+
     PlayStateHost(GameStateManager gsm){
         super(gsm);
         //spawning initialization
+        doorCounter = 0;
+        powerCounter = 0;
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
     }
 
     void wallCoord(){
+        powerCounter += 1;
+        doorCounter += 1;
         boolean test = false;
         int out_index = 0;
         boolean[] new_row = createArray(false);
