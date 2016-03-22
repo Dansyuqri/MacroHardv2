@@ -55,13 +55,13 @@ public abstract class PlayState extends State{
     public boolean[] path = createArray(true);
     boolean[] current = createArray(true);
     boolean[] powerUp = createArray(false);
-    boolean[] doorSwitch = createArray(false);
+    float[] doorSwitch = null;
     boolean[] barrier = createArray(false);
 
     //Arraylists
     protected ArrayList<boolean[]> mapBuffer = new ArrayList<boolean[]>();
     protected ArrayList<boolean[]> doorBuffer = new ArrayList<boolean[]>();
-    protected ArrayList<boolean[]> switchBuffer = new ArrayList<boolean[]>();
+    protected ArrayList<float[]> switchBuffer = new ArrayList<float[]>();
     protected ArrayList<boolean[]> powerUpBuffer = new ArrayList<boolean[]>();
 
     private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
@@ -158,7 +158,7 @@ public abstract class PlayState extends State{
         handleInput();
         checkSwitchCollision();
         // tell the camera to update its matrices.
-        while (sideWalls.get(sideWalls.size() - 1).y < 999) {
+        while (sideWalls.get(sideWalls.size() - 1).y < 1000) {
             synchronized (this) {
                 while (mapBuffer.size() == 0){
                     try {
@@ -401,71 +401,8 @@ public abstract class PlayState extends State{
         }
     }
     private void spawnSwitch(){
-//        ArrayList<Rectangle> dfs0 = new ArrayList<Rectangle>();
-//        ArrayList<String> dfs1 = new ArrayList<String>();
-//        float x = 15;
-//        float y = sideWalls.get(PlayState.sideWalls.size()-1).y+50;
-//        boolean spawn = false;
-//        for (int i = 0; i < path.length; i++){
-//            if (path[i]){
-//                x = 15 + i*50;
-//            }
-//        }
-//        while (!spawn){
-//            Rectangle current = new Rectangle();
-//            current.height = spriteHeight;
-//            current.width = spriteWidth;
-//            current.x = x;
-//            current.y = y;
-//            dfs0.add(current);
-//            dfs1.add("grey");
-//            //check counter-clockwise, starting with left
-//            boolean leftCheck = false;
-//            boolean bottomCheck = false;
-//            boolean rightCheck = false;
-//            boolean topCheck = false;
-//            for (int i = 0; i < 4; i++){
-//                while (i == 0 && x > 50 && !leftCheck){
-//                    float tempX = x - 50;
-//                    for (Rectangle check: obstacles){
-//                        if (check.contains(tempX,y)){
-//                            leftCheck = true;
-//                        }
-//                    }
-//                }
-//                while (i == 1 && y > 799 && !bottomCheck){
-//                    float tempY = y - 50;
-//                    for (Rectangle check: obstacles){
-//                        if (check.contains(x,tempY)){
-//                            bottomCheck = true;
-//                        }
-//                    }
-//                }
-//                while (i == 2 && x < 415 && !rightCheck){
-//                    float tempX = x + 50;
-//                    for (Rectangle check: obstacles){
-//                        if (check.contains(tempX,y)){
-//                            rightCheck = true;
-//                        }
-//                    }
-//                }
-//                while (i == 3 && y < 999 && !topCheck){
-//                    float tempY = y + 50;
-//                    for (Rectangle check: obstacles){
-//                        if (check.contains(x,tempY)){
-//                            topCheck = true;
-//                        }
-//                    }
-//                }
-//            }
-//
-//        }
-        for (int i = 0; i < doorSwitch.length; i++) {
-            if (doorSwitch[i]) {
-                Switch doorSwitch = new Switch(spriteWidth, spriteHeight, i);
-                switches.add(doorSwitch);
-            }
-        }
+        Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1]);
+        switches.add(doorSwitch);
     }
     private void spawnDoor(){
         for (int i = 0; i < barrier.length; i++) {

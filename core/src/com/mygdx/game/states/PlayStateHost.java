@@ -8,12 +8,19 @@ import com.badlogic.gdx.math.MathUtils;
 public class PlayStateHost extends PlayState {
     private int doorCounter;
     private int powerCounter;
+    private int[][] memory;
 
     public PlayStateHost(GameStateManager gsm){
         super(gsm);
         //spawning initialization
         doorCounter = 0;
         powerCounter = 0;
+        memory = new int[5][9];
+        for (int i = 0; i < 5; i++){
+            for (int j = 0; j < 9; j++){
+                memory[i][j] = 0;
+            }
+        }
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
     }
@@ -84,18 +91,6 @@ public class PlayStateHost extends PlayState {
             }
         }
 
-        // spawning door switch
-        boolean[] temp_switch = createArray(false);
-        if (doorCounter == 40){
-            while (true){
-                int temp = MathUtils.random(0,8);
-                if (current[temp]){
-                    temp_switch[temp] = true;
-                    break;
-                }
-            }
-        }
-
         // spawning door/barrier
         boolean[] temp_door = createArray(false);
         if (doorCounter > 45){
@@ -107,6 +102,60 @@ public class PlayStateHost extends PlayState {
             doorCounter = 0;
         }
 
+        // updating the memory
+        // 0 = wall, 1 = empty but unreachable, 2 = empty and reachable
+        for (int i = memory.length-1; i > 0; i--){
+            System.arraycopy(memory[i-1],0,memory[i],0,memory[i-1].length);
+        }
+        for (int i = 0; i < new_row.length; i++){
+            if (!new_row[i]){
+                memory[0][i] = 0;
+            }
+            else if (new_row[i]){
+                memory[0][i] = 1;
+            }
+            if (current[i]){
+                memory[0][i] = 2;
+            }
+        }
+        for (int i = 1; i < memory.length; i++){
+            int temp = 0;
+            for (int j = 0; j < memory[i].length; j++){
+                if ((memory[i-1][j] == 2) && (memory[i][j] == 1)){
+                    memory[i][j] = 2;
+                    temp = j;
+                }
+            }
+            for (int j = 0; j < memory[i].length; j++){
+                if (temp-j >= 0){
+                    if ((memory[i][temp-j] == 1) && (memory[i][temp-j+1] == 2)){
+                        memory[i][temp-j] = 2;
+                    }
+                }
+                if ((temp+j < 9) && (temp+j-1 > 0)){
+                    if ((memory[i][temp+j] == 1) && (memory[i][temp+j-1] == 2)){
+                        memory[i][temp+j] = 2;
+                    }
+                }
+            }
+        }
+
+        // spawning door switch
+        float[] switchCoord = {500, 1000};
+        if (doorCounter == 44){
+            boolean check = true;
+            while (check){
+                int temp0 = MathUtils.random(0,8);
+                int temp1 = MathUtils.random(0,4);
+                if (memory[temp1][temp0] == 2){
+                    switchCoord[0] = temp0;
+                    switchCoord[1] = temp1;
+                    check = false;
+                    break;
+                }
+            }
+        }
+
         synchronized (this) {
             while (mapBuffer.size() > 3){
                 try {
@@ -115,7 +164,7 @@ public class PlayStateHost extends PlayState {
             }
             powerUpBuffer.add(temp_power);
             mapBuffer.add(new_row);
-            switchBuffer.add(temp_switch);
+            switchBuffer.add(switchCoord);
             doorBuffer.add(temp_door);
             notifyAll();
         }
