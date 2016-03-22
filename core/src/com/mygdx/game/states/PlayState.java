@@ -18,9 +18,6 @@ import com.mygdx.game.objects.Switch;
 import com.mygdx.game.objects.JoyStick;
 import com.mygdx.game.objects.Player;
 import com.mygdx.game.objects.UI;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-
-import org.w3c.dom.css.Rect;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -76,7 +73,8 @@ public abstract class PlayState extends State{
     //final values
     final int spriteWidth = 50;
     final int spriteHeight = 50;
-    private final String[] TYPES_OF_POWER = {"slowGameDown","speedPlayerUp","dangerZoneHigher"};
+    private final String[] TYPES_OF_POWER = {"slowGameDown","speedPlayerUp","doubleScore","morePowers","dangerZoneLower",
+            "speedGameUp","slowPlayerDown","haltScore","lessPowers","dangerZoneHigher"};
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
@@ -231,7 +229,7 @@ public abstract class PlayState extends State{
         sb.end();
 
 //		constantly check if any power/DangerZone's effect still lingers
-        effectPower();
+        effectPassivePower();
         effectDangerZone(player);
 
         // move the obstacles, remove any that are beneath the bottom edge of the screen.
@@ -577,11 +575,13 @@ public abstract class PlayState extends State{
 //		collide with power up PASSIVE
         for (Power power:powers){
             if (player.overlaps(power)){
-                player.setPower(power.getType());
+                if (isPassive(power)) {
+                    player.setPassivePower(power.getType());
+                    powerState = true;
+                    endPowerTime = System.currentTimeMillis()+5000;
+                }
+                else player.setActivePower(power.getType());
                 powers.remove(power);
-                powerState = true;
-                endPowerTime = System.currentTimeMillis()+5000;
-                System.out.println(power.getType());
             }
         }
     }
@@ -605,25 +605,25 @@ public abstract class PlayState extends State{
         }
     }
 
-    private void effectPower(){
+    private void effectPassivePower(){
         if (powerState) {
             if (!powerEffectTaken) {
-                if (player.getPower().equals("slowGameDown")) {
+                if (player.getPassivePower().equals("slowGameDown")) {
                     gameSpeed *= speedChange;
-                } else if (player.getPower().equals("speedPlayerUp")) {
-                    playerSpeed *= speedChange;
-                } else if (player.getPower().equals("dangerZoneHigher")) {
-                    dangerZone += 50;
+                } else if (player.getPassivePower().equals("speedPlayerUp")) {
+                    playerSpeed /= speedChange;
+                } else if (player.getPassivePower().equals("dangerZoneHigher")) {
+                    dangerZone += 20;
                 }
                 powerEffectTaken = true;
             }
             if (System.currentTimeMillis() >= endPowerTime) {
-                if (player.getPower().equals("slowGameDown")) {
-                    gameSpeed *= speedChange;
-                } else if (player.getPower().equals("speedPlayerUp")) {
+                if (player.getPassivePower().equals("slowGameDown")) {
+                    gameSpeed /= speedChange;
+                } else if (player.getPassivePower().equals("speedPlayerUp")) {
                     playerSpeed *= speedChange;
-                } else if (player.getPower().equals("dangerZoneHigher")) {
-                    dangerZone -= 50;
+                } else if (player.getPassivePower().equals("dangerZoneHigher")) {
+                    dangerZone -= 20;
                     // change background file
                 }
                 powerState = false;
@@ -638,6 +638,19 @@ public abstract class PlayState extends State{
                 array[i] = b;
             }
         return array;
+    }
+    protected boolean isPassive(Power newPower) {
+        int index=0;
+        for (int i=0; i<TYPES_OF_POWER.length; i++) {
+            if (newPower.getType().equals(TYPES_OF_POWER.length)) {
+                index = i;
+                break;
+            }
+        }
+        if (index<TYPES_OF_POWER.length/2) {
+            return false;
+        }
+        return true;
     }
 }
 
