@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.objects.Background;
+import com.mygdx.game.objects.DangerZone;
 import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Barrier;
 import com.mygdx.game.objects.BarrierOpen;
@@ -16,6 +17,10 @@ import com.mygdx.game.objects.SideWall;
 import com.mygdx.game.objects.Switch;
 import com.mygdx.game.objects.JoyStick;
 import com.mygdx.game.objects.Player;
+import com.mygdx.game.objects.UI;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
+import org.w3c.dom.css.Rect;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -63,6 +68,8 @@ public abstract class PlayState extends State{
     private ArrayList<Power> powers = new ArrayList<Power>();
     private ArrayList<Background> bg = new ArrayList<Background>();
     private ArrayList<Overlay> effects = new ArrayList<Overlay>();
+    private ArrayList<DangerZone> dz = new ArrayList<DangerZone>();
+    private ArrayList<UI> ui = new ArrayList<UI>();
 
     //final values
     final int spriteWidth = 50;
@@ -204,6 +211,12 @@ public abstract class PlayState extends State{
         for (Overlay effect : effects) {
             sb.draw(effect.getImage(), effect.x, effect.y);
         }
+        for (DangerZone danger : dz) {
+            sb.draw(danger.getImage(), danger.x, danger.y);
+        }
+        for (UI inter : ui) {
+            sb.draw(inter.getImage(), inter.x, inter.y);
+        }
 
         if(touched){
 
@@ -327,8 +340,12 @@ public abstract class PlayState extends State{
     private void createBg(){
         Background backg = new Background(0);
         Overlay effect = new Overlay(0);
+        DangerZone danger = new DangerZone(0);
+        UI inter = new UI(0);
         bg.add(backg);
         effects.add(effect);
+        dz.add(danger);
+        ui.add(inter);
     }
     private void createSides(){
         int counter = 0;
@@ -377,6 +394,65 @@ public abstract class PlayState extends State{
         }
     }
     private void spawnSwitch(){
+//        ArrayList<Rectangle> dfs0 = new ArrayList<Rectangle>();
+//        ArrayList<String> dfs1 = new ArrayList<String>();
+//        float x = 15;
+//        float y = sideWalls.get(PlayState.sideWalls.size()-1).y+50;
+//        boolean spawn = false;
+//        for (int i = 0; i < path.length; i++){
+//            if (path[i]){
+//                x = 15 + i*50;
+//            }
+//        }
+//        while (!spawn){
+//            Rectangle current = new Rectangle();
+//            current.height = spriteHeight;
+//            current.width = spriteWidth;
+//            current.x = x;
+//            current.y = y;
+//            dfs0.add(current);
+//            dfs1.add("grey");
+//            //check counter-clockwise, starting with left
+//            boolean leftCheck = false;
+//            boolean bottomCheck = false;
+//            boolean rightCheck = false;
+//            boolean topCheck = false;
+//            for (int i = 0; i < 4; i++){
+//                while (i == 0 && x > 50 && !leftCheck){
+//                    float tempX = x - 50;
+//                    for (Rectangle check: obstacles){
+//                        if (check.contains(tempX,y)){
+//                            leftCheck = true;
+//                        }
+//                    }
+//                }
+//                while (i == 1 && y > 799 && !bottomCheck){
+//                    float tempY = y - 50;
+//                    for (Rectangle check: obstacles){
+//                        if (check.contains(x,tempY)){
+//                            bottomCheck = true;
+//                        }
+//                    }
+//                }
+//                while (i == 2 && x < 415 && !rightCheck){
+//                    float tempX = x + 50;
+//                    for (Rectangle check: obstacles){
+//                        if (check.contains(tempX,y)){
+//                            rightCheck = true;
+//                        }
+//                    }
+//                }
+//                while (i == 3 && y < 999 && !topCheck){
+//                    float tempY = y + 50;
+//                    for (Rectangle check: obstacles){
+//                        if (check.contains(x,tempY)){
+//                            topCheck = true;
+//                        }
+//                    }
+//                }
+//            }
+//
+//        }
         for (int i = 0; i < doorSwitch.length; i++) {
             if (doorSwitch[i]) {
                 Switch doorSwitch = new Switch(spriteWidth, spriteHeight, i);
