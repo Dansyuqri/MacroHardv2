@@ -7,8 +7,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.objects.Background;
-import com.mygdx.game.objects.DangerZone;
-import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Barrier;
 import com.mygdx.game.objects.BarrierOpen;
 import com.mygdx.game.objects.Obstacle;
@@ -17,10 +15,6 @@ import com.mygdx.game.objects.SideWall;
 import com.mygdx.game.objects.Switch;
 import com.mygdx.game.objects.JoyStick;
 import com.mygdx.game.objects.Player;
-import com.mygdx.game.objects.UI;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-
-import org.w3c.dom.css.Rect;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,25 +28,22 @@ public abstract class PlayState extends State{
     private JoyStick joystick;
     protected Player player;
     private Vector3 touchPos = new Vector3();
+    protected final int GAME_WIDTH = 9;
+
     //values
     public boolean running;
     private boolean touched;
     private boolean touchHeld;
-    private long endPowerTime = System.currentTimeMillis();
-    protected int gameSpeed;
-    protected double speedChange;
+    private long endPowerTime;
+    protected float gameSpeed, speedIncrement;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter;
-    protected int dangerZoneSpeedLimit;
-    public long start = System.currentTimeMillis();
-    boolean powerState = false;
-    boolean powerEffectTaken = false;
 
     //boolean arrays
-    public boolean[] path = {true, true, true, true, true, true, true, true, true};
-    boolean[] current = {true, true, true, true, true, true, true, true, true};
-    boolean[] powerUp = {false, false, false, false, false, false, false, false, false};
-    boolean[] doorSwitch = {false, false, false, false, false, false, false, false, false};
-    boolean[] barrier = {false, false, false, false, false, false, false, false, false};
+    public boolean[] path = createArray(true);
+    boolean[] current = createArray(true);
+    boolean[] powerUp = createArray(false);
+    boolean[] doorSwitch = createArray(false);
+    boolean[] barrier = createArray(false);
 
     //Arraylists
     protected ArrayList<boolean[]> mapBuffer = new ArrayList<boolean[]>();
@@ -67,14 +58,11 @@ public abstract class PlayState extends State{
     private ArrayList<BarrierOpen> barrierOpens = new ArrayList<BarrierOpen>();
     private ArrayList<Power> powers = new ArrayList<Power>();
     private ArrayList<Background> bg = new ArrayList<Background>();
-    private ArrayList<Overlay> effects = new ArrayList<Overlay>();
-    private ArrayList<DangerZone> dz = new ArrayList<DangerZone>();
-    private ArrayList<UI> ui = new ArrayList<UI>();
 
     //final values
     final int spriteWidth = 50;
     final int spriteHeight = 50;
-    private final String[] TYPES_OF_POWER = {"slowGameDown","speedPlayerUp","dangerZoneHigher"};
+    private final String[] TYPES_OF_POWER = {"slowGameDown","fewerObstacles","speedPlayerUp","dangerZoneHigher"};
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
@@ -89,13 +77,12 @@ public abstract class PlayState extends State{
         joystick = new JoyStick();
 
         //misc values initialization
-        gameSpeed = 80;
-        speedChange = 0.6;
+        gameSpeed = 75;
+        speedIncrement = (float) 0.01;
         playerSpeed = 300;
-        dangerZone = 200;
+        dangerZone = 300;
         powerCounter = 0;
         doorCounter = 0;
-        dangerZoneSpeedLimit = 200;
 
         createBg();
         createObstacle();
@@ -114,8 +101,6 @@ public abstract class PlayState extends State{
         float relativey = 0;
         if (touched) {
             cam.unproject(touchPos);
-            relativex = touchPos.x - (joystick.getX() + joystick.getJoystickWidth()/2);
-            relativey = touchPos.y - (joystick.getY() + joystick.getJoystickHeight()/2);
             if (!touchHeld) {
                 joystick.setX(touchPos.x - joystick.getJoystickWidth()/2);
                 joystick.setY(touchPos.y - joystick.getJoystickHeight()/2);
@@ -123,6 +108,8 @@ public abstract class PlayState extends State{
                 joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
                 touchHeld = true;
             }
+            relativex = touchPos.x - (joystick.getX() + joystick.getJoystickWidth()/2);
+            relativey = touchPos.y - (joystick.getY() + joystick.getJoystickHeight()/2);
         } else {
             touchHeld = false;
         }
@@ -141,15 +128,17 @@ public abstract class PlayState extends State{
                 joystick.setCY(sin * joystick.getJoystickWidth()/2 + joystick.getY() + joystick.getJoystickHeight()/2 - joystick.getJoystickCenterHeight()/2);
             }
 
-            omniMove(cos, sin);
+            if (Math.pow(relativex, 2) + Math.pow(relativey, 2) > 400) {
+                omniMove(cos, sin);
+            }
         }
     }
 
     @Override
     public void render(SpriteBatch sb) {
-        long score = System.currentTimeMillis()-start;
         handleInput();
         checkSwitchCollision();
+        checkDangerZone();
         // tell the camera to update its matrices.
         while (sideWalls.get(sideWalls.size() - 1).y < 999) {
             synchronized (this) {
@@ -208,16 +197,6 @@ public abstract class PlayState extends State{
 
         sb.draw(player.getTexture(), player.x, player.y);
 
-        for (Overlay effect : effects) {
-            sb.draw(effect.getImage(), effect.x, effect.y);
-        }
-        for (DangerZone danger : dz) {
-            sb.draw(danger.getImage(), danger.x, danger.y);
-        }
-        for (UI inter : ui) {
-            sb.draw(inter.getImage(), inter.x, inter.y);
-        }
-
         if(touched){
 
             sb.draw(joystick.getJoystickImage(), joystick.getX(), joystick.getY());
@@ -228,7 +207,7 @@ public abstract class PlayState extends State{
 
 //		constantly check if any power/DangerZone's effect still lingers
         effectPower();
-        effectDangerZone(player);
+        notifyDangerZone();
 
         // move the obstacles, remove any that are beneath the bottom edge of the screen.
 
@@ -241,7 +220,6 @@ public abstract class PlayState extends State{
         Iterator<Barrier> iter5 = barriers.iterator();
         Iterator<BarrierOpen> iter6 = barrierOpens.iterator();
         Iterator<Background> iter7 = bg.iterator();
-        Iterator<Overlay> iter8 = effects.iterator();
         while (iter.hasNext()) {
             Rectangle obstacle = iter.next();
             obstacle.y -= gameSpeed * Gdx.graphics.getDeltaTime();
@@ -276,11 +254,6 @@ public abstract class PlayState extends State{
             Rectangle bg = iter7.next();
             bg.y -= gameSpeed * Gdx.graphics.getDeltaTime();
             if (bg.y + 800 < 0) iter7.remove();
-        }
-        while (iter8.hasNext()) {
-            Rectangle effect = iter8.next();
-            effect.y -= gameSpeed * Gdx.graphics.getDeltaTime();
-            if (effect.y + 800 < 0) iter8.remove();
         }
     }
     @Override
@@ -339,22 +312,12 @@ public abstract class PlayState extends State{
     }
     private void createBg(){
         Background backg = new Background(0);
-        Overlay effect = new Overlay(0);
-        DangerZone danger = new DangerZone(0);
-        UI inter = new UI(0);
         bg.add(backg);
-        effects.add(effect);
-        dz.add(danger);
-        ui.add(inter);
     }
     private void createSides(){
-        int counter = 0;
-        while (counter*spriteHeight <= 800) {
-            for (int i = 0; i < 2; i++) {
-                SideWall sideWall = new SideWall(spriteHeight, counter*spriteHeight, i);
-                sideWalls.add(sideWall);
-            }
-            counter++;
+        for (int i = 0; i < 2; i++) {
+            SideWall sideWall = new SideWall(spriteHeight,800,i);
+            sideWalls.add(sideWall);
         }
     }
 
@@ -381,9 +344,7 @@ public abstract class PlayState extends State{
     }
     private void spawnBg(){
         Background backg = new Background(800);
-        Overlay effect = new Overlay(800);
         bg.add(backg);
-        effects.add(effect);
     }
     private void spawnPower() {
         for (int i = 0; i < powerUp.length; i++) {
@@ -394,65 +355,6 @@ public abstract class PlayState extends State{
         }
     }
     private void spawnSwitch(){
-//        ArrayList<Rectangle> dfs0 = new ArrayList<Rectangle>();
-//        ArrayList<String> dfs1 = new ArrayList<String>();
-//        float x = 15;
-//        float y = sideWalls.get(PlayState.sideWalls.size()-1).y+50;
-//        boolean spawn = false;
-//        for (int i = 0; i < path.length; i++){
-//            if (path[i]){
-//                x = 15 + i*50;
-//            }
-//        }
-//        while (!spawn){
-//            Rectangle current = new Rectangle();
-//            current.height = spriteHeight;
-//            current.width = spriteWidth;
-//            current.x = x;
-//            current.y = y;
-//            dfs0.add(current);
-//            dfs1.add("grey");
-//            //check counter-clockwise, starting with left
-//            boolean leftCheck = false;
-//            boolean bottomCheck = false;
-//            boolean rightCheck = false;
-//            boolean topCheck = false;
-//            for (int i = 0; i < 4; i++){
-//                while (i == 0 && x > 50 && !leftCheck){
-//                    float tempX = x - 50;
-//                    for (Rectangle check: obstacles){
-//                        if (check.contains(tempX,y)){
-//                            leftCheck = true;
-//                        }
-//                    }
-//                }
-//                while (i == 1 && y > 799 && !bottomCheck){
-//                    float tempY = y - 50;
-//                    for (Rectangle check: obstacles){
-//                        if (check.contains(x,tempY)){
-//                            bottomCheck = true;
-//                        }
-//                    }
-//                }
-//                while (i == 2 && x < 415 && !rightCheck){
-//                    float tempX = x + 50;
-//                    for (Rectangle check: obstacles){
-//                        if (check.contains(tempX,y)){
-//                            rightCheck = true;
-//                        }
-//                    }
-//                }
-//                while (i == 3 && y < 999 && !topCheck){
-//                    float tempY = y + 50;
-//                    for (Rectangle check: obstacles){
-//                        if (check.contains(x,tempY)){
-//                            topCheck = true;
-//                        }
-//                    }
-//                }
-//            }
-//
-//        }
         for (int i = 0; i < doorSwitch.length; i++) {
             if (doorSwitch[i]) {
                 Switch doorSwitch = new Switch(spriteWidth, spriteHeight, i);
@@ -492,10 +394,10 @@ public abstract class PlayState extends State{
         if (collidesObstacle()){
             player.x = prevx;
             player.y = prevy;
-            if (x > 0) x = 1;
-            if (x < 0) x = -1;
-            if (y > 0) y = 1;
-            if (y < 0) y = -1;
+            if (x > 0) x = (float) 2.0/3;
+            if (x < 0) x = (float) -2.0/3;
+            if (y > 0) y = (float) 2.0/3;
+            if (y < 0) y = (float) -2.0/3;
             player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
             if (collidesObstacle()){
                 player.x = prevx;
@@ -552,6 +454,11 @@ public abstract class PlayState extends State{
      occupied by a wall and that switches are reachable.
      */
 
+    private void effectDangerZone(){
+        // if notified by server
+        gameSpeed += speedIncrement;
+    }
+
     private void checkSwitchCollision(){
         //		collide with switch
         for (Switch eachSwitch:switches){
@@ -570,62 +477,65 @@ public abstract class PlayState extends State{
                 // then notify server
             }
         }
-//		collide with power up PASSIVE
+//		collide with power up
         for (Power power:powers){
             if (player.overlaps(power)){
                 player.setPower(power.getType());
                 powers.remove(power);
-                powerState = true;
-                endPowerTime = System.currentTimeMillis()+5000;
-                System.out.println(power.getType());
+                // then notify server
             }
         }
     }
 
+    private void checkDangerZone(){
+        if (player.y < dangerZone) {
+            effectDangerZone();
+            System.out.println(gameSpeed);
+        }
+    }
 
     private void removeBarriers(){
 //		TODO: if notified by server (Ryan)
         barriers.clear();
     }
 
+    private void notifyDangerZone(){
+        if (player.y < dangerZone) {
+            //notify server
+        }
+    }
+
     /**
-     Methods handling power-ups/affecting game attributes
+     Method handling power-ups
      */
-    boolean dangerZoneEffectTaken = false;
-    private void effectDangerZone(Player p) {
-        if (p.getY()<=dangerZone && !dangerZoneEffectTaken && gameSpeed<=dangerZoneSpeedLimit) {
-            gameSpeed += 100;
-            dangerZoneEffectTaken = true;
-        } else if (p.getY()>dangerZone) {
-            dangerZoneEffectTaken = false;
-        }
-    }
-
+    boolean setPowerLock = true;
     private void effectPower(){
-        if (powerState) {
-            if (!powerEffectTaken) {
-                if (player.getPower().equals("slowGameDown")) {
-                    gameSpeed *= speedChange;
-                } else if (player.getPower().equals("speedPlayerUp")) {
-                    playerSpeed *= speedChange;
-                } else if (player.getPower().equals("dangerZoneHigher")) {
-                    dangerZone += 50;
-                }
-                powerEffectTaken = true;
+        if (System.currentTimeMillis() > endPowerTime) {
+            setPowerLock = true;
+        }
+        if (System.currentTimeMillis() <= endPowerTime){
+            if (setPowerLock) {
+                endPowerTime = System.currentTimeMillis() + 5000;
+                setPowerLock = false;
             }
-            if (System.currentTimeMillis() >= endPowerTime) {
-                if (player.getPower().equals("slowGameDown")) {
-                    gameSpeed *= speedChange;
-                } else if (player.getPower().equals("speedPlayerUp")) {
-                    playerSpeed *= speedChange;
-                } else if (player.getPower().equals("dangerZoneHigher")) {
-                    dangerZone -= 50;
-                    // change background file
-                }
-                powerState = false;
-                powerEffectTaken = false;
+            if (player.getPower().equals("slowGameDown")) {
+                gameSpeed -= speedIncrement;
+            } else if (player.getPower().equals("fewerObstacles")) {
+
+            } else if (player.getPower().equals("speedPlayerUp")) {
+                playerSpeed += speedIncrement;
+            } else if (player.getPower().equals("dangerZoneHigher")) {
+                dangerZone += 50;
             }
         }
     }
-}
 
+    protected boolean[] createArray(boolean b){
+        boolean[] array = new boolean[GAME_WIDTH];
+        for (int i = 0; i < GAME_WIDTH; i++) {
+            array[i] = b;
+        }
+        return array;
+    }
+
+}
