@@ -234,7 +234,7 @@ public abstract class PlayState extends State{
         sb.end();
 
 //		constantly check if any power/DangerZone's effect still lingers
-        effectPower();
+        effectPassivePower();
         effectDangerZone(player);
 
         // move the obstacles, remove any that are beneath the bottom edge of the screen.
@@ -580,11 +580,12 @@ public abstract class PlayState extends State{
 //		collide with power up PASSIVE
         for (Power power:powers){
             if (player.overlaps(power)){
-                player.setPower(power.getType());
+                if (isPassive(power)) {
+                    player.setPassivePower(power.getType());
+                    powerState = true;
+                    endPowerTime = System.currentTimeMillis()+5000;
+                }
                 powers.remove(power);
-                powerState = true;
-                endPowerTime = System.currentTimeMillis()+5000;
-                System.out.println(power.getType());
             }
         }
     }
@@ -608,24 +609,24 @@ public abstract class PlayState extends State{
         }
     }
 
-    private void effectPower(){
+    private void effectPassivePower(){
         if (powerState) {
             if (!powerEffectTaken) {
-                if (player.getPower().equals("slowGameDown")) {
+                if (player.getPassivePower().equals("slowGameDown")) {
                     gameSpeed *= speedChange;
-                } else if (player.getPower().equals("speedPlayerUp")) {
+                } else if (player.getPassivePower().equals("speedPlayerUp")) {
                     playerSpeed *= speedChange;
-                } else if (player.getPower().equals("dangerZoneHigher")) {
+                } else if (player.getPassivePower().equals("dangerZoneHigher")) {
                     dangerZone += 50;
                 }
                 powerEffectTaken = true;
             }
             if (System.currentTimeMillis() >= endPowerTime) {
-                if (player.getPower().equals("slowGameDown")) {
+                if (player.getPassivePower().equals("slowGameDown")) {
                     gameSpeed *= speedChange;
-                } else if (player.getPower().equals("speedPlayerUp")) {
+                } else if (player.getPassivePower().equals("speedPlayerUp")) {
                     playerSpeed *= speedChange;
-                } else if (player.getPower().equals("dangerZoneHigher")) {
+                } else if (player.getPassivePower().equals("dangerZoneHigher")) {
                     dangerZone -= 50;
                     // change background file
                 }
@@ -641,5 +642,18 @@ public abstract class PlayState extends State{
             array[i] = b;
         }
         return array;
+    }
+    protected boolean isPassive(Power newPower) {
+        int index = 0;
+        for (int i=0; i<TYPES_OF_POWER.length; i++) {
+            if (newPower.getType().equals(TYPES_OF_POWER.length)) {
+                index = i;
+                break;
+            }
+        }
+        if (index<TYPES_OF_POWER.length/2) {
+            return false;
+        }
+        return true;
     }
 }

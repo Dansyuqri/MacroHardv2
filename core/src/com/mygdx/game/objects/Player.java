@@ -8,7 +8,8 @@ import com.badlogic.gdx.math.Rectangle;
  * Created by Syuqri on 3/9/2016.
  */
 public class Player extends GameObject {
-    private String power;
+    private String passivePower;
+    private String activePower;
     private Texture texture;
     public Player(){
         super();
@@ -17,15 +18,22 @@ public class Player extends GameObject {
         this.y = 400;
         this.width = 40;
         this.height = 40;
-
     }
 
-    public void setPower(String power) {
-        this.power = power;
+    public String getActivePower(){
+        return activePower;
     }
 
-    public String getPower() {
-        return power;
+    public void setActivePower(String activePower) {
+        this.activePower = activePower;
+    }
+
+    public void setPassivePower(String passivePower) {
+        this.passivePower = passivePower;
+    }
+
+    public String getPassivePower() {
+        return passivePower;
     }
 
     public Texture getTexture(){
