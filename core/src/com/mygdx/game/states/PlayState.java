@@ -43,10 +43,8 @@ public abstract class PlayState extends State{
     private boolean touched;
     private boolean touchHeld;
     private long endPowerTime = System.currentTimeMillis();
-    protected int gameSpeed;
-    protected double speedChange;
+    protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter;
-    protected int dangerZoneSpeedLimit;
     public long start = System.currentTimeMillis();
     boolean powerState = false;
     boolean powerEffectTaken = false;
@@ -95,12 +93,13 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         gameSpeed = 80;
-        speedChange = 0.6;
+        speedIncrease = (float) 0.07;
+        speedChange = (float) 0.6;
         playerSpeed = 300;
         dangerZone = 200;
         powerCounter = 0;
         doorCounter = 0;
-        dangerZoneSpeedLimit = 200;
+        dangerZoneSpeedLimit = 250;
 
         createBg();
         createObstacle();
@@ -120,6 +119,7 @@ public abstract class PlayState extends State{
         if (touched) {
             cam.unproject(touchPos);
             if (!touchHeld) {
+                //if this is the initial touch initialize the joystick at the touched location
                 joystick.setX(touchPos.x - joystick.getJoystickWidth()/2);
                 joystick.setY(touchPos.y - joystick.getJoystickHeight()/2);
                 joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
@@ -133,19 +133,21 @@ public abstract class PlayState extends State{
         }
 
         if (touchHeld) {
-            // check if touch is within joystick hitbox with buffer
+            //calculates the relevant numbers needed for omnidirectional movement
             float angle = (float) Math.atan2(relativey, relativex);
             float cos = (float) Math.cos(angle);
             float sin = (float) Math.sin(angle);
             if (Math.abs(relativex) < joystick.getJoystickWidth()/2
                     && (Math.abs(relativey) < joystick.getJoystickHeight()/2)) {
+                //if the touched position is within the circle set the dot to the touched position
                 joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
                 joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
             } else {
+                //otherwise set it to the edge of the circle
                 joystick.setCX(cos * joystick.getJoystickWidth()/2 + joystick.getX() + joystick.getJoystickWidth()/2 - joystick.getJoystickCenterWidth()/2);
                 joystick.setCY(sin * joystick.getJoystickWidth()/2 + joystick.getY() + joystick.getJoystickHeight()/2 - joystick.getJoystickCenterHeight()/2);
             }
-
+            //if the touch is within a specific distance from the centre of the circle then move the player
             if (Math.pow(relativex, 2) + Math.pow(relativey, 2) > 400) {
                 omniMove(cos, sin);
             }
@@ -436,10 +438,10 @@ public abstract class PlayState extends State{
         if (collidesObstacle()){
             player.x = prevx;
             player.y = prevy;
-            if (x > 0) x = 1;
-            if (x < 0) x = -1;
-            if (y > 0) y = 1;
-            if (y < 0) y = -1;
+            if (x > 0) x = (float)2/3;
+            if (x < 0) x = -(float)2/3;
+            if (y > 0) y = (float)2/3;
+            if (y < 0) y = -(float)2/3;
             player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
             if (collidesObstacle()){
                 player.x = prevx;
@@ -536,13 +538,9 @@ public abstract class PlayState extends State{
     /**
      Methods handling power-ups/affecting game attributes
      */
-    boolean dangerZoneEffectTaken = false;
     private void effectDangerZone(Player p) {
-        if (p.getY()<=dangerZone && !dangerZoneEffectTaken && gameSpeed<=dangerZoneSpeedLimit) {
-            gameSpeed += 100;
-            dangerZoneEffectTaken = true;
-        } else if (p.getY()>dangerZone) {
-            dangerZoneEffectTaken = false;
+        if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
+            gameSpeed += speedIncrease;
         }
     }
 
