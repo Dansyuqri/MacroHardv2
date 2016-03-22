@@ -34,6 +34,8 @@ public abstract class PlayState extends State{
     private JoyStick joystick;
     protected Player player;
     private Vector3 touchPos = new Vector3();
+    protected final int GAME_WIDTH = 9;
+
     //values
     public boolean running;
     private boolean touched;
@@ -48,11 +50,11 @@ public abstract class PlayState extends State{
     boolean powerEffectTaken = false;
 
     //boolean arrays
-    public boolean[] path = {true, true, true, true, true, true, true, true, true};
-    boolean[] current = {true, true, true, true, true, true, true, true, true};
-    boolean[] powerUp = {false, false, false, false, false, false, false, false, false};
-    boolean[] doorSwitch = {false, false, false, false, false, false, false, false, false};
-    boolean[] barrier = {false, false, false, false, false, false, false, false, false};
+    public boolean[] path = createArray(true);
+    boolean[] current = createArray(true);
+    boolean[] powerUp = createArray(false);
+    boolean[] doorSwitch = createArray(false);
+    boolean[] barrier = createArray(false);
 
     //Arraylists
     protected ArrayList<boolean[]> mapBuffer = new ArrayList<boolean[]>();
@@ -114,8 +116,6 @@ public abstract class PlayState extends State{
         float relativey = 0;
         if (touched) {
             cam.unproject(touchPos);
-            relativex = touchPos.x - (joystick.getX() + joystick.getJoystickWidth()/2);
-            relativey = touchPos.y - (joystick.getY() + joystick.getJoystickHeight()/2);
             if (!touchHeld) {
                 joystick.setX(touchPos.x - joystick.getJoystickWidth()/2);
                 joystick.setY(touchPos.y - joystick.getJoystickHeight()/2);
@@ -123,6 +123,8 @@ public abstract class PlayState extends State{
                 joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
                 touchHeld = true;
             }
+            relativex = touchPos.x - (joystick.getX() + joystick.getJoystickWidth()/2);
+            relativey = touchPos.y - (joystick.getY() + joystick.getJoystickHeight()/2);
         } else {
             touchHeld = false;
         }
@@ -141,7 +143,9 @@ public abstract class PlayState extends State{
                 joystick.setCY(sin * joystick.getJoystickWidth()/2 + joystick.getY() + joystick.getJoystickHeight()/2 - joystick.getJoystickCenterHeight()/2);
             }
 
-            omniMove(cos, sin);
+            if (Math.pow(relativex, 2) + Math.pow(relativey, 2) > 400) {
+                omniMove(cos, sin);
+            }
         }
     }
 
@@ -626,6 +630,14 @@ public abstract class PlayState extends State{
                 powerEffectTaken = false;
             }
         }
+    }
+
+    protected boolean[] createArray(boolean b){
+        boolean[] array = new boolean[GAME_WIDTH];
+            for (int i = 0; i < GAME_WIDTH; i++) {
+                array[i] = b;
+            }
+        return array;
     }
 }
 

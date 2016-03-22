@@ -6,17 +6,24 @@ import com.badlogic.gdx.math.MathUtils;
  * Created by hj on 19/3/16.
  */
 public class PlayStateHost extends PlayState {
+    private int doorCounter;
+    private int powerCounter;
+
     PlayStateHost(GameStateManager gsm){
         super(gsm);
         //spawning initialization
+        doorCounter = 0;
+        powerCounter = 0;
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
     }
 
     void wallCoord(){
+        powerCounter += 1;
+        doorCounter += 1;
         boolean test = false;
         int out_index = 0;
-        boolean[] new_row = {false, false, false, false, false, false, false, false, false};
+        boolean[] new_row = createArray(false);
 
         // random generator
         while (!test) {
@@ -65,7 +72,7 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning power ups after a certain time
-        boolean[] temp_power = {false, false, false, false, false, false, false, false, false};
+        boolean[] temp_power = createArray(false);
         if (powerCounter > 20){
             while (true){
                 int temp = MathUtils.random(0,8);
@@ -78,7 +85,7 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning door switch
-        boolean[] temp_switch = {false, false, false, false, false, false, false, false, false};
+        boolean[] temp_switch = createArray(false);
         if (doorCounter == 40){
             while (true){
                 int temp = MathUtils.random(0,8);
@@ -90,7 +97,7 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning door/barrier
-        boolean[] temp_door = {false, false, false, false, false, false, false, false, false};
+        boolean[] temp_door = createArray(false);
         if (doorCounter > 45){
             for (int i = 0; i < current.length; i++) {
                 if (new_row[i]) {
