@@ -2,14 +2,14 @@ package com.mygdx.game.objects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.customEnum.PowerType;
 
 /**
  * Created by Syuqri on 3/9/2016.
  */
 public class Player extends GameObject {
-    private String passivePower;
-    private String activePower;
+    private PowerType passivePower;
+    private PowerType activePower;
     private Texture texture;
     public Player(){
         super();
@@ -18,21 +18,22 @@ public class Player extends GameObject {
         this.y = 400;
         this.width = 40;
         this.height = 40;
+        this.activePower = PowerType.NOTHING;
     }
 
-    public String getActivePower(){
+    public PowerType getActivePower(){
         return activePower;
     }
 
-    public void setActivePower(String activePower) {
+    public void setActivePower(PowerType activePower) {
         this.activePower = activePower;
     }
 
-    public void setPassivePower(String passivePower) {
+    public void setPassivePower(PowerType passivePower) {
         this.passivePower = passivePower;
     }
 
-    public String getPassivePower() {
+    public PowerType getPassivePower() {
         return passivePower;
     }
 

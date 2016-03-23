@@ -142,8 +142,9 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning door switch
-        float[] switchCoord = {500, 1000};
+        float[] switchCoord = {500, 1000, 0};
         if (doorCounter == 44){
+            switchCoord[2] = 1;
             boolean check = true;
             while (check){
                 int temp0 = MathUtils.random(0,8);

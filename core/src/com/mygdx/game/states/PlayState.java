@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.customEnum.MapTile;
+import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.DangerZone;
 import com.mygdx.game.objects.Overlay;
@@ -390,14 +391,16 @@ public abstract class PlayState extends State{
     private void spawnPower() {
         for (int i = 0; i < path.length; i++) {
             if (path[i] == MapTile.POWER) {
-                Power power = new Power(TYPES_OF_POWER[(int)(Math.random()*TYPES_OF_POWER.length)],i);
-                powers.add(power);
+                Power power = new Power(PowerType.values()[(int)(Math.random()*PowerType.values().length)],i);                powers.add(power);
             }
         }
     }
     private void spawnSwitch(){
-        Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1]);
-        switches.add(doorSwitch);
+        if (this.doorSwitch[2] == 1) {
+            Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1]);
+            switches.add(doorSwitch);
+            this.doorSwitch[2] = 0;
+        }
     }
     private void spawnDoor(){
         for (int i = 0; i < path.length; i++) {
@@ -605,7 +608,7 @@ public abstract class PlayState extends State{
                 } else if (player.getActivePower().equals("dangerZoneLower")) {
                     dangerZone += 20;
                 }
-                player.setActivePower("nothing");
+                player.setActivePower(PowerType.NOTHING);
                 activePowerState = false;
                 activePowerEffectTaken = false;
             }
@@ -620,12 +623,12 @@ public abstract class PlayState extends State{
     }
     protected boolean isPassive(Power newPower) {
         int index=0;
-        for (int i=0; i<TYPES_OF_POWER.length; i++) {
-            if (newPower.getType().equals(TYPES_OF_POWER[i])) {
+        for (int i=0; i<PowerType.values().length; i++) {
+            if (newPower.getType().equals(PowerType.values()[i])) {
                 index = i;
                 break;
             }
         }
-        return !(index<TYPES_OF_POWER.length/2);
+        return !(index<PowerType.values().length/2);
     }
 }
