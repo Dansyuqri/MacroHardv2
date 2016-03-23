@@ -634,8 +634,7 @@ public abstract class PlayState extends State{
                 break;
             }
         }
-        if (index<TYPES_OF_POWER.length/2) return false;
-        return true;
+        return !(index<TYPES_OF_POWER.length/2);
     }
 }
 
