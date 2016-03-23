@@ -43,7 +43,9 @@ public class MacroHardv2 extends ApplicationAdapter {
 
 	public void multiplayerGameReady(){
 		//gamew.multiplayer = true;
-		gsm.set(new PlayStateHost(gsm));
+
+		//gsm.set(new PlayStateHost(gsm));
+		MenuState.goToPlay=true;
 		dispose();
 
 		//Used to send players coorindates to everyone else

@@ -20,6 +20,7 @@ public class MenuState extends State{
     private Vector3 touchPos = new Vector3(0,0,0);
     private float bufferFromBottom = 200;
     private boolean touched = false;
+    public static volatile boolean goToPlay = false;
 
 
     //Resize variables
@@ -55,6 +56,10 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the play button when pressed
          * **************************************************************************************
          */
+        if(goToPlay == true){
+            gsm.set(new PlayStateHost(gsm));
+            dispose();
+        }
         if(Gdx.input.isTouched() && touched == false){
             if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
                 if(touchPos.y<=(graphicsY/2)+(playBtnY/2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
@@ -169,4 +174,5 @@ public class MenuState extends State{
         quickGameBtn.dispose();
 
     }
+
 }
