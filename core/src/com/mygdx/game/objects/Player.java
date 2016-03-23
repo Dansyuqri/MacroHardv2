@@ -10,10 +10,9 @@ import com.mygdx.game.customEnum.PowerType;
 public class Player extends Movable {
     private PowerType passivePower;
     private PowerType activePower;
-    private Texture texture;
     public Player(){
         super();
-        texture = new Texture(Gdx.files.internal("player_temp.png"));
+        this.setImage(new Texture(Gdx.files.internal("player_temp.png")));
         this.x = 480/2-50/2;
         this.y = 400;
         this.width = 40;
@@ -35,10 +34,6 @@ public class Player extends Movable {
 
     public PowerType getPassivePower() {
         return passivePower;
-    }
-
-    public Texture getTexture(){
-        return texture;
     }
 
     public boolean canGoThrough() {

@@ -11,11 +11,11 @@ import com.mygdx.game.states.PlayState;
 public class Switch extends Obstacle implements Collidable{
     private boolean on = false;
 
-    public Switch(int spriteWidth,int spriteHeight,float x, float y){
+    public Switch(int spriteWidth,int spriteHeight,float x, float y, float tracker){
         super();
         this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
         this.x = 15 + x*spriteWidth;
-        this.y = PlayState.tracker+50 - (y*spriteHeight);
+        this.y = tracker+50 - (y*spriteHeight);
         this.width = spriteWidth;
         this.height = spriteHeight;
     }
