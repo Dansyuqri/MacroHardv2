@@ -45,9 +45,7 @@ public abstract class PlayState extends State{
     private long endPassivePowerTime, endActivePowerTime;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
-
     boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
-    boolean powerEffectTaken = false;
 
     //boolean arrays
     public int[] path = {1, 1, 1, 1, 1, 1, 1, 1, 1};
