@@ -7,7 +7,7 @@ import com.mygdx.game.customEnum.PowerType;
 /**
  * Created by Syuqri on 3/9/2016.
  */
-public class Player extends GameObject {
+public class Player extends Movable {
     private PowerType passivePower;
     private PowerType activePower;
     private Texture texture;

@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 /**
  * Created by Samuel on 21/3/2016.
  */
-public class Overlay extends GameObject{
+public class Overlay extends Movable{
     public Overlay(int y){
         super();
         this.setImage(new Texture(Gdx.files.internal("effects1.png")));
