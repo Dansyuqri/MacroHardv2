@@ -1,6 +1,7 @@
 package com.mygdx.game.states;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.mygdx.game.customEnum.MapTile;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,18 +35,17 @@ public class PlayStateHost extends PlayState {
         doorCounter += 1;
         boolean test = false;
         int out_index = 0;
-        // 0 = wall, 1 = empty, 2 = power, 3 = door
-        int[] new_row = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+        MapTile[] new_row = {MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES};
 
         // random generator
         while (!test) {
             int temp = MathUtils.random(1, 9);
             for (int i = 0; i < temp; i++) {
                 int coord = MathUtils.random(0,8);
-                new_row[coord] = 1;
+                new_row[coord] = MapTile.EMPTY;
             }
             for (int i = 0; i < new_row.length; i++) {
-                if ((new_row[i] == 1) && current[i]) {
+                if ((new_row[i] == MapTile.EMPTY) && current[i]) {
                     test = true;
                     break;
                 }
@@ -54,7 +54,7 @@ public class PlayStateHost extends PlayState {
 
         // updating the path array (only 1 path)
         for (int k = 0; k < new_row.length; k++) {
-            if ((new_row[k] == 1) && current[k]) {
+            if ((new_row[k] == MapTile.EMPTY) && current[k]) {
                 current[k] = true;
                 out_index = k;
             } else {
@@ -66,7 +66,7 @@ public class PlayStateHost extends PlayState {
         // also true)
         for (int j = 1; j < new_row.length; j++) {
             if (out_index + j < new_row.length) {
-                if ((new_row[out_index + j] == 1) && current[out_index + j - 1]) {
+                if ((new_row[out_index + j] == MapTile.EMPTY) && current[out_index + j - 1]) {
                     current[out_index + j] = true;
                 }
                 else {
@@ -74,7 +74,7 @@ public class PlayStateHost extends PlayState {
                 }
             }
             if (out_index - j >= 0) {
-                if ((new_row[out_index - j] == 1) && current[out_index - j + 1]) {
+                if ((new_row[out_index - j] == MapTile.EMPTY) && current[out_index - j + 1]) {
                     current[out_index - j] = true;
                 }
                 else {
@@ -87,19 +87,19 @@ public class PlayStateHost extends PlayState {
         if (powerCounter > 20){
             while (true){
                 int temp = MathUtils.random(0,8);
-                if (new_row[temp] == 1){
-                    new_row[temp] = 2;
+                if (new_row[temp] == MapTile.EMPTY){
+                    new_row[temp] = MapTile.POWER;
                     powerCounter = 0;
                     break;
                 }
             }
         }
 
-        // spawning door/barrier
+        // spawning door
         if (doorCounter > 45){
             for (int i = 0; i < current.length; i++) {
-                if (new_row[i] == 1) {
-                    new_row[i] = 3;
+                if (new_row[i] == MapTile.EMPTY) {
+                    new_row[i] = MapTile.DOOR;
                 }
             }
             doorCounter = 0;
@@ -111,10 +111,10 @@ public class PlayStateHost extends PlayState {
             System.arraycopy(memory[i-1],0,memory[i],0,memory[i-1].length);
         }
         for (int i = 0; i < new_row.length; i++){
-            if (new_row[i] == 0){
+            if (new_row[i] == MapTile.OBSTACLES){
                 memory[0][i] = 0;
             }
-            else if (new_row[i] == 1){
+            else if (new_row[i] == MapTile.EMPTY){
                 memory[0][i] = 1;
             }
             if (current[i]){
