@@ -30,17 +30,18 @@ public class PlayStateHost extends PlayState {
         doorCounter += 1;
         boolean test = false;
         int out_index = 0;
-        boolean[] new_row = createArray(false);
+        // 0 = wall, 1 = empty, 2 = power, 3 = door
+        int[] new_row = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         // random generator
         while (!test) {
             int temp = MathUtils.random(1, 9);
             for (int i = 0; i < temp; i++) {
                 int coord = MathUtils.random(0,8);
-                new_row[coord] = true;
+                new_row[coord] = 1;
             }
             for (int i = 0; i < new_row.length; i++) {
-                if (new_row[i] && current[i]) {
+                if ((new_row[i] == 1) && current[i]) {
                     test = true;
                     break;
                 }
@@ -49,7 +50,7 @@ public class PlayStateHost extends PlayState {
 
         // updating the path array (only 1 path)
         for (int k = 0; k < new_row.length; k++) {
-            if (new_row[k] && current[k]) {
+            if ((new_row[k] == 1) && current[k]) {
                 current[k] = true;
                 out_index = k;
             } else {
@@ -61,7 +62,7 @@ public class PlayStateHost extends PlayState {
         // also true)
         for (int j = 1; j < new_row.length; j++) {
             if (out_index + j < new_row.length) {
-                if (new_row[out_index + j] && current[out_index + j - 1]) {
+                if ((new_row[out_index + j] == 1) && current[out_index + j - 1]) {
                     current[out_index + j] = true;
                 }
                 else {
@@ -69,7 +70,7 @@ public class PlayStateHost extends PlayState {
                 }
             }
             if (out_index - j >= 0) {
-                if (new_row[out_index - j] && current[out_index - j + 1]) {
+                if ((new_row[out_index - j] == 1) && current[out_index - j + 1]) {
                     current[out_index - j] = true;
                 }
                 else {
@@ -79,12 +80,12 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning power ups after a certain time
-        boolean[] temp_power = createArray(false);
+
         if (powerCounter > 20){
             while (true){
                 int temp = MathUtils.random(0,8);
-                if (new_row[temp]){
-                    temp_power[temp] = true;
+                if (new_row[temp] == 1){
+                    new_row[temp] = 2;
                     powerCounter = 0;
                     break;
                 }
@@ -92,11 +93,11 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning door/barrier
-        boolean[] temp_door = createArray(false);
+
         if (doorCounter > 45){
             for (int i = 0; i < current.length; i++) {
-                if (new_row[i]) {
-                    temp_door[i] = true;
+                if (new_row[i] == 1) {
+                    new_row[i] = 3;
                 }
             }
             doorCounter = 0;
@@ -108,10 +109,10 @@ public class PlayStateHost extends PlayState {
             System.arraycopy(memory[i-1],0,memory[i],0,memory[i-1].length);
         }
         for (int i = 0; i < new_row.length; i++){
-            if (!new_row[i]){
+            if (new_row[i] == 0){
                 memory[0][i] = 0;
             }
-            else if (new_row[i]){
+            else if (new_row[i] == 1){
                 memory[0][i] = 1;
             }
             if (current[i]){
@@ -162,10 +163,10 @@ public class PlayStateHost extends PlayState {
                     wait();
                 } catch (InterruptedException ignored){}
             }
-            powerUpBuffer.add(temp_power);
+
             mapBuffer.add(new_row);
             switchBuffer.add(switchCoord);
-            doorBuffer.add(temp_door);
+
             notifyAll();
         }
     }
