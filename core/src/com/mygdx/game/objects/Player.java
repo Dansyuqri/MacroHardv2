@@ -2,6 +2,7 @@ package com.mygdx.game.objects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.mygdx.game.customEnum.PowerType;
 
 /**
  * Created by Syuqri on 3/9/2016.

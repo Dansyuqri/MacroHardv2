@@ -6,10 +6,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.customEnum.MapTile;
+import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.DangerZone;
 import com.mygdx.game.objects.Overlay;
-import com.mygdx.game.objects.Barrier;
+import com.mygdx.game.objects.Door;
 import com.mygdx.game.objects.BarrierOpen;
 import com.mygdx.game.objects.Obstacle;
 import com.mygdx.game.objects.Power;
@@ -43,22 +45,18 @@ public abstract class PlayState extends State{
     boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
 
     //boolean arrays
-    public boolean[] path = createArray(true);
+    public MapTile[] path = {MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY};
     boolean[] current = createArray(true);
-    boolean[] powerUp = createArray(false);
     float[] doorSwitch = null;
-    boolean[] barrier = createArray(false);
 
     //Arraylists
-    protected ArrayList<boolean[]> mapBuffer = new ArrayList<boolean[]>();
-    protected ArrayList<boolean[]> doorBuffer = new ArrayList<boolean[]>();
+    protected ArrayList<MapTile[]> mapBuffer = new ArrayList<MapTile[]>();
     protected ArrayList<float[]> switchBuffer = new ArrayList<float[]>();
-    protected ArrayList<boolean[]> powerUpBuffer = new ArrayList<boolean[]>();
 
     private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
     public static ArrayList<SideWall> sideWalls = new ArrayList<SideWall>();
     private ArrayList<Switch> switches = new ArrayList<Switch>();
-    private ArrayList<Barrier> barriers = new ArrayList<Barrier>();
+    private ArrayList<Door> doors = new ArrayList<Door>();
     private ArrayList<BarrierOpen> barrierOpens = new ArrayList<BarrierOpen>();
     private ArrayList<Power> powers = new ArrayList<Power>();
     private ArrayList<Background> bg = new ArrayList<Background>();
@@ -69,8 +67,6 @@ public abstract class PlayState extends State{
     //final values
     final int spriteWidth = 50;
     final int spriteHeight = 50;
-    private final String[] TYPES_OF_POWER = {"slowGameDown","speedPlayerUp","doubleScore","morePowers","dangerZoneLower",
-            "speedGameUp","slowPlayerDown","haltScore","lessPowers","dangerZoneHigher"};
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
@@ -164,9 +160,7 @@ public abstract class PlayState extends State{
                     } catch (InterruptedException ignored){}
                 }
                 path = mapBuffer.remove(0);
-                barrier = doorBuffer.remove(0);
                 doorSwitch = switchBuffer.remove(0);
-                powerUp = powerUpBuffer.remove(0);
                 notifyAll();
             }
             float temp = sideWalls.get(sideWalls.size() - 1).y + 50;
@@ -204,7 +198,7 @@ public abstract class PlayState extends State{
         for (Switch eachSwitch : switches) {
             sb.draw(eachSwitch.getImage(), eachSwitch.x, eachSwitch.y);
         }
-        for (Barrier barrier : barriers) {
+        for (Door barrier : doors) {
             sb.draw(barrier.getImage(), barrier.x, barrier.y);
         }
         for (BarrierOpen barrier : barrierOpens) {
@@ -244,7 +238,7 @@ public abstract class PlayState extends State{
         Iterator<SideWall> iter2 = sideWalls.iterator();
         Iterator<Power> iter3 = powers.iterator();
         Iterator<Switch> iter4 = switches.iterator();
-        Iterator<Barrier> iter5 = barriers.iterator();
+        Iterator<Door> iter5 = doors.iterator();
         Iterator<BarrierOpen> iter6 = barrierOpens.iterator();
         Iterator<Background> iter7 = bg.iterator();
         Iterator<Overlay> iter8 = effects.iterator();
@@ -302,7 +296,7 @@ public abstract class PlayState extends State{
         for (Power power:powers) {
             power.getImage().dispose();
         }
-        for (Barrier barrier:barriers) {
+        for (Door barrier: doors) {
             barrier.getImage().dispose();
         }
         for (Switch eachSwitch:switches) {
@@ -319,19 +313,14 @@ public abstract class PlayState extends State{
         joystick.getJoystickCentreImage().dispose();
     }
 
-
-
-
-
-
-/***************************************************
-*  CREATE METHODS HERE
-****************************************************
-*/
+    /***************************************************
+     *  CREATE METHODS HERE
+     ****************************************************
+     */
 
     private void createObstacle() {
         for (int i = 0; i < path.length; i++) {
-            if (!path[i]) {
+            if (path[i] == MapTile.OBSTACLES) {
                 Obstacle obstacle = new Obstacle();
                 obstacle.x = (spriteWidth * i) + 15;
                 obstacle.y = 800;
@@ -373,7 +362,7 @@ public abstract class PlayState extends State{
      */
     private void spawnObstacle(float in) {
         for (int i = 0; i < path.length; i++) {
-            if (!path[i]) {
+            if (path[i] == MapTile.OBSTACLES) {
                 Obstacle obstacle = new Obstacle();
                 obstacle.x = (spriteWidth * i) + 15;
                 obstacle.y = in;
@@ -393,26 +382,29 @@ public abstract class PlayState extends State{
         effects.add(effect);
     }
     private void spawnPower() {
-        for (int i = 0; i < powerUp.length; i++) {
-            if (powerUp[i]) {
-                Power power = new Power(TYPES_OF_POWER[(int)(Math.random()*TYPES_OF_POWER.length)],i);
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] == MapTile.POWER) {
+                Power power = new Power(PowerType.values()[(int)(Math.random()*PowerType.values().length)],i);
                 powers.add(power);
             }
         }
     }
     private void spawnSwitch(){
-        Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1]);
-        switches.add(doorSwitch);
+        if (this.doorSwitch[2] == 1) {
+            Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1]);
+            switches.add(doorSwitch);
+            this.doorSwitch[2] = 0;
+        }
     }
     private void spawnDoor(){
-        for (int i = 0; i < barrier.length; i++) {
-            if (barrier[i]) {
-                Barrier door = new Barrier();
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] == MapTile.DOOR) {
+                Door door = new Door();
                 door.x = (spriteWidth * i) + 15;
                 door.y = sideWalls.get(sideWalls.size()-1).y+50;
                 door.width = spriteWidth;
                 door.height = spriteHeight;
-                barriers.add(door);
+                doors.add(door);
             }
         }
     }
@@ -452,9 +444,9 @@ public abstract class PlayState extends State{
     }
 
 /***********************************************
-* MISC METHODS HERE
-************************************************
-*/
+ * MISC METHODS HERE
+ ************************************************
+ */
 
     /**
      Method handling collision. If there is an overlap over an object that should be impassable,
@@ -480,8 +472,8 @@ public abstract class PlayState extends State{
                 return true;
             }
         }
-//		collide with barriers
-        for (Barrier barrier : barriers) {
+//		collide with doors
+        for (Door barrier : doors) {
             if (player.overlaps(barrier)) {
                 return true;
             }
@@ -502,7 +494,7 @@ public abstract class PlayState extends State{
             if (player.overlaps(eachSwitch)){
                 // change this to another different switch image
                 eachSwitch.setImage(new Texture(Gdx.files.internal("switch_on.png")));
-                for (Barrier barrier: barriers){
+                for (Door barrier: doors){
                     BarrierOpen bg = new BarrierOpen();
                     bg.x = barrier.x;
                     bg.y = barrier.y;
@@ -531,7 +523,7 @@ public abstract class PlayState extends State{
 
     private void removeBarriers(){
 //		TODO: if notified by server (Ryan)
-        barriers.clear();
+        doors.clear();
     }
 
     /**
@@ -546,31 +538,11 @@ public abstract class PlayState extends State{
     private void effectPassivePower(){
         if (passivePowerState) {
             if (!passivePowerEffectTaken) {
-                if (player.getPassivePower().equals("speedGameUp")) {
-                    gameSpeed /= speedChange;
-                } else if (player.getPassivePower().equals("slowPlayerDown")) {
-                    playerSpeed *= speedChange;
-                } else if (player.getPassivePower().equals("haltScore")) {
-                    scoreIncrement = 0;
-                } else if (player.getPassivePower().equals("lessPowers")) {
 
-                } else if (player.getPassivePower().equals("dangerZoneHigher")) {
-                    dangerZone += 20;
-                }
                 passivePowerEffectTaken = true;
             }
             if (System.currentTimeMillis() >= endPassivePowerTime) {
-                if (player.getPassivePower().equals("speedGameUp")) {
-                    gameSpeed *= speedChange;
-                } else if (player.getPassivePower().equals("slowPlayerDown")) {
-                    playerSpeed /= speedChange;
-                } else if (player.getPassivePower().equals("haltScore")) {
-                    scoreIncrement = 1;
-                } else if (player.getPassivePower().equals("lessPowers")) {
 
-                } else if (player.getPassivePower().equals("dangerZoneHigher")) {
-                    dangerZone -= 20;
-                }
                 passivePowerState = false;
                 passivePowerEffectTaken = false;
             }
@@ -586,32 +558,12 @@ public abstract class PlayState extends State{
     private void effectActivePower(){
         if (activePowerState) {
             if (!activePowerEffectTaken) {
-                if (player.getActivePower().equals("slowGameDown")) {
-                    gameSpeed *= speedChange;
-                } else if (player.getActivePower().equals("speedPlayerUp")) {
-                    playerSpeed /= speedChange;
-                } else if (player.getActivePower().equals("doubleScore")) {
-                    scoreIncrement = 2;
-                } else if (player.getActivePower().equals("lessPowers")) {
 
-                } else if (player.getActivePower().equals("dangerZoneLower")) {
-                    dangerZone -= 20;
-                }
                 activePowerEffectTaken = true;
             }
             if (System.currentTimeMillis() >= endActivePowerTime) {
-                if (player.getActivePower().equals("slowGameDown")) {
-                    gameSpeed /= speedChange;
-                } else if (player.getActivePower().equals("speedPlayerUp")) {
-                    playerSpeed *= speedChange;
-                } else if (player.getActivePower().equals("doubleScore")) {
-                    scoreIncrement = 1;
-                } else if (player.getActivePower().equals("lessPowers")) {
 
-                } else if (player.getActivePower().equals("dangerZoneLower")) {
-                    dangerZone += 20;
-                }
-                player.setActivePower("nothing");
+                player.setActivePower(PowerType.NOTHING);
                 activePowerState = false;
                 activePowerEffectTaken = false;
             }
@@ -620,21 +572,20 @@ public abstract class PlayState extends State{
 
     protected boolean[] createArray(boolean b){
         boolean[] array = new boolean[GAME_WIDTH];
-            for (int i = 0; i < GAME_WIDTH; i++) {
-                array[i] = b;
-            }
+        for (int i = 0; i < GAME_WIDTH; i++) {
+            array[i] = b;
+        }
         return array;
     }
 
     protected boolean isPassive(Power newPower) {
         int index=0;
-        for (int i=0; i<TYPES_OF_POWER.length; i++) {
-            if (newPower.getType().equals(TYPES_OF_POWER[i])) {
+        for (int i=0; i<PowerType.values().length; i++) {
+            if (newPower.getType().equals(PowerType.values()[i])) {
                 index = i;
                 break;
             }
         }
-        return !(index<TYPES_OF_POWER.length/2);
+        return !(index<PowerType.values().length/2);
     }
 }
-

@@ -1,4 +1,4 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.customEnum;
 
 /**
  * Created by MinhBreaker on 23/3/16.
