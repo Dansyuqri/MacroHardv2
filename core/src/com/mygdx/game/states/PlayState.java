@@ -37,14 +37,10 @@ public abstract class PlayState extends State{
     public boolean running;
     private boolean touched;
     private boolean touchHeld;
-    private long endPowerTime = System.currentTimeMillis();
-    protected int gameSpeed;
-    protected double speedChange;
-    protected int playerSpeed, dangerZone, powerCounter, doorCounter;
-    protected int dangerZoneSpeedLimit;
-    public long start = System.currentTimeMillis();
-    boolean powerState = false;
-    boolean powerEffectTaken = false;
+    private long endPassivePowerTime, endActivePowerTime;
+    protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit;
+    protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
+    boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
 
     //boolean arrays
     public int[] path = {1, 1, 1, 1, 1, 1, 1, 1, 1};
@@ -90,12 +86,17 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         gameSpeed = 80;
-        speedChange = 0.6;
+        speedIncrease = (float) 0.07;
+        speedChange = (float) 0.6;
         playerSpeed = 300;
         dangerZone = 200;
         powerCounter = 0;
         doorCounter = 0;
-        dangerZoneSpeedLimit = 200;
+        dangerZoneSpeedLimit = 250;
+        score = 0;
+        scoreIncrement = 1;
+        passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = false;
+        endPassivePowerTime = endActivePowerTime = System.currentTimeMillis();
 
         createBg();
         createObstacle();
@@ -115,6 +116,7 @@ public abstract class PlayState extends State{
         if (touched) {
             cam.unproject(touchPos);
             if (!touchHeld) {
+                //if this is the initial touch initialize the joystick at the touched location
                 joystick.setX(touchPos.x - joystick.getJoystickWidth()/2);
                 joystick.setY(touchPos.y - joystick.getJoystickHeight()/2);
                 joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
@@ -128,19 +130,21 @@ public abstract class PlayState extends State{
         }
 
         if (touchHeld) {
-            // check if touch is within joystick hitbox with buffer
+            //calculates the relevant numbers needed for omnidirectional movement
             float angle = (float) Math.atan2(relativey, relativex);
             float cos = (float) Math.cos(angle);
             float sin = (float) Math.sin(angle);
             if (Math.abs(relativex) < joystick.getJoystickWidth()/2
                     && (Math.abs(relativey) < joystick.getJoystickHeight()/2)) {
+                //if the touched position is within the circle set the dot to the touched position
                 joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
                 joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
             } else {
+                //otherwise set it to the edge of the circle
                 joystick.setCX(cos * joystick.getJoystickWidth()/2 + joystick.getX() + joystick.getJoystickWidth()/2 - joystick.getJoystickCenterWidth()/2);
                 joystick.setCY(sin * joystick.getJoystickWidth()/2 + joystick.getY() + joystick.getJoystickHeight()/2 - joystick.getJoystickCenterHeight()/2);
             }
-
+            //if the touch is within a specific distance from the centre of the circle then move the player
             if (Math.pow(relativex, 2) + Math.pow(relativey, 2) > 400) {
                 omniMove(cos, sin);
             }
@@ -149,7 +153,6 @@ public abstract class PlayState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
-        long score = System.currentTimeMillis()-start;
         handleInput();
         checkSwitchCollision();
         // tell the camera to update its matrices.
@@ -230,6 +233,7 @@ public abstract class PlayState extends State{
 
 //		constantly check if any power/DangerZone's effect still lingers
         effectPassivePower();
+        effectActivePower();
         effectDangerZone(player);
 
         // move the obstacles, remove any that are beneath the bottom edge of the screen.
@@ -378,6 +382,7 @@ public abstract class PlayState extends State{
                 obstacles.add(obstacle);
             }
         }
+        score += scoreIncrement;
         powerCounter += 1;
         doorCounter += 1;
     }
@@ -431,10 +436,10 @@ public abstract class PlayState extends State{
         if (collidesObstacle()){
             player.x = prevx;
             player.y = prevy;
-            if (x > 0) x = 1;
-            if (x < 0) x = -1;
-            if (y > 0) y = 1;
-            if (y < 0) y = -1;
+            if (x > 0) x = (float)2/3;
+            if (x < 0) x = -(float)2/3;
+            if (y > 0) y = (float)2/3;
+            if (y < 0) y = -(float)2/3;
             player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
             if (collidesObstacle()){
                 player.x = prevx;
@@ -509,13 +514,13 @@ public abstract class PlayState extends State{
                 // then notify server
             }
         }
-//		collide with power up PASSIVE
+//		collide with power up
         for (Power power:powers){
             if (player.overlaps(power)){
                 if (isPassive(power)) {
                     player.setPassivePower(power.getType());
-                    powerState = true;
-                    endPowerTime = System.currentTimeMillis()+5000;
+                    passivePowerState = true;
+                    endPassivePowerTime = System.currentTimeMillis()+5000;
                 }
                 else player.setActivePower(power.getType());
                 powers.remove(power);
@@ -532,39 +537,83 @@ public abstract class PlayState extends State{
     /**
      Methods handling power-ups/affecting game attributes
      */
-    boolean dangerZoneEffectTaken = false;
+
     private void effectDangerZone(Player p) {
-        if (p.getY()<=dangerZone && !dangerZoneEffectTaken && gameSpeed<=dangerZoneSpeedLimit) {
-            gameSpeed += 100;
-            dangerZoneEffectTaken = true;
-        } else if (p.getY()>dangerZone) {
-            dangerZoneEffectTaken = false;
+        if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
+            gameSpeed += speedIncrease;
         }
     }
-
     private void effectPassivePower(){
-        if (powerState) {
-            if (!powerEffectTaken) {
-                if (player.getPassivePower().equals("slowGameDown")) {
-                    gameSpeed *= speedChange;
-                } else if (player.getPassivePower().equals("speedPlayerUp")) {
-                    playerSpeed /= speedChange;
+        if (passivePowerState) {
+            if (!passivePowerEffectTaken) {
+                if (player.getPassivePower().equals("speedGameUp")) {
+                    gameSpeed /= speedChange;
+                } else if (player.getPassivePower().equals("slowPlayerDown")) {
+                    playerSpeed *= speedChange;
+                } else if (player.getPassivePower().equals("haltScore")) {
+                    scoreIncrement = 0;
+                } else if (player.getPassivePower().equals("lessPowers")) {
+
                 } else if (player.getPassivePower().equals("dangerZoneHigher")) {
                     dangerZone += 20;
                 }
-                powerEffectTaken = true;
+                passivePowerEffectTaken = true;
             }
-            if (System.currentTimeMillis() >= endPowerTime) {
-                if (player.getPassivePower().equals("slowGameDown")) {
-                    gameSpeed /= speedChange;
-                } else if (player.getPassivePower().equals("speedPlayerUp")) {
-                    playerSpeed *= speedChange;
+            if (System.currentTimeMillis() >= endPassivePowerTime) {
+                if (player.getPassivePower().equals("speedGameUp")) {
+                    gameSpeed *= speedChange;
+                } else if (player.getPassivePower().equals("slowPlayerDown")) {
+                    playerSpeed /= speedChange;
+                } else if (player.getPassivePower().equals("haltScore")) {
+                    scoreIncrement = 1;
+                } else if (player.getPassivePower().equals("lessPowers")) {
+
                 } else if (player.getPassivePower().equals("dangerZoneHigher")) {
                     dangerZone -= 20;
-                    // change background file
                 }
-                powerState = false;
-                powerEffectTaken = false;
+                passivePowerState = false;
+                passivePowerEffectTaken = false;
+            }
+        }
+    }
+
+    private void activateActivePower(){
+        if (!player.getActivePower().equals("nothing")) {
+            activePowerState = true;
+            endActivePowerTime = System.currentTimeMillis()+5000;
+        }
+    }
+    private void effectActivePower(){
+        if (activePowerState) {
+            if (!activePowerEffectTaken) {
+                if (player.getActivePower().equals("slowGameDown")) {
+                    gameSpeed *= speedChange;
+                } else if (player.getActivePower().equals("speedPlayerUp")) {
+                    playerSpeed /= speedChange;
+                } else if (player.getActivePower().equals("doubleScore")) {
+                    scoreIncrement = 2;
+                } else if (player.getActivePower().equals("lessPowers")) {
+
+                } else if (player.getActivePower().equals("dangerZoneLower")) {
+                    dangerZone -= 20;
+                }
+                activePowerEffectTaken = true;
+            }
+            if (System.currentTimeMillis() >= endActivePowerTime) {
+                if (player.getActivePower().equals("slowGameDown")) {
+                    gameSpeed /= speedChange;
+                } else if (player.getActivePower().equals("speedPlayerUp")) {
+                    playerSpeed *= speedChange;
+                } else if (player.getActivePower().equals("doubleScore")) {
+                    scoreIncrement = 1;
+                } else if (player.getActivePower().equals("lessPowers")) {
+
+                } else if (player.getActivePower().equals("dangerZoneLower")) {
+                    dangerZone += 20;
+                }
+                player.setActivePower("nothing");
+                activePowerState = false;
+                activePowerEffectTaken = false;
             }
         }
     }
@@ -580,15 +629,12 @@ public abstract class PlayState extends State{
     protected boolean isPassive(Power newPower) {
         int index=0;
         for (int i=0; i<TYPES_OF_POWER.length; i++) {
-            if (newPower.getType().equals(TYPES_OF_POWER.length)) {
+            if (newPower.getType().equals(TYPES_OF_POWER[i])) {
                 index = i;
                 break;
             }
         }
-        if (index<TYPES_OF_POWER.length/2) {
-            return false;
-        }
-        return true;
+        return !(index<TYPES_OF_POWER.length/2);
     }
 }
 
