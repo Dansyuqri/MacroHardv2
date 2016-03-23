@@ -11,8 +11,8 @@ import com.mygdx.game.states.PlayState;
 public class Door extends Obstacle implements Collidable{
     private boolean open = false;
 
-    public Door(){
-        super();
+    public Door(float x, float y, float width, float height){
+        super(x, y, width, height);
         this.setImage(new Texture(Gdx.files.internal("gate_closed.png")));
     }
 
@@ -22,7 +22,7 @@ public class Door extends Obstacle implements Collidable{
     }
 
     @Override
-    public boolean collide(Player player, PlayState playState) {
+    public boolean collides(Player player, PlayState playState) {
         if (player.overlaps(this) && !open) {
             return true;
         }

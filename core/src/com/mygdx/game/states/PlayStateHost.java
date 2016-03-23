@@ -147,14 +147,12 @@ public class PlayStateHost extends PlayState {
         float[] switchCoord = {500, 1000, 0};
         if (doorCounter == 44){
             switchCoord[2] = 1;
-            boolean check = true;
-            while (check){
+            while (true){
                 int temp0 = MathUtils.random(0,8);
                 int temp1 = MathUtils.random(0,4);
                 if (memory[temp1][temp0] == 2){
                     switchCoord[0] = temp0;
                     switchCoord[1] = temp1;
-                    check = false;
                     break;
                 }
             }

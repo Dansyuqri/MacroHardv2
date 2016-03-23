@@ -2,15 +2,12 @@ package com.mygdx.game.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.DangerZone;
-import com.mygdx.game.objects.DoorOpen;
 import com.mygdx.game.objects.GameObject;
 import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Overlay;
@@ -24,8 +21,6 @@ import com.mygdx.game.objects.Player;
 import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -44,7 +39,6 @@ public abstract class PlayState extends State{
     public boolean running;
     private boolean touched;
     private boolean touchHeld;
-    private long endPassivePowerTime, endActivePowerTime;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
     boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
@@ -65,7 +59,6 @@ public abstract class PlayState extends State{
     private ArrayList<SideWall> sideWalls = new ArrayList<SideWall>();
     private ArrayList<Switch> switches = new ArrayList<Switch>();
     private ArrayList<Door> doors = new ArrayList<Door>();
-    private ArrayList<DoorOpen> doorOpens = new ArrayList<DoorOpen>();
     private ArrayList<Power> powers = new ArrayList<Power>();
     private ArrayList<Background> bg = new ArrayList<Background>();
     private ArrayList<Overlay> effects = new ArrayList<Overlay>();
@@ -73,8 +66,7 @@ public abstract class PlayState extends State{
     private ArrayList<UI> ui = new ArrayList<UI>();
 
     //final values
-    final int spriteWidth = 50;
-    final int spriteHeight = 50;
+    final int tileWidth = 50;
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
@@ -100,17 +92,15 @@ public abstract class PlayState extends State{
         score = 0;
         scoreIncrement = 1;
         passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = false;
-        endPassivePowerTime = endActivePowerTime = System.currentTimeMillis();
         tracker = 800;
         trackerBG = 800;
 
         gameObjects.add(bg);
+        gameObjects.add(powers);
+        gameObjects.add(doors);
         gameObjects.add(obstacles);
         gameObjects.add(sideWalls);
         gameObjects.add(switches);
-        gameObjects.add(doors);
-        gameObjects.add(doorOpens);
-        gameObjects.add(powers);
         gameObjects.add(new ArrayList<Player>(Collections.singletonList(player)));
         gameObjects.add(effects);
         gameObjects.add(dz);
@@ -184,13 +174,11 @@ public abstract class PlayState extends State{
                 path = mapBuffer.remove(0);
                 doorSwitch = switchBuffer.remove(0);
                 notifyAll();
+                score += scoreIncrement;
             }
-            spawnObstacle(tracker + spriteHeight);
-            spawnPower();
-            spawnSwitch();
-            spawnDoor();
-            spawnSides(tracker + spriteHeight);
-            tracker += spriteHeight;
+            spawnObjects();
+            spawnSides(tracker + tileWidth);
+            tracker += tileWidth;
         }
         if (trackerBG < 800) {
             spawnBg();
@@ -263,16 +251,10 @@ public abstract class PlayState extends State{
     private void createObstacle() {
         for (int i = 0; i < path.length; i++) {
             if (path[i] == MapTile.OBSTACLES) {
-                Obstacle obstacle = new Obstacle();
-                obstacle.x = (spriteWidth * i) + 15;
-                obstacle.y = 800;
-                obstacle.width = spriteWidth;
-                obstacle.height = spriteHeight;
+                Obstacle obstacle = new Obstacle((tileWidth * i) + 15, 800, tileWidth, tileWidth);
                 obstacles.add(obstacle);
             }
         }
-        powerCounter += 1;
-        doorCounter += 1;
     }
     private void createBg(){
         Background backg = new Background(0);
@@ -286,9 +268,9 @@ public abstract class PlayState extends State{
     }
     private void createSides(){
         int counter = 0;
-        while (counter*spriteHeight <= 800) {
+        while (counter*tileWidth <= 800) {
             for (int i = 0; i < 2; i++) {
-                SideWall sideWall = new SideWall(spriteHeight, counter*spriteHeight, i);
+                SideWall sideWall = new SideWall(tileWidth, counter*tileWidth, i);
                 sideWalls.add(sideWall);
             }
             counter++;
@@ -302,60 +284,42 @@ public abstract class PlayState extends State{
     /**
      Method to spawn the walls using the coordinates from the wallCoord() method
      */
-    private void spawnObstacle(float in) {
+
+    private void spawnObjects(){
         for (int i = 0; i < path.length; i++) {
-            if (path[i] == MapTile.OBSTACLES) {
-                Obstacle obstacle = new Obstacle();
-                obstacle.x = (spriteWidth * i) + 15;
-                obstacle.y = in;
-                obstacle.width = spriteWidth;
-                obstacle.height = spriteHeight;
-                obstacles.add(obstacle);
+            switch (path[i]){
+                default:
+                    if (doorSwitch[2] == 1) {
+                        switches.add(new Switch(15 + doorSwitch[0] * tileWidth, tracker - (doorSwitch[1] * tileWidth), tileWidth, tileWidth));
+                        this.doorSwitch[2] = 0;
+                    }
+                    break;
+                case OBSTACLES:
+                    obstacles.add(new Obstacle((tileWidth * (i % GAME_WIDTH) + 15), tracker, tileWidth, tileWidth));
+                    break;
+                case POWER:
+                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)],(i % GAME_WIDTH),tracker));
+                    break;
+                case DOOR:
+                    doors.add(new Door((tileWidth * (i % GAME_WIDTH)) + 15, tracker, tileWidth, tileWidth));
+                    break;
             }
         }
-        score += scoreIncrement;
-        powerCounter += 1;
-        doorCounter += 1;
     }
+
     private void spawnBg(){
         Background backg = new Background(800);
         Overlay effect = new Overlay(800);
         bg.add(backg);
         effects.add(effect);
     }
-    private void spawnPower() {
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] == MapTile.POWER) {
-                Power power = new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)],i,tracker);
-                powers.add(power);
-            }
-        }
-    }
-    private void spawnSwitch(){
-        if (this.doorSwitch[2] == 1) {
-            Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1], tracker);
-            switches.add(doorSwitch);
-            this.doorSwitch[2] = 0;
-        }
-    }
-    private void spawnDoor(){
-        for (int i = 0; i < path.length; i++) {
-            if (path[i] == MapTile.DOOR) {
-                Door door = new Door();
-                door.x = (spriteWidth * i) + 15;
-                door.y = sideWalls.get(sideWalls.size()-1).y+50;
-                door.width = spriteWidth;
-                door.height = spriteHeight;
-                doors.add(door);
-            }
-        }
-    }
+
     /**
      Spawn side walls to fill up the gap between the playing field and the actual maze
      */
     private void spawnSides(float in){
         for (int i = 0; i < 2; i++) {
-            SideWall sideWall = new SideWall(spriteHeight,in,i);
+            SideWall sideWall = new SideWall(tileWidth,in,i);
             sideWalls.add(sideWall);
         }
     }
@@ -411,15 +375,15 @@ public abstract class PlayState extends State{
 
 //        if (!player.canGoThrough()) {
 
-//		collide with normal wall obstacle
+//		collides with normal wall obstacle
             for (Obstacle obstacle : obstacles) {
                 if (player.overlaps(obstacle)) {
                     return true;
                 }
             }
-//		collide with doors
-            for (Door barrier : doors) {
-                if (player.overlaps(barrier)) {
+//		collides with doors
+            for (Door door : doors) {
+                if (door.collides(player, this)) {
                     return true;
                 }
             }
@@ -435,40 +399,23 @@ public abstract class PlayState extends State{
      */
 
     private void checkSwitchCollision(){
-        //		collide with switch
+        //		collides with switch
         for (Switch eachSwitch:switches){
-            if (player.overlaps(eachSwitch)){
-                // change this to another different switch image
-                eachSwitch.setImage(new Texture(Gdx.files.internal("switch_on.png")));
-                for (Door barrier: doors){
-                    DoorOpen bg = new DoorOpen();
-                    bg.x = barrier.x;
-                    bg.y = barrier.y;
-                    bg.width = 50;
-                    bg.height = 50;
-                    doorOpens.add(bg);
+            if (eachSwitch.collides(player, this)){
+                for (Door door: doors){
+                    door.setOpen();
                 }
-                removeBarriers();
                 // then notify server
             }
         }
-//		collide with power up
-        for (Power power:powers){
-            if (player.overlaps(power)){
-                if (power.isPassive()) {
-                    player.setPassivePower(power.getType());
-                    passivePowerState = true;
-                    endPassivePowerTime = System.currentTimeMillis()+5000;
-                }
-                else player.setActivePower(power.getType());
-                powers.remove(power);
+
+//		collides with power up
+        Iterator<Power> powerIterator = powers.iterator();
+        while (powerIterator.hasNext()){
+            if (powerIterator.next().collides(player, this)){
+                powerIterator.remove();
             }
         }
-    }
-
-    private void removeBarriers(){
-//		TODO: if notified by server (Ryan)
-        doors.clear();
     }
 
     /**
@@ -496,7 +443,7 @@ public abstract class PlayState extends State{
                 }
                 passivePowerEffectTaken = true;
             }
-            if (System.currentTimeMillis() >= endPassivePowerTime) {
+            if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     gameSpeed = tempGameSpeed;
                 } else if (player.getPassivePower().equals(PowerType.DANGER_ZONE_HIGHER)) {
@@ -516,7 +463,7 @@ public abstract class PlayState extends State{
     private void activateActivePower(){
         if (!player.getActivePower().equals(PowerType.NOTHING)) {
             activePowerState = true;
-            endActivePowerTime = System.currentTimeMillis()+5000;
+            player.setEndActivePowerTime(System.currentTimeMillis()+5000);
         }
     }
     private void effectActivePower(){
@@ -527,7 +474,7 @@ public abstract class PlayState extends State{
                 }
                 activePowerEffectTaken = true;
             }
-            if (System.currentTimeMillis() >= endActivePowerTime) {
+            if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
                     dangerZone += 20;
                 }

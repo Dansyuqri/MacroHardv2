@@ -7,5 +7,5 @@ import com.mygdx.game.states.PlayState;
  * Created by Samuel on 23/3/2016.
  */
 public interface Collidable {
-    boolean collide(Player player, PlayState game);
+    boolean collides(Player player, PlayState game);
 }

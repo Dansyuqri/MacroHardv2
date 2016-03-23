@@ -10,6 +10,9 @@ import com.mygdx.game.customEnum.PowerType;
 public class Player extends Movable {
     private PowerType passivePower;
     private PowerType activePower;
+    private long endPassivePowerTime;
+    private long endActivePowerTime;
+
     public Player(){
         super();
         this.setImage(new Texture(Gdx.files.internal("player_temp.png")));
@@ -18,6 +21,23 @@ public class Player extends Movable {
         this.width = 40;
         this.height = 40;
         this.activePower = this.passivePower = PowerType.NOTHING;
+        endActivePowerTime = endPassivePowerTime = System.currentTimeMillis();
+    }
+
+    public long getEndPassivePowerTime() {
+        return endPassivePowerTime;
+    }
+
+    public void setEndPassivePowerTime(long endPassivePowerTime) {
+        this.endPassivePowerTime = endPassivePowerTime;
+    }
+
+    public long getEndActivePowerTime() {
+        return endActivePowerTime;
+    }
+
+    public void setEndActivePowerTime(long endActivePowerTime) {
+        this.endActivePowerTime = endActivePowerTime;
     }
 
     public PowerType getActivePower() {
