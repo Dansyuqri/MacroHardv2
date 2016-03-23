@@ -40,4 +40,8 @@ public class Player extends GameObject {
     public Texture getTexture(){
         return texture;
     }
+
+    public boolean canGoThrough() {
+        return (passivePower.equals(PowerType.GO_THROUGH_WALL) || activePower.equals(PowerType.DESTROY_WALL));
+    }
 }

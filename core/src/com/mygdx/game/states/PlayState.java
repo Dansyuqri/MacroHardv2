@@ -40,7 +40,7 @@ public abstract class PlayState extends State{
     private boolean touched;
     private boolean touchHeld;
     private long endPassivePowerTime, endActivePowerTime;
-    protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit;
+    protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
     boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
 
@@ -391,7 +391,8 @@ public abstract class PlayState extends State{
     private void spawnPower() {
         for (int i = 0; i < path.length; i++) {
             if (path[i] == MapTile.POWER) {
-                Power power = new Power(PowerType.values()[(int)(Math.random()*PowerType.values().length)],i);                powers.add(power);
+                Power power = new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)],i);
+                powers.add(power);
             }
         }
     }
@@ -471,17 +472,19 @@ public abstract class PlayState extends State{
         if (player.y > 750){
             player.y = 750;
         }
-
-//		collide with normal wall obstacle
-        for (Obstacle obstacle : obstacles) {
-            if (player.overlaps(obstacle)) {
-                return true;
+        // DESTROY_WALL and GO_THROUGH_WALL implementation
+        if (!player.canGoThrough()) {
+            //		collide with normal wall obstacle
+            for (Obstacle obstacle : obstacles) {
+                if (player.overlaps(obstacle)) {
+                    return true;
+                }
             }
-        }
-//		collide with doors
-        for (Door door : doors) {
-            if (player.overlaps(door)) {
-                return true;
+            //		collide with doors
+            for (Door door : doors) {
+                if (player.overlaps(door)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -543,30 +546,29 @@ public abstract class PlayState extends State{
     private void effectPassivePower(){
         if (passivePowerState) {
             if (!passivePowerEffectTaken) {
-                if (player.getPassivePower().equals("speedGameUp")) {
-                    gameSpeed /= speedChange;
-                } else if (player.getPassivePower().equals("slowPlayerDown")) {
-                    playerSpeed *= speedChange;
-                } else if (player.getPassivePower().equals("haltScore")) {
-                    scoreIncrement = 0;
-                } else if (player.getPassivePower().equals("lessPowers")) {
-
-                } else if (player.getPassivePower().equals("dangerZoneHigher")) {
+                if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
+                    tempGameSpeed = gameSpeed;
+                    gameSpeed = 0;
+                } else if (player.getPassivePower().equals(PowerType.DANGER_ZONE_HIGHER)) {
                     dangerZone += 20;
+                    // change photo
+                } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
+                    gameSpeed /= speedChange;
+                } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
+                    playerSpeed /= speedChange;
                 }
                 passivePowerEffectTaken = true;
             }
             if (System.currentTimeMillis() >= endPassivePowerTime) {
-                if (player.getPassivePower().equals("speedGameUp")) {
-                    gameSpeed *= speedChange;
-                } else if (player.getPassivePower().equals("slowPlayerDown")) {
-                    playerSpeed /= speedChange;
-                } else if (player.getPassivePower().equals("haltScore")) {
-                    scoreIncrement = 1;
-                } else if (player.getPassivePower().equals("lessPowers")) {
-
-                } else if (player.getPassivePower().equals("dangerZoneHigher")) {
+                if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
+                    gameSpeed = tempGameSpeed;
+                } else if (player.getPassivePower().equals(PowerType.DANGER_ZONE_HIGHER)) {
                     dangerZone -= 20;
+                    // change photo
+                } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
+                    gameSpeed *= speedChange;
+                } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
+                    playerSpeed *= speedChange;
                 }
                 passivePowerState = false;
                 passivePowerEffectTaken = false;
@@ -575,7 +577,7 @@ public abstract class PlayState extends State{
     }
 
     private void activateActivePower(){
-        if (!player.getActivePower().equals("nothing")) {
+        if (!player.getActivePower().equals(PowerType.NOTHING)) {
             activePowerState = true;
             endActivePowerTime = System.currentTimeMillis()+5000;
         }
@@ -583,29 +585,13 @@ public abstract class PlayState extends State{
     private void effectActivePower(){
         if (activePowerState) {
             if (!activePowerEffectTaken) {
-                if (player.getActivePower().equals("slowGameDown")) {
-                    gameSpeed *= speedChange;
-                } else if (player.getActivePower().equals("speedPlayerUp")) {
-                    playerSpeed /= speedChange;
-                } else if (player.getActivePower().equals("doubleScore")) {
-                    scoreIncrement = 2;
-                } else if (player.getActivePower().equals("lessPowers")) {
-
-                } else if (player.getActivePower().equals("dangerZoneLower")) {
+                if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
                     dangerZone -= 20;
                 }
                 activePowerEffectTaken = true;
             }
             if (System.currentTimeMillis() >= endActivePowerTime) {
-                if (player.getActivePower().equals("slowGameDown")) {
-                    gameSpeed /= speedChange;
-                } else if (player.getActivePower().equals("speedPlayerUp")) {
-                    playerSpeed *= speedChange;
-                } else if (player.getActivePower().equals("doubleScore")) {
-                    scoreIncrement = 1;
-                } else if (player.getActivePower().equals("lessPowers")) {
-
-                } else if (player.getActivePower().equals("dangerZoneLower")) {
+                if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
                     dangerZone += 20;
                 }
                 player.setActivePower(PowerType.NOTHING);
@@ -614,6 +600,7 @@ public abstract class PlayState extends State{
             }
         }
     }
+
     protected boolean[] createArray(boolean b){
         boolean[] array = new boolean[GAME_WIDTH];
         for (int i = 0; i < GAME_WIDTH; i++) {
@@ -621,6 +608,7 @@ public abstract class PlayState extends State{
         }
         return array;
     }
+
     protected boolean isPassive(Power newPower) {
         int index=0;
         for (int i=0; i<PowerType.values().length; i++) {
@@ -629,6 +617,6 @@ public abstract class PlayState extends State{
                 break;
             }
         }
-        return !(index<PowerType.values().length/2);
+        return (index<7);
     }
 }
