@@ -511,7 +511,7 @@ public abstract class PlayState extends State{
 //		collide with power up
         for (Power power:powers){
             if (player.overlaps(power)){
-                if (isPassive(power)) {
+                if (power.isPassive()) {
                     player.setPassivePower(power.getType());
                     passivePowerState = true;
                     endPassivePowerTime = System.currentTimeMillis()+5000;
@@ -521,7 +521,6 @@ public abstract class PlayState extends State{
             }
         }
     }
-
 
     private void removeBarriers(){
 //		TODO: if notified by server (Ryan)
@@ -601,16 +600,5 @@ public abstract class PlayState extends State{
             array[i] = b;
         }
         return array;
-    }
-
-    protected boolean isPassive(Power newPower) {
-        int index=0;
-        for (int i=0; i<PowerType.values().length; i++) {
-            if (newPower.getType().equals(PowerType.values()[i])) {
-                index = i;
-                break;
-            }
-        }
-        return (index<7);
     }
 }

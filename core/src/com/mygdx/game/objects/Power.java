@@ -23,4 +23,14 @@ public class Power extends GameObject {
     public PowerType getType() {
         return type;
     }
+    public boolean isPassive() {
+        int index=0;
+        for (int i=0; i<PowerType.values().length; i++) {
+            if (type.equals(PowerType.values()[i])) {
+                index = i;
+                break;
+            }
+        }
+        return (index<7);
+    }
 }
