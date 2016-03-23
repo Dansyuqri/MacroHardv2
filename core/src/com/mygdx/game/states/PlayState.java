@@ -40,7 +40,7 @@ public abstract class PlayState extends State{
     private boolean touched;
     private boolean touchHeld;
     private long endPassivePowerTime, endActivePowerTime;
-    protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit;
+    protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
     boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
 
@@ -384,7 +384,7 @@ public abstract class PlayState extends State{
     private void spawnPower() {
         for (int i = 0; i < path.length; i++) {
             if (path[i] == MapTile.POWER) {
-                Power power = new Power(PowerType.values()[(int)(Math.random()*PowerType.values().length)],i);
+                Power power = new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)],i);
                 powers.add(power);
             }
         }
@@ -465,17 +465,19 @@ public abstract class PlayState extends State{
         if (player.y > 750){
             player.y = 750;
         }
-
+        // DESTROY_WALL and GO_THROUGH_WALL implementation
+        if (!player.canGoThrough()) {
 //		collide with normal wall obstacle
-        for (Obstacle obstacle : obstacles) {
-            if (player.overlaps(obstacle)) {
-                return true;
+            for (Obstacle obstacle : obstacles) {
+                if (player.overlaps(obstacle)) {
+                    return true;
+                }
             }
-        }
 //		collide with doors
-        for (Door barrier : doors) {
-            if (player.overlaps(barrier)) {
-                return true;
+            for (Door barrier : doors) {
+                if (player.overlaps(barrier)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -538,11 +540,30 @@ public abstract class PlayState extends State{
     private void effectPassivePower(){
         if (passivePowerState) {
             if (!passivePowerEffectTaken) {
-
+                if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
+                    tempGameSpeed = gameSpeed;
+                    gameSpeed = 0;
+                } else if (player.getPassivePower().equals(PowerType.DANGER_ZONE_HIGHER)) {
+                    dangerZone += 20;
+                    // change photo
+                } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
+                    gameSpeed /= speedChange;
+                } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
+                    playerSpeed /= speedChange;
+                }
                 passivePowerEffectTaken = true;
             }
             if (System.currentTimeMillis() >= endPassivePowerTime) {
-
+                if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
+                    gameSpeed = tempGameSpeed;
+                } else if (player.getPassivePower().equals(PowerType.DANGER_ZONE_HIGHER)) {
+                    dangerZone -= 20;
+                    // change photo
+                } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
+                    gameSpeed *= speedChange;
+                } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
+                    playerSpeed *= speedChange;
+                }
                 passivePowerState = false;
                 passivePowerEffectTaken = false;
             }
@@ -550,7 +571,7 @@ public abstract class PlayState extends State{
     }
 
     private void activateActivePower(){
-        if (!player.getActivePower().equals("nothing")) {
+        if (!player.getActivePower().equals(PowerType.NOTHING)) {
             activePowerState = true;
             endActivePowerTime = System.currentTimeMillis()+5000;
         }
@@ -558,11 +579,15 @@ public abstract class PlayState extends State{
     private void effectActivePower(){
         if (activePowerState) {
             if (!activePowerEffectTaken) {
-
+                if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
+                    dangerZone -= 20;
+                }
                 activePowerEffectTaken = true;
             }
             if (System.currentTimeMillis() >= endActivePowerTime) {
-
+                if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
+                    dangerZone += 20;
+                }
                 player.setActivePower(PowerType.NOTHING);
                 activePowerState = false;
                 activePowerEffectTaken = false;
@@ -586,6 +611,6 @@ public abstract class PlayState extends State{
                 break;
             }
         }
-        return !(index<PowerType.values().length/2);
+        return (index<7);
     }
 }
