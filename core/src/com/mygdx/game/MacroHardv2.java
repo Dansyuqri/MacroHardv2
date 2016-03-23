@@ -43,8 +43,8 @@ public class MacroHardv2 extends ApplicationAdapter {
 
 	public void multiplayerGameReady(){
 		//gamew.multiplayer = true;
-		//gsm.set(new PlayStateHost(gsm));
-		//dispose();
+		gsm.set(new PlayStateHost(gsm));
+		dispose();
 
 		//Used to send players coorindates to everyone else
 		//this.actionResolver.sendPos((float) 1, (float) 1);
@@ -52,10 +52,10 @@ public class MacroHardv2 extends ApplicationAdapter {
 		//boolean[] a = {false, false, true, false, false, true, false, false, true};
 		//this.actionResolver.sendMap(a);
 		//to get hostid
-		if(this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){
-			gsm.set(new PlayStateHost(gsm));
-			dispose();
-		}
+		//if(this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){
+		//	gsm.set(new PlayStateHost(gsm));
+		//	dispose();
+		//}
 
 
 
