@@ -1,6 +1,7 @@
 package com.mygdx.game.objects;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
@@ -14,5 +15,8 @@ public class GameObject extends Rectangle {
     }
     public void setImage(Texture image) {
         this.image = image;
+    }
+    public void draw(SpriteBatch sb){
+        sb.draw(image, x, y);
     }
 }

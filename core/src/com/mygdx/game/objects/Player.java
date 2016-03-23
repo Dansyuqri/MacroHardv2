@@ -18,7 +18,7 @@ public class Player extends GameObject {
         this.y = 400;
         this.width = 40;
         this.height = 40;
-        this.activePower = PowerType.NOTHING;
+        this.activePower = this.passivePower = PowerType.NOTHING;
     }
 
     public PowerType getActivePower(){
