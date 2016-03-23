@@ -47,17 +47,17 @@ public abstract class PlayState extends State{
     boolean powerEffectTaken = false;
 
     //boolean arrays
-    public boolean[] path = createArray(true);
+    public int[] path = {1, 1, 1, 1, 1, 1, 1, 1, 1};
     boolean[] current = createArray(true);
     boolean[] powerUp = createArray(false);
     float[] doorSwitch = null;
     boolean[] barrier = createArray(false);
 
     //Arraylists
-    protected ArrayList<boolean[]> mapBuffer = new ArrayList<boolean[]>();
-    protected ArrayList<boolean[]> doorBuffer = new ArrayList<boolean[]>();
+    protected ArrayList<int[]> mapBuffer = new ArrayList<int[]>();
+//    protected ArrayList<boolean[]> doorBuffer = new ArrayList<boolean[]>();
     protected ArrayList<float[]> switchBuffer = new ArrayList<float[]>();
-    protected ArrayList<boolean[]> powerUpBuffer = new ArrayList<boolean[]>();
+//    protected ArrayList<boolean[]> powerUpBuffer = new ArrayList<boolean[]>();
 
     private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
     public static ArrayList<SideWall> sideWalls = new ArrayList<SideWall>();
@@ -161,9 +161,9 @@ public abstract class PlayState extends State{
                     } catch (InterruptedException ignored){}
                 }
                 path = mapBuffer.remove(0);
-                barrier = doorBuffer.remove(0);
+//                barrier = doorBuffer.remove(0);
                 doorSwitch = switchBuffer.remove(0);
-                powerUp = powerUpBuffer.remove(0);
+//                powerUp = powerUpBuffer.remove(0);
                 notifyAll();
             }
             float temp = sideWalls.get(sideWalls.size() - 1).y + 50;
@@ -327,7 +327,7 @@ public abstract class PlayState extends State{
 
     private void createObstacle() {
         for (int i = 0; i < path.length; i++) {
-            if (!path[i]) {
+            if (path[i] == 0) {
                 Obstacle obstacle = new Obstacle();
                 obstacle.x = (spriteWidth * i) + 15;
                 obstacle.y = 800;
@@ -369,7 +369,7 @@ public abstract class PlayState extends State{
      */
     private void spawnObstacle(float in) {
         for (int i = 0; i < path.length; i++) {
-            if (!path[i]) {
+            if (path[i] == 0) {
                 Obstacle obstacle = new Obstacle();
                 obstacle.x = (spriteWidth * i) + 15;
                 obstacle.y = in;
@@ -388,8 +388,8 @@ public abstract class PlayState extends State{
         effects.add(effect);
     }
     private void spawnPower() {
-        for (int i = 0; i < powerUp.length; i++) {
-            if (powerUp[i]) {
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] == 2) {
                 Power power = new Power(TYPES_OF_POWER[(int)(Math.random()*TYPES_OF_POWER.length)],i);
                 powers.add(power);
             }
@@ -400,8 +400,8 @@ public abstract class PlayState extends State{
         switches.add(doorSwitch);
     }
     private void spawnDoor(){
-        for (int i = 0; i < barrier.length; i++) {
-            if (barrier[i]) {
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] == 3) {
                 Barrier door = new Barrier();
                 door.x = (spriteWidth * i) + 15;
                 door.y = sideWalls.get(sideWalls.size()-1).y+50;
