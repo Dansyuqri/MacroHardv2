@@ -396,8 +396,11 @@ public abstract class PlayState extends State{
         }
     }
     private void spawnSwitch(){
-        Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1]);
-        switches.add(doorSwitch);
+        if (this.doorSwitch[2] == 1) {
+            Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1]);
+            switches.add(doorSwitch);
+            this.doorSwitch[2] = 0;
+        }
     }
     private void spawnDoor(){
         for (int i = 0; i < path.length; i++) {
