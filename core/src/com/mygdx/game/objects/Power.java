@@ -16,22 +16,22 @@ public class Power extends Movable implements Collidable {
         this.setImage(new Texture(Gdx.files.internal("droplet.png")));
         this.type = powerType;
         this.x = (50 * i) + 15;
-        this.y = PlayState.tracker;
+        this.y = PlayState.tracker+50;
         this.width = 50;
         this.height = 50;
     }
 
     @Override
     public boolean collide(Player player, PlayState game) {
-        if (player.overlaps(this)){
-            if (PlayState.isPassive(this)) {
-                player.setPassivePower(power.getType());
-                passivePowerState = true;
-                endPassivePowerTime = System.currentTimeMillis()+5000;
-            }
-            else player.setActivePower(power.getType());
-            powers.remove(power);
-        }
+//        if (player.overlaps(this)){
+//            if (PlayState.isPassive(this)) {
+//                player.setPassivePower(power.getType());
+//                passivePowerState = true;
+//                endPassivePowerTime = System.currentTimeMillis()+5000;
+//            }
+//            else player.setActivePower(power.getType());
+//            powers.remove(power);
+//        }
         return false;
     }
 

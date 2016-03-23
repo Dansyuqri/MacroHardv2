@@ -15,22 +15,22 @@ public class Switch extends Obstacle implements Collidable{
         super();
         this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
         this.x = 15 + x*spriteWidth;
-        this.y = PlayState.tracker - (y*spriteHeight);
+        this.y = PlayState.tracker+50 - (y*spriteHeight);
         this.width = spriteWidth;
         this.height = spriteHeight;
     }
 
     @Override
     public boolean collide(Player player, PlayState playState) {
-        if (player.overlaps(this) && !on) {
-            this.setImage(new Texture(Gdx.files.internal("switch_on.png")));
-            on = true;
-            for (GameObject gameObj: playState.getGameObjects()){
-                if (gameObj instanceof Door){
-                    ((Door) gameObj).setOpen();
-                }
-            }
-        }
+//        if (player.overlaps(this) && !on) {
+//            this.setImage(new Texture(Gdx.files.internal("switch_on.png")));
+//            on = true;
+//            for (GameObject gameObj: playState.getGameObjects()){
+//                if (gameObj instanceof Door){
+//                    ((Door) gameObj).setOpen();
+//                }
+//            }
+//        }
         return false;
     }
 }

@@ -10,9 +10,11 @@ import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.DangerZone;
+import com.mygdx.game.objects.DoorOpen;
+import com.mygdx.game.objects.GameObject;
+import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Door;
-import com.mygdx.game.objects.BarrierOpen;
 import com.mygdx.game.objects.Obstacle;
 import com.mygdx.game.objects.Power;
 import com.mygdx.game.objects.SideWall;
@@ -43,6 +45,8 @@ public abstract class PlayState extends State{
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
     boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
+    public static float tracker;
+    public float trackerBG;
 
     //boolean arrays
     public MapTile[] path = {MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY};
@@ -53,11 +57,12 @@ public abstract class PlayState extends State{
     protected ArrayList<MapTile[]> mapBuffer = new ArrayList<MapTile[]>();
     protected ArrayList<float[]> switchBuffer = new ArrayList<float[]>();
 
+    private ArrayList<ArrayList> gameObjects = new ArrayList<ArrayList>();
     private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
     public static ArrayList<SideWall> sideWalls = new ArrayList<SideWall>();
     private ArrayList<Switch> switches = new ArrayList<Switch>();
     private ArrayList<Door> doors = new ArrayList<Door>();
-    private ArrayList<BarrierOpen> barrierOpens = new ArrayList<BarrierOpen>();
+    private ArrayList<DoorOpen> doorOpens = new ArrayList<DoorOpen>();
     private ArrayList<Power> powers = new ArrayList<Power>();
     private ArrayList<Background> bg = new ArrayList<Background>();
     private ArrayList<Overlay> effects = new ArrayList<Overlay>();
@@ -93,6 +98,19 @@ public abstract class PlayState extends State{
         scoreIncrement = 1;
         passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = false;
         endPassivePowerTime = endActivePowerTime = System.currentTimeMillis();
+        tracker = 800;
+        trackerBG = 800;
+
+        gameObjects.add(obstacles);
+        gameObjects.add(sideWalls);
+        gameObjects.add(switches);
+        gameObjects.add(doors);
+        gameObjects.add(doorOpens);
+        gameObjects.add(powers);
+        gameObjects.add(bg);
+        gameObjects.add(effects);
+        gameObjects.add(dz);
+        gameObjects.add(ui);
 
         createBg();
         createObstacle();
@@ -152,7 +170,7 @@ public abstract class PlayState extends State{
         handleInput();
         checkSwitchCollision();
         // tell the camera to update its matrices.
-        while (sideWalls.get(sideWalls.size() - 1).y < 1000) {
+        while (tracker < 1000) {
             synchronized (this) {
                 while (mapBuffer.size() == 0){
                     try {
@@ -163,15 +181,16 @@ public abstract class PlayState extends State{
                 doorSwitch = switchBuffer.remove(0);
                 notifyAll();
             }
-            float temp = sideWalls.get(sideWalls.size() - 1).y + 50;
-            spawnObstacle(temp);
+            spawnObstacle(tracker + spriteHeight);
             spawnPower();
             spawnSwitch();
             spawnDoor();
-            spawnSides(temp);
+            spawnSides(tracker + spriteHeight);
+            tracker += spriteHeight;
         }
-        if (bg.get(bg.size() - 1).y < 1) {
+        if (trackerBG < 800) {
             spawnBg();
+            trackerBG += 800;
         }
         // tell the camera to update its matrices.
         cam.update();
@@ -182,40 +201,7 @@ public abstract class PlayState extends State{
 
         // begin a new batch and draw the player and all objects
         sb.begin();
-
-        for (Background backg : bg) {
-            sb.draw(backg.getImage(), backg.x, backg.y);
-        }
-        for (Obstacle obstacle : obstacles) {
-            sb.draw(obstacle.getImage(), obstacle.x, obstacle.y);
-        }
-        for (SideWall sideWall : sideWalls) {
-            sb.draw(sideWall.getImage(), sideWall.x, sideWall.y);
-        }
-        for (Power power : powers) {
-            sb.draw(power.getImage(), power.x, power.y);
-        }
-        for (Switch eachSwitch : switches) {
-            sb.draw(eachSwitch.getImage(), eachSwitch.x, eachSwitch.y);
-        }
-        for (Door barrier : doors) {
-            sb.draw(barrier.getImage(), barrier.x, barrier.y);
-        }
-        for (BarrierOpen barrier : barrierOpens) {
-            sb.draw(barrier.getImage(), barrier.x, barrier.y);
-        }
-
-        sb.draw(player.getTexture(), player.x, player.y);
-
-        for (Overlay effect : effects) {
-            sb.draw(effect.getImage(), effect.x, effect.y);
-        }
-        for (DangerZone danger : dz) {
-            sb.draw(danger.getImage(), danger.x, danger.y);
-        }
-        for (UI inter : ui) {
-            sb.draw(inter.getImage(), inter.x, inter.y);
-        }
+        draw(sb);
 
         if(touched){
 
@@ -233,55 +219,19 @@ public abstract class PlayState extends State{
         // move the obstacles, remove any that are beneath the bottom edge of the screen.
 
         player.y -= gameSpeed * Gdx.graphics.getDeltaTime();
+        tracker -= gameSpeed * Gdx.graphics.getDeltaTime();
+        trackerBG -= gameSpeed * Gdx.graphics.getDeltaTime();
 
-        Iterator<Obstacle> iter = obstacles.iterator();
-        Iterator<SideWall> iter2 = sideWalls.iterator();
-        Iterator<Power> iter3 = powers.iterator();
-        Iterator<Switch> iter4 = switches.iterator();
-        Iterator<Door> iter5 = doors.iterator();
-        Iterator<BarrierOpen> iter6 = barrierOpens.iterator();
-        Iterator<Background> iter7 = bg.iterator();
-        Iterator<Overlay> iter8 = effects.iterator();
-        while (iter.hasNext()) {
-            Rectangle obstacle = iter.next();
-            obstacle.y -= gameSpeed * Gdx.graphics.getDeltaTime();
-            if (obstacle.y + spriteHeight < 0) iter.remove();
+        for (ArrayList gameObj: gameObjects){
+            Iterator<Obstacle> gameObjectIterator = gameObj.iterator();
+            while (gameObjectIterator.hasNext()){
+                GameObject gameObject = gameObjectIterator.next();
+                if (gameObject instanceof Movable){
+                    ((Movable) gameObject).scroll(gameSpeed);
+                }
+            }
         }
-        while (iter2.hasNext()) {
-            Rectangle side = iter2.next();
-            side.y -= gameSpeed * Gdx.graphics.getDeltaTime();
-            if (side.y + spriteHeight < 0) iter2.remove();
-        }
-        while (iter3.hasNext()) {
-            Rectangle power = iter3.next();
-            power.y -= gameSpeed * Gdx.graphics.getDeltaTime();
-            if (power.y + spriteHeight < 0) iter3.remove();
-        }
-        while (iter4.hasNext()) {
-            Rectangle swt = iter4.next();
-            swt.y -= gameSpeed * Gdx.graphics.getDeltaTime();
-            if (swt.y + spriteHeight < 0) iter4.remove();
-        }
-        while (iter5.hasNext()) {
-            Rectangle door = iter5.next();
-            door.y -= gameSpeed * Gdx.graphics.getDeltaTime();
-            if (door.y + spriteHeight < 0) iter5.remove();
-        }
-        while (iter6.hasNext()) {
-            Rectangle door = iter6.next();
-            door.y -= gameSpeed * Gdx.graphics.getDeltaTime();
-            if (door.y + spriteHeight < 0) iter6.remove();
-        }
-        while (iter7.hasNext()) {
-            Rectangle bg = iter7.next();
-            bg.y -= gameSpeed * Gdx.graphics.getDeltaTime();
-            if (bg.y + 800 < 0) iter7.remove();
-        }
-        while (iter8.hasNext()) {
-            Rectangle effect = iter8.next();
-            effect.y -= gameSpeed * Gdx.graphics.getDeltaTime();
-            if (effect.y + 800 < 0) iter8.remove();
-        }
+
     }
     @Override
     public void update(float dt) {
@@ -290,23 +240,12 @@ public abstract class PlayState extends State{
     @Override
     public void dispose() {
         // dispose of all the native resources
-        for (Obstacle obstacle:obstacles) {
-            obstacle.getImage().dispose();
-        }
-        for (Power power:powers) {
-            power.getImage().dispose();
-        }
-        for (Door barrier: doors) {
-            barrier.getImage().dispose();
-        }
-        for (Switch eachSwitch:switches) {
-            eachSwitch.getImage().dispose();
-        }
-        for (SideWall sideWall:sideWalls) {
-            sideWall.getImage().dispose();
-        }
-        for (BarrierOpen barrier:barrierOpens) {
-            barrier.getImage().dispose();
+        for (ArrayList gameObj: gameObjects) {
+            Iterator<Obstacle> gameObjectIterator = gameObj.iterator();
+            while (gameObjectIterator.hasNext()) {
+                GameObject gameObject = gameObjectIterator.next();
+                gameObject.getImage().dispose();
+            }
         }
         player.getImage().dispose();
         joystick.getJoystickImage().dispose();
@@ -466,7 +405,9 @@ public abstract class PlayState extends State{
             player.y = 750;
         }
         // DESTROY_WALL and GO_THROUGH_WALL implementation
-        if (!player.canGoThrough()) {
+
+//        if (!player.canGoThrough()) {
+
 //		collide with normal wall obstacle
             for (Obstacle obstacle : obstacles) {
                 if (player.overlaps(obstacle)) {
@@ -479,7 +420,7 @@ public abstract class PlayState extends State{
                     return true;
                 }
             }
-        }
+//        }
         return false;
     }
 
@@ -497,12 +438,12 @@ public abstract class PlayState extends State{
                 // change this to another different switch image
                 eachSwitch.setImage(new Texture(Gdx.files.internal("switch_on.png")));
                 for (Door barrier: doors){
-                    BarrierOpen bg = new BarrierOpen();
+                    DoorOpen bg = new DoorOpen();
                     bg.x = barrier.x;
                     bg.y = barrier.y;
                     bg.width = 50;
                     bg.height = 50;
-                    barrierOpens.add(bg);
+                    doorOpens.add(bg);
                 }
                 removeBarriers();
                 // then notify server
@@ -600,5 +541,41 @@ public abstract class PlayState extends State{
             array[i] = b;
         }
         return array;
+    }
+
+    public void draw(SpriteBatch sb){
+        for (Background backg : bg) {
+            sb.draw(backg.getImage(), backg.x, backg.y);
+        }
+        for (Obstacle obstacle : obstacles) {
+            sb.draw(obstacle.getImage(), obstacle.x, obstacle.y);
+        }
+        for (SideWall sideWall : sideWalls) {
+            sb.draw(sideWall.getImage(), sideWall.x, sideWall.y);
+        }
+        for (Power power : powers) {
+            sb.draw(power.getImage(), power.x, power.y);
+        }
+        for (Switch eachSwitch : switches) {
+            sb.draw(eachSwitch.getImage(), eachSwitch.x, eachSwitch.y);
+        }
+        for (Door barrier : doors) {
+            sb.draw(barrier.getImage(), barrier.x, barrier.y);
+        }
+        for (DoorOpen barrier : doorOpens) {
+            sb.draw(barrier.getImage(), barrier.x, barrier.y);
+        }
+
+        sb.draw(player.getTexture(), player.x, player.y);
+
+        for (Overlay effect : effects) {
+            sb.draw(effect.getImage(), effect.x, effect.y);
+        }
+        for (DangerZone danger : dz) {
+            sb.draw(danger.getImage(), danger.x, danger.y);
+        }
+        for (UI inter : ui) {
+            sb.draw(inter.getImage(), inter.x, inter.y);
+        }
     }
 }
