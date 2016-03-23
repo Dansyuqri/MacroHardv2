@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.Texture;
  * Created by Syuqri on 3/9/2016.
  */
 public class Player extends GameObject {
-    private String passivePower;
-    private String activePower;
+    private PowerType passivePower;
+    private PowerType activePower;
     private Texture texture;
     public Player(){
         super();
@@ -17,21 +17,22 @@ public class Player extends GameObject {
         this.y = 400;
         this.width = 40;
         this.height = 40;
+        this.activePower = PowerType.NOTHING;
     }
 
-    public String getActivePower() {
+    public PowerType getActivePower() {
         return activePower;
     }
 
-    public void setActivePower(String activePower) {
+    public void setActivePower(PowerType activePower) {
         this.activePower = activePower;
     }
 
-    public void setPassivePower(String power) {
+    public void setPassivePower(PowerType power) {
         this.passivePower = power;
     }
 
-    public String getPassivePower() {
+    public PowerType getPassivePower() {
         return passivePower;
     }
 
