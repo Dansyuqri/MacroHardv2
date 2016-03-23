@@ -40,7 +40,6 @@ public abstract class PlayState extends State{
     private long endPassivePowerTime, endActivePowerTime;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
-    public long start = System.currentTimeMillis();
     boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
 
     //boolean arrays
@@ -154,7 +153,6 @@ public abstract class PlayState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
-        long score = System.currentTimeMillis()-start;
         handleInput();
         checkSwitchCollision();
         // tell the camera to update its matrices.
@@ -235,6 +233,7 @@ public abstract class PlayState extends State{
 
 //		constantly check if any power/DangerZone's effect still lingers
         effectPassivePower();
+        effectActivePower();
         effectDangerZone(player);
 
         // move the obstacles, remove any that are beneath the bottom edge of the screen.
@@ -581,6 +580,7 @@ public abstract class PlayState extends State{
     private void activateActivePower(){
         if (!player.getActivePower().equals("nothing")) {
             activePowerState = true;
+            endActivePowerTime = System.currentTimeMillis()+5000;
         }
     }
     private void effectActivePower(){
@@ -599,8 +599,8 @@ public abstract class PlayState extends State{
                 }
                 activePowerEffectTaken = true;
             }
-            if (System.currentTimeMillis() >= endPassivePowerTime) {
-                if (player.getPassivePower().equals("slowGameDown")) {
+            if (System.currentTimeMillis() >= endActivePowerTime) {
+                if (player.getActivePower().equals("slowGameDown")) {
                     gameSpeed /= speedChange;
                 } else if (player.getActivePower().equals("speedPlayerUp")) {
                     playerSpeed *= speedChange;
