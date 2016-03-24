@@ -41,7 +41,6 @@ public abstract class PlayState extends State{
     private boolean touchHeld;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
-    boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
     public float tracker;
     public float trackerBG;
 
@@ -90,7 +89,6 @@ public abstract class PlayState extends State{
         dangerZoneSpeedLimit = 250;
         score = 0;
         scoreIncrement = 1;
-        passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = false;
         tracker = 800;
         trackerBG = 800;
 
@@ -289,7 +287,7 @@ public abstract class PlayState extends State{
                     break;
                 case POWER:
                     powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
-                    //powers.add(new Power(PowerType.DESTROY_WALL,tileLength * (i % GAME_WIDTH)+15, tracker, tileLength, tileLength));
+                    //powers.add(new Power(PowerType.FREEZE_MAZE,tileLength * (i % GAME_WIDTH)+15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
@@ -434,8 +432,8 @@ public abstract class PlayState extends State{
         }
     }
     private void effectPassivePower(){
-        if (passivePowerState) {
-            if (!passivePowerEffectTaken) {
+        if (player.getPassivePowerState()) {
+            if (!player.getPassivePowerEffectTaken()) {
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     tempGameSpeed = gameSpeed;
                     gameSpeed = 0;
@@ -447,7 +445,7 @@ public abstract class PlayState extends State{
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
                     playerSpeed /= speedChange;
                 }
-                passivePowerEffectTaken = true;
+                player.setPassivePowerEffectTaken(true);
             }
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
@@ -460,34 +458,34 @@ public abstract class PlayState extends State{
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
                     playerSpeed *= speedChange;
                 }
-                passivePowerState = false;
-                passivePowerEffectTaken = false;
+                player.setPassivePowerState(false);
+                player.setPassivePowerEffectTaken(false);
             }
         }
     }
 
     private void activateActivePower(){
         if (!player.getActivePower().equals(PowerType.NOTHING)) {
-            activePowerState = true;
+            player.setActivePowerState(true);
             player.setEndActivePowerTime(System.currentTimeMillis()+5000);
         }
     }
 
     private void effectActivePower(){
-        if (activePowerState) {
-            if (!activePowerEffectTaken) {
+        if (player.getActivePowerState()) {
+            if (!player.getActivePowerEffectTaken()) {
                 if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
                     dangerZone -= 20;
                 }
-                activePowerEffectTaken = true;
+                player.setActivePowerEffectTaken(true);
             }
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
                     dangerZone += 20;
                 }
                 player.setActivePower(PowerType.NOTHING);
-                activePowerState = false;
-                activePowerEffectTaken = false;
+                player.setActivePowerState(false);
+                player.setActivePowerEffectTaken(false);
             }
         }
     }
