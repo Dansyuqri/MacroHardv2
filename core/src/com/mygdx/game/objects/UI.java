@@ -1,6 +1,5 @@
 package com.mygdx.game.objects;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
@@ -9,11 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
  */
 public class UI extends GameObject{
     public UI(int y){
-        super();
+        super(0, y, 480, 800);
         this.setImage(new Texture(Gdx.files.internal("UI.png")));
-        this.x = 0;
-        this.y = y;
-        this.width = 480;
-        this.height = 800;
     }
 }

@@ -8,11 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
  */
 public class Overlay extends Movable{
     public Overlay(int y){
-        super();
+        super(0, y, 480, 800);
         this.setImage(new Texture(Gdx.files.internal("effects1.png")));
-        this.x = 0;
-        this.y = y;
-        this.width = 480;
-        this.height = 800;
     }
 }

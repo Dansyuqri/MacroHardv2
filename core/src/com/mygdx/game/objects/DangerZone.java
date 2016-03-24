@@ -1,6 +1,7 @@
 package com.mygdx.game.objects;
 
 
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 
@@ -9,11 +10,7 @@ import com.badlogic.gdx.graphics.Texture;
  */
 public class DangerZone extends GameObject{
     public DangerZone(int y){
-        super();
+        super(0, y, 480, 200);
         this.setImage(new Texture(Gdx.files.internal("dangerzone.png")));
-        this.x = 0;
-        this.y = y;
-        this.width = 480;
-        this.height = 200;
     }
 }
