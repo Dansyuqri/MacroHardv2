@@ -22,11 +22,11 @@ public class Power extends Movable implements Collidable {
         if (player.overlaps(this)){
             if (this.isPassive()) {
                 player.setPassivePower(type);
+                System.out.println(player.getPassivePower().toString());
                 player.setEndPassivePowerTime(System.currentTimeMillis()+5000);
             }
             else {
                 player.setActivePower(type);
-                player.setEndActivePowerTime(System.currentTimeMillis()+5000);
             }
             return true;
         }
@@ -45,6 +45,6 @@ public class Power extends Movable implements Collidable {
                 break;
             }
         }
-        return (index<7);
+        return (index<8);
     }
 }

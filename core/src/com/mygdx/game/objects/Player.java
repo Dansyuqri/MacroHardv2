@@ -53,6 +53,14 @@ public class Player extends Movable {
     }
 
     public boolean canGoThrough() {
-        return (passivePower.equals(PowerType.GO_THROUGH_WALL) || activePower.equals(PowerType.DESTROY_WALL));
+        return (passivePower.equals(PowerType.GO_THROUGH_WALL));
+    }
+
+    public boolean canDestroy() {
+        return (activePower.equals(PowerType.DESTROY_WALL));
+    }
+
+    public boolean isDead() {
+        return y>=0;
     }
 }

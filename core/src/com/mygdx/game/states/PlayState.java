@@ -363,8 +363,10 @@ public abstract class PlayState extends State{
         }
         // DESTROY_WALL and GO_THROUGH_WALL implementation
 
-    //        if (!player.canGoThrough()) {
-
+        if (player.canGoThrough() && System.currentTimeMillis()<player.getEndPassivePowerTime()) {}
+        else if (player.canGoThrough() && System.currentTimeMillis()>=player.getEndPassivePowerTime()) {
+            player.setPassivePower(PowerType.NOTHING);
+        } else {
     //		collides with normal wall obstacle
             for (GameObject obstacle : obstacles) {
                 if (((Obstacle) obstacle).collides(player, this)) {
@@ -377,7 +379,7 @@ public abstract class PlayState extends State{
                     return true;
                 }
             }
-    //        }
+        }
         return false;
     }
 
