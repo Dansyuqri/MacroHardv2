@@ -52,7 +52,6 @@ public abstract class PlayState extends State{
 
     //Arraylists
     protected ArrayList<MapTile[]> mapBuffer = new ArrayList<MapTile[]>();
-    protected ArrayList<float[]> switchBuffer = new ArrayList<float[]>();
 
     private ArrayList<ArrayList<GameObject>> gameObjects = new ArrayList<ArrayList<GameObject>>();
     private ArrayList<GameObject> obstacles = new ArrayList<GameObject>();
@@ -172,7 +171,6 @@ public abstract class PlayState extends State{
                     } catch (InterruptedException ignored){}
                 }
                 path = mapBuffer.remove(0);
-                doorSwitch = switchBuffer.remove(0);
                 notifyAll();
                 score += scoreIncrement;
             }
@@ -234,7 +232,6 @@ public abstract class PlayState extends State{
                 gameObject.getImage().dispose();
             }
         }
-        player.getImage().dispose();
         joystick.getJoystickImage().dispose();
         joystick.getJoystickCentreImage().dispose();
     }
@@ -273,10 +270,10 @@ public abstract class PlayState extends State{
         }
     }
 
-/***********************************************
- *  SPAWN METHODS HERE
- ***********************************************
- */
+    /***********************************************
+     *  SPAWN METHODS HERE
+     ***********************************************
+     */
     /**
      Method to spawn the walls using the coordinates from the wallCoord() method
      */
@@ -284,11 +281,8 @@ public abstract class PlayState extends State{
     private void spawnObjects(){
         for (int i = 0; i < path.length; i++) {
             switch (path[i]){
-                default:
-                    if (doorSwitch[2] == 1) {
-                        switches.add(new Switch(15 + doorSwitch[0] * tileLength, tracker - (doorSwitch[1] * tileLength), tileLength, tileLength));
-                        this.doorSwitch[2] = 0;
-                    }
+                case SWITCH:
+                    switches.add(new Switch((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength));
                     break;
                 case OBSTACLES:
                     obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength));
@@ -345,17 +339,17 @@ public abstract class PlayState extends State{
         }
     }
 
-/***********************************************
- * MISC METHODS HERE
- ************************************************
- */
+    /***********************************************
+     * MISC METHODS HERE
+     ************************************************
+     */
 
     /**
      Method handling collision. If there is an overlap over an object that should be impassable,
      the player will be moved back to his previous position (remembered by a temporary variable)
      */
     private boolean collidesObstacle(){
-// collision with screen boundaries
+        // collision with screen boundaries
         if (player.x > 465 - player.width ){
             player.x = 465 - player.height;
         }
@@ -369,21 +363,21 @@ public abstract class PlayState extends State{
         }
         // DESTROY_WALL and GO_THROUGH_WALL implementation
 
-//        if (!player.canGoThrough()) {
+        //        if (!player.canGoThrough()) {
 
-//		collides with normal wall obstacle
+        //		collides with normal wall obstacle
         for (GameObject obstacle : obstacles) {
             if (((Obstacle) obstacle).collides(player, this)) {
                 return true;
             }
         }
-//		collides with doors
+        //		collides with doors
         for (GameObject door : doors) {
             if (((Door)door).collides(player, this)) {
                 return true;
             }
         }
-//        }
+        //        }
         return false;
     }
 
@@ -405,7 +399,7 @@ public abstract class PlayState extends State{
             }
         }
 
-//		collides with power up
+        //		collides with power up
         Iterator<GameObject> powerIterator = powers.iterator();
         while (powerIterator.hasNext()){
             if (((Power)powerIterator.next()).collides(player, this)){
