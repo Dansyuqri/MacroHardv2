@@ -24,6 +24,9 @@ import com.mygdx.game.objects.Player;
 import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -45,7 +48,7 @@ public abstract class PlayState extends State{
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
     boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
-    public static float tracker;
+    public float tracker;
     public float trackerBG;
 
     //boolean arrays
@@ -59,7 +62,7 @@ public abstract class PlayState extends State{
 
     private ArrayList<ArrayList> gameObjects = new ArrayList<ArrayList>();
     private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
-    public static ArrayList<SideWall> sideWalls = new ArrayList<SideWall>();
+    public ArrayList<SideWall> sideWalls = new ArrayList<SideWall>();
     private ArrayList<Switch> switches = new ArrayList<Switch>();
     private ArrayList<Door> doors = new ArrayList<Door>();
     private ArrayList<DoorOpen> doorOpens = new ArrayList<DoorOpen>();
@@ -101,13 +104,14 @@ public abstract class PlayState extends State{
         tracker = 800;
         trackerBG = 800;
 
+        gameObjects.add(bg);
         gameObjects.add(obstacles);
         gameObjects.add(sideWalls);
         gameObjects.add(switches);
         gameObjects.add(doors);
         gameObjects.add(doorOpens);
         gameObjects.add(powers);
-        gameObjects.add(bg);
+        gameObjects.add(new ArrayList<Player>(Collections.singletonList(player)));
         gameObjects.add(effects);
         gameObjects.add(dz);
         gameObjects.add(ui);
@@ -223,7 +227,7 @@ public abstract class PlayState extends State{
         trackerBG -= gameSpeed * Gdx.graphics.getDeltaTime();
 
         for (ArrayList gameObj: gameObjects){
-            Iterator<Obstacle> gameObjectIterator = gameObj.iterator();
+            Iterator<GameObject> gameObjectIterator = gameObj.iterator();
             while (gameObjectIterator.hasNext()){
                 GameObject gameObject = gameObjectIterator.next();
                 if (gameObject instanceof Movable){
@@ -323,15 +327,14 @@ public abstract class PlayState extends State{
     private void spawnPower() {
         for (int i = 0; i < path.length; i++) {
             if (path[i] == MapTile.POWER) {
-                Power power = new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)],i);
+                Power power = new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)],i,tracker);
                 powers.add(power);
             }
         }
     }
     private void spawnSwitch(){
         if (this.doorSwitch[2] == 1) {
-            Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1]);
-            switches.add(doorSwitch);
+            Switch doorSwitch = new Switch(spriteWidth, spriteHeight, this.doorSwitch[0], this.doorSwitch[1], tracker);            switches.add(doorSwitch);
             this.doorSwitch[2] = 0;
         }
     }
@@ -544,38 +547,10 @@ public abstract class PlayState extends State{
     }
 
     public void draw(SpriteBatch sb){
-        for (Background backg : bg) {
-            sb.draw(backg.getImage(), backg.x, backg.y);
-        }
-        for (Obstacle obstacle : obstacles) {
-            sb.draw(obstacle.getImage(), obstacle.x, obstacle.y);
-        }
-        for (SideWall sideWall : sideWalls) {
-            sb.draw(sideWall.getImage(), sideWall.x, sideWall.y);
-        }
-        for (Power power : powers) {
-            sb.draw(power.getImage(), power.x, power.y);
-        }
-        for (Switch eachSwitch : switches) {
-            sb.draw(eachSwitch.getImage(), eachSwitch.x, eachSwitch.y);
-        }
-        for (Door barrier : doors) {
-            sb.draw(barrier.getImage(), barrier.x, barrier.y);
-        }
-        for (DoorOpen barrier : doorOpens) {
-            sb.draw(barrier.getImage(), barrier.x, barrier.y);
-        }
-
-        sb.draw(player.getTexture(), player.x, player.y);
-
-        for (Overlay effect : effects) {
-            sb.draw(effect.getImage(), effect.x, effect.y);
-        }
-        for (DangerZone danger : dz) {
-            sb.draw(danger.getImage(), danger.x, danger.y);
-        }
-        for (UI inter : ui) {
-            sb.draw(inter.getImage(), inter.x, inter.y);
+        for (ArrayList<GameObject> gameObjList: gameObjects) {
+            for (GameObject gameObj: gameObjList) {
+                gameObj.draw(sb);
+            }
         }
     }
 }

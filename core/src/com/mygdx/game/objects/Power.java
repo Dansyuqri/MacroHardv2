@@ -11,12 +11,12 @@ import com.mygdx.game.customEnum.PowerType;
  */
 public class Power extends Movable implements Collidable {
     private PowerType type;
-    public Power(PowerType powerType, int i){
+    public Power(PowerType powerType, int i, float tracker){
         super();
         this.setImage(new Texture(Gdx.files.internal("droplet.png")));
         this.type = powerType;
         this.x = (50 * i) + 15;
-        this.y = PlayState.tracker+50;
+        this.y = tracker+50;
         this.width = 50;
         this.height = 50;
     }
