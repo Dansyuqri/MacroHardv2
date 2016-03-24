@@ -47,7 +47,6 @@ public abstract class PlayState extends State{
     //boolean arrays
     public MapTile[] path = {MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY};
     boolean[] current = createArray(true);
-    float[] doorSwitch = null;
 
     //Arraylists
     protected ArrayList<MapTile[]> mapBuffer = new ArrayList<MapTile[]>();
@@ -176,7 +175,7 @@ public abstract class PlayState extends State{
             spawnSides(tracker + tileLength);
             tracker += tileLength;
         }
-        if (trackerBG < 800) {
+        if (trackerBG <= 800) {
             spawnBg();
             trackerBG += 800;
         }
@@ -287,7 +286,6 @@ public abstract class PlayState extends State{
                     break;
                 case POWER:
                     powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
-                    //powers.add(new Power(PowerType.FREEZE_MAZE,tileLength * (i % GAME_WIDTH)+15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
@@ -297,8 +295,8 @@ public abstract class PlayState extends State{
     }
 
     private void spawnBg(){
-        Background backg = new Background(800);
-        Overlay effect = new Overlay(800);
+        Background backg = new Background(trackerBG);
+        Overlay effect = new Overlay(trackerBG);
         bg.add(backg);
         effects.add(effect);
     }
@@ -501,8 +499,14 @@ public abstract class PlayState extends State{
 
     public void draw(SpriteBatch sb){
         for (ArrayList<GameObject> gameObjList: gameObjects) {
-            for (GameObject gameObj: gameObjList) {
-                gameObj.draw(sb);
+            Iterator<GameObject> gameObjectIterator = gameObjList.iterator();
+            while (gameObjectIterator.hasNext()){
+                GameObject gameObject = gameObjectIterator.next();
+                if (gameObject.y < -gameObject.height){
+                    gameObjectIterator.remove();
+                    continue;
+                }
+                gameObject.draw(sb);
             }
         }
     }
