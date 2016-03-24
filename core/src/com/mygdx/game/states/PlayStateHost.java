@@ -15,7 +15,7 @@ public class PlayStateHost extends PlayState {
     private int powerCounter;
     private int[][] memory;
 
-    PlayStateHost(GameStateManager gsm){
+    public PlayStateHost(GameStateManager gsm){
         super(gsm);
         //spawning initialization
         doorCounter = 0;
