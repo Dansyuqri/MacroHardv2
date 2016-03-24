@@ -13,12 +13,14 @@ public class Player extends Movable {
     private PowerType activePower;
     private long endPassivePowerTime;
     private long endActivePowerTime;
+    private boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
 
     public Player(){
         super(480/2-50/2, 400, 40, 40);
         this.setImage(new Texture(Gdx.files.internal("player_temp.png")));
         this.activePower = this.passivePower = PowerType.NOTHING;
         endActivePowerTime = endPassivePowerTime = System.currentTimeMillis();
+        passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = false;
     }
 
     public long getEndPassivePowerTime() {
@@ -63,5 +65,34 @@ public class Player extends Movable {
 
     public boolean isDead() {
         return y>=0;
+    }
+
+    public void setActivePowerEffectTaken(boolean activePowerEffectTaken) {
+        this.activePowerEffectTaken = activePowerEffectTaken;
+    }
+
+    public void setPassivePowerEffectTaken(boolean passivePowerEffectTaken) {
+        this.passivePowerEffectTaken = passivePowerEffectTaken;
+    }
+
+    public void setPassivePowerState(boolean passivePowerState) {
+        this.passivePowerState = passivePowerState;
+    }
+
+    public void setActivePowerState(boolean activePowerState) {
+        this.activePowerState = activePowerState;
+    }
+
+    public boolean getActivePowerEffectTaken() {
+        return activePowerEffectTaken;
+    }
+    public boolean getPassivePowerEffectTaken() {
+        return passivePowerEffectTaken;
+    }
+    public boolean getPassivePowerState() {
+        return passivePowerState;
+    }
+    public boolean getActivePowerState() {
+        return activePowerState;
     }
 }

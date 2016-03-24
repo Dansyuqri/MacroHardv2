@@ -21,13 +21,16 @@ public class Power extends Movable implements Collidable {
     @Override
     public boolean collides(Player player, PlayState game) {
         if (player.overlaps(this)){
+            System.out.println(type.toString());
             if (this.isPassive()) {
+                player.setPassivePowerState(true);
                 player.setPassivePower(type);
                 player.setEndPassivePowerTime(System.currentTimeMillis()+5000);
             }
             else {
                 player.setActivePower(type);
             }
+            System.out.println(player.getPassivePower());
             return true;
         }
         return false;
