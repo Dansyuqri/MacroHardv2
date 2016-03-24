@@ -84,7 +84,7 @@ public class PlayStateHost extends PlayState {
             }
         }
 
-        // spawning power ups after a certain time
+        // spawning power ups after a certain time. 20 is default. 5 is to test
         if (powerCounter > 20){
             while (true){
                 int temp = MathUtils.random(0,8);
