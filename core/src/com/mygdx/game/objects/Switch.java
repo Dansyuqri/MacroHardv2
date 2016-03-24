@@ -11,26 +11,18 @@ import com.mygdx.game.states.PlayState;
 public class Switch extends Obstacle implements Collidable{
     private boolean on = false;
 
-    public Switch(int spriteWidth,int spriteHeight,float x, float y, float tracker){
-        super();
-        this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
-        this.x = 15 + x*spriteWidth;
-        this.y = tracker+50 - (y*spriteHeight);
-        this.width = spriteWidth;
-        this.height = spriteHeight;
+    public Switch(float x, float y, float width, float height){
+        super(x, y, width, height);
+        this.setImage(new Texture(Gdx.files.internal("switch_off.png")));;
     }
 
     @Override
-    public boolean collide(Player player, PlayState playState) {
-//        if (player.overlaps(this) && !on) {
-//            this.setImage(new Texture(Gdx.files.internal("switch_on.png")));
-//            on = true;
-//            for (GameObject gameObj: playState.getGameObjects()){
-//                if (gameObj instanceof Door){
-//                    ((Door) gameObj).setOpen();
-//                }
-//            }
-//        }
+    public boolean collides(Player player, PlayState playState) {
+        if (player.overlaps(this) && !on) {
+            this.setImage(new Texture(Gdx.files.internal("switch_on.png")));
+            on = true;
+            return true;
+        }
         return false;
     }
 }

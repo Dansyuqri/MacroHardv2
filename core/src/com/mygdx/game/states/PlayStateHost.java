@@ -3,6 +3,10 @@ package com.mygdx.game.states;
 import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.customEnum.MapTile;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * Created by hj on 19/3/16.
  */
@@ -80,7 +84,6 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning power ups after a certain time
-
         if (powerCounter > 20){
             while (true){
                 int temp = MathUtils.random(0,8);
@@ -93,7 +96,6 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning door
-
         if (doorCounter > 45){
             for (int i = 0; i < current.length; i++) {
                 if (new_row[i] == MapTile.EMPTY) {
@@ -145,14 +147,12 @@ public class PlayStateHost extends PlayState {
         float[] switchCoord = {500, 1000, 0};
         if (doorCounter == 44){
             switchCoord[2] = 1;
-            boolean check = true;
-            while (check){
+            while (true){
                 int temp0 = MathUtils.random(0,8);
                 int temp1 = MathUtils.random(0,4);
                 if (memory[temp1][temp0] == 2){
                     switchCoord[0] = temp0;
                     switchCoord[1] = temp1;
-                    check = false;
                     break;
                 }
             }
@@ -164,10 +164,8 @@ public class PlayStateHost extends PlayState {
                     wait();
                 } catch (InterruptedException ignored){}
             }
-
             mapBuffer.add(new_row);
             switchBuffer.add(switchCoord);
-
             notifyAll();
         }
     }

@@ -1,5 +1,6 @@
 package com.mygdx.game.objects;
 
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.customEnum.PowerType;
@@ -7,9 +8,12 @@ import com.mygdx.game.customEnum.PowerType;
 /**
  * Created by Syuqri on 3/9/2016.
  */
-public class Player extends GameObject {
+public class Player extends Movable {
     private PowerType passivePower;
     private PowerType activePower;
+    private long endPassivePowerTime;
+    private long endActivePowerTime;
+
     public Player(){
         super();
         this.setImage(new Texture(Gdx.files.internal("player_temp.png")));
@@ -18,9 +22,26 @@ public class Player extends GameObject {
         this.width = 40;
         this.height = 40;
         this.activePower = this.passivePower = PowerType.NOTHING;
+        endActivePowerTime = endPassivePowerTime = System.currentTimeMillis();
     }
 
-    public PowerType getActivePower(){
+    public long getEndPassivePowerTime() {
+        return endPassivePowerTime;
+    }
+
+    public void setEndPassivePowerTime(long endPassivePowerTime) {
+        this.endPassivePowerTime = endPassivePowerTime;
+    }
+
+    public long getEndActivePowerTime() {
+        return endActivePowerTime;
+    }
+
+    public void setEndActivePowerTime(long endActivePowerTime) {
+        this.endActivePowerTime = endActivePowerTime;
+    }
+
+    public PowerType getActivePower() {
         return activePower;
     }
 
@@ -28,8 +49,8 @@ public class Player extends GameObject {
         this.activePower = activePower;
     }
 
-    public void setPassivePower(PowerType passivePower) {
-        this.passivePower = passivePower;
+    public void setPassivePower(PowerType power) {
+        this.passivePower = power;
     }
 
     public PowerType getPassivePower() {
