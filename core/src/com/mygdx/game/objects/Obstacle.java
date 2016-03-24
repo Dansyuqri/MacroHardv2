@@ -10,11 +10,7 @@ import com.mygdx.game.states.PlayState;
  */
 public class Obstacle extends Movable implements Collidable {
     public Obstacle(float x, float y, float width, float height){
-        super();
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        super(x, y, width, height);
         this.setImage(new Texture(Gdx.files.internal("wall4.1.png")));
     }
 

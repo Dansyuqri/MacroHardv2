@@ -14,12 +14,8 @@ public class Player extends Movable {
     private long endActivePowerTime;
 
     public Player(){
-        super();
+        super(480/2-50/2, 400, 40, 40);
         this.setImage(new Texture(Gdx.files.internal("player_temp.png")));
-        this.x = 480/2-50/2;
-        this.y = 400;
-        this.width = 40;
-        this.height = 40;
         this.activePower = this.passivePower = PowerType.NOTHING;
         endActivePowerTime = endPassivePowerTime = System.currentTimeMillis();
     }
