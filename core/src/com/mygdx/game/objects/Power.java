@@ -1,5 +1,6 @@
 package com.mygdx.game.objects;
 
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.Interface.Collidable;
@@ -11,8 +12,8 @@ import com.mygdx.game.customEnum.PowerType;
  */
 public class Power extends Movable implements Collidable {
     private PowerType type;
-    public Power(PowerType powerType, int i, float y){
-        super((50 * i) + 15, y, 50, 50);
+    public Power(PowerType powerType, float x, float y, float width, float height){
+        super(x, y, width, height);
         this.setImage(new Texture(Gdx.files.internal("droplet.png")));
         this.type = powerType;
     }
