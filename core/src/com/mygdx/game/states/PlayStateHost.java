@@ -2,6 +2,7 @@ package com.mygdx.game.states;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.customEnum.MapTile;
+import com.mygdx.game.objects.Switch;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -143,29 +144,32 @@ public class PlayStateHost extends PlayState {
             }
         }
 
+        int temp0 = 0;
+        int temp1 = 0;
+
         // spawning door switch
-        float[] switchCoord = {500, 1000, 0};
+        boolean switchCoord = false;
         if (doorCounter == 44){
-            switchCoord[2] = 1;
+            switchCoord = true;
             while (true){
-                int temp0 = MathUtils.random(0,8);
-                int temp1 = MathUtils.random(0,4);
+                temp0 = MathUtils.random(0,8);
+                temp1 = MathUtils.random(0,4);
                 if (memory[temp1][temp0] == 2){
-                    switchCoord[0] = temp0;
-                    switchCoord[1] = temp1;
                     break;
                 }
             }
         }
 
         synchronized (this) {
-            while (mapBuffer.size() > 3){
+            while (mapBuffer.size() > 5){
                 try {
                     wait();
                 } catch (InterruptedException ignored){}
             }
             mapBuffer.add(new_row);
-            switchBuffer.add(switchCoord);
+            if (switchCoord) {
+                mapBuffer.get(5 - temp1)[temp0] = MapTile.SWITCH;
+            }
             notifyAll();
         }
     }
