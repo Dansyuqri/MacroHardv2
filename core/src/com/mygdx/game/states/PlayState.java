@@ -163,7 +163,7 @@ public abstract class PlayState extends State{
         handleInput();
         checkSwitchCollision();
         // tell the camera to update its matrices.
-        while (tracker < 1000) {
+        while (tracker < 1050) {
             synchronized (this) {
                 while (mapBuffer.size() == 0){
                     try {

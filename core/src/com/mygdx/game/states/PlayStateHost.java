@@ -97,7 +97,7 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning door
-        if (doorCounter > 45){
+        if (doorCounter > 44){
             for (int i = 0; i < current.length; i++) {
                 if (new_row[i] == MapTile.EMPTY) {
                     new_row[i] = MapTile.DOOR;
