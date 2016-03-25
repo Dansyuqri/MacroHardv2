@@ -13,7 +13,7 @@ import com.mygdx.game.states.PlayStateNonHost;
 
 import java.awt.Menu;
 
-public class MacroHardv2 extends ApplicationAdapter {
+public class MacroHardv2 extends ApplicationAdapter{
 	public static final int WIDTH = 480;
 	public static final int HEIGHT = 800;
 	public static final String TITLE = "Demo";

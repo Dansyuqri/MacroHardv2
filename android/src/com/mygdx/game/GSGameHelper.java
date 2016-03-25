@@ -430,6 +430,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         // mIncomingInvitationId
         // and show the popup on the screen.
         mIncomingInvitationId = invitation.getInvitationId();
+        BaseGameUtils.showAlert(activity, "Received Invitation");
         /*((TextView) findViewById(R.id.incoming_invitation_text)).setText(
                 invitation.getInviter().getDisplayName() + " " +
                         getString(R.string.is_inviting_you));
@@ -471,7 +472,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     public void inviteplayers(){
         Intent intent;
-        intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 3);
+        intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1);
         activity.startActivityForResult(intent, RC_SELECT_PLAYERS);
     }
     public void seeinvites(){

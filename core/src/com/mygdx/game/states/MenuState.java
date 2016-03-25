@@ -168,7 +168,7 @@ public class MenuState extends State{
                     //TODO: put your method call here
                     if(MacroHardv2.actionResolver.isSignedIn()){
                         MacroHardv2.actionResolver.QuickGame();
-                        //MacroHardv2.actionResolver.Inviteplayers();
+
                     }
                     quickGameBtn.dispose();
                     System.out.println("qg");
@@ -201,6 +201,7 @@ public class MenuState extends State{
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2-playBtnY/2-bufferFromTop) && touchPos.y>=(graphicsY/2-playBtnY/2-bufferFromTop-sendInviteBtnY)){
                     //TODO: RYAN PUT YOUR SEND INVITE HERE
+                    MacroHardv2.actionResolver.Inviteplayers();
                     sendInviteBtn.dispose();
                     sendInviteBtn = new Texture("sendInviteBtn.png");
                     touched = false;
@@ -230,6 +231,7 @@ public class MenuState extends State{
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2-playBtnY/2-sendInviteBtnY - 2*bufferFromTop) && touchPos.y>=(graphicsY/2-playBtnY/2-2*bufferFromTop-sendInviteBtnY - invitationBtnY)){
                     //TODO: RYAN PUT YOUR INVITATION BOX HERE
+                    MacroHardv2.actionResolver.Seeinvites();
                     invitationBtn.dispose();
                     invitationBtn = new Texture("invitationBtn.png");
                     touched = false;
@@ -260,6 +262,7 @@ public class MenuState extends State{
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2-playBtnY/2-sendInviteBtnY - invitationBtnY - 3*bufferFromTop) && touchPos.y>=(graphicsY/2-playBtnY/2-3*bufferFromTop-sendInviteBtnY - invitationBtnY - signInBtnY)){
                     //TODO: RYAN PUT YOUR SIGN IN HERE
+                    MacroHardv2.actionResolver.SignIn();
                     signInBtn.dispose();
                     signInBtn = new Texture("signInBtn.png");
                     touched = false;
