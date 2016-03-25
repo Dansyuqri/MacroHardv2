@@ -19,6 +19,9 @@ public class JoyStick {
         joystickCentreImage = new Texture(Gdx.files.internal("joystick_centre.png"));
         joystick = new Rectangle();
 
+        joystick.x = 405;
+        joystick.y = 80;
+
         joystick.height = 100;
         joystick.width = 100;
 

@@ -9,6 +9,7 @@ import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.DangerZone;
 import com.mygdx.game.objects.GameObject;
+import com.mygdx.game.objects.Icon;
 import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Door;
@@ -37,8 +38,7 @@ public abstract class PlayState extends State{
 
     //values
     public boolean running;
-    private boolean touched;
-    private boolean touchHeld;
+    private boolean touchHeld = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
     public float tracker;
@@ -61,6 +61,7 @@ public abstract class PlayState extends State{
     private ArrayList<GameObject> effects = new ArrayList<GameObject>();
     private ArrayList<GameObject> dz = new ArrayList<GameObject>();
     private ArrayList<GameObject> ui = new ArrayList<GameObject>();
+    private ArrayList<GameObject> icons = new ArrayList<GameObject>();
 
     //final values
     final int tileLength = 50;
@@ -101,57 +102,39 @@ public abstract class PlayState extends State{
         gameObjects.add(effects);
         gameObjects.add(dz);
         gameObjects.add(ui);
+        gameObjects.add(icons);
 
         createBg();
         createObstacle();
         createSides();
     }
+
     @Override
     protected void handleInput() {
-        if(Gdx.input.isTouched()){
-            touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            touched = true;
-        } else {
-            touched = false;
-        }
-
-        float relativex = 0;
-        float relativey = 0;
-        if (touched) {
+        if(Gdx.input.isTouched()) {
+            touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
             cam.unproject(touchPos);
-            if (!touchHeld) {
-                //if this is the initial touch initialize the joystick at the touched location
-                joystick.setX(touchPos.x - joystick.getJoystickWidth()/2);
-                joystick.setY(touchPos.y - joystick.getJoystickHeight()/2);
-                joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
-                joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
+            float relativex = touchPos.x - (joystick.getX());
+            float relativey = touchPos.y - (joystick.getY());
+            if (touchHeld || (Math.abs(relativex) < joystick.getJoystickWidth() / 2
+                    && (Math.abs(relativey) < joystick.getJoystickHeight() / 2))) {
                 touchHeld = true;
+                //calculates the relevant numbers needed for omnidirectional movement
+                float angle = (float) Math.atan2(relativey, relativex);
+                float cos = (float) Math.cos(angle);
+                float sin = (float) Math.sin(angle);
+
+                omniMove(cos, sin);
+            } else {
+                if (!icons.isEmpty()){
+                    if (icons.get(0).contains(touchPos.x, touchPos.y)){
+                        activateActivePower();
+                        icons.remove(0);
+                    }
+                }
             }
-            relativex = touchPos.x - (joystick.getX() + joystick.getJoystickWidth()/2);
-            relativey = touchPos.y - (joystick.getY() + joystick.getJoystickHeight()/2);
         } else {
             touchHeld = false;
-        }
-
-        if (touchHeld) {
-            //calculates the relevant numbers needed for omnidirectional movement
-            float angle = (float) Math.atan2(relativey, relativex);
-            float cos = (float) Math.cos(angle);
-            float sin = (float) Math.sin(angle);
-            if (Math.abs(relativex) < joystick.getJoystickWidth()/2
-                    && (Math.abs(relativey) < joystick.getJoystickHeight()/2)) {
-                //if the touched position is within the circle set the dot to the touched position
-                joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
-                joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
-            } else {
-                //otherwise set it to the edge of the circle
-                joystick.setCX(cos * joystick.getJoystickWidth()/2 + joystick.getX() + joystick.getJoystickWidth()/2 - joystick.getJoystickCenterWidth()/2);
-                joystick.setCY(sin * joystick.getJoystickWidth()/2 + joystick.getY() + joystick.getJoystickHeight()/2 - joystick.getJoystickCenterHeight()/2);
-            }
-            //if the touch is within a specific distance from the centre of the circle then move the player
-            if (Math.pow(relativex, 2) + Math.pow(relativey, 2) > 400) {
-                omniMove(cos, sin);
-            }
         }
     }
 
@@ -190,11 +173,10 @@ public abstract class PlayState extends State{
         sb.begin();
         draw(sb);
 
-        if(touched){
-
-            sb.draw(joystick.getJoystickImage(), joystick.getX(), joystick.getY());
-            sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
-        }
+//        if(touched){
+//            sb.draw(joystick.getJoystickImage(), joystick.getX(), joystick.getY());
+//            sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
+//        }
 
         sb.end();
 
@@ -246,6 +228,7 @@ public abstract class PlayState extends State{
             }
         }
     }
+
     private void createBg(){
         Background backg = new Background(0);
         Overlay effect = new Overlay(0);
@@ -256,6 +239,7 @@ public abstract class PlayState extends State{
         dz.add(danger);
         ui.add(inter);
     }
+
     private void createSides(){
         int counter = 0;
         while (counter* tileLength <= 800) {
@@ -429,6 +413,7 @@ public abstract class PlayState extends State{
             gameSpeed += speedIncrease;
         }
     }
+
     private void effectPassivePower(){
         if (player.getPassivePowerState()) {
             if (!player.getPassivePowerEffectTaken()) {
@@ -508,5 +493,9 @@ public abstract class PlayState extends State{
                 gameObject.draw(sb);
             }
         }
+    }
+
+    public void addIcon(Icon icon){
+        icons.add(icon);
     }
 }
