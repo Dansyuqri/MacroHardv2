@@ -108,7 +108,6 @@ public class MenuState extends State{
                 if(touchPos.y<=(graphicsY/2) + (playBtnY / 2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     gsm.set(new PlayStateHost(gsm));
                     dispose();
-                    MacroHardv2.actionResolver.Acceptinvites();
                     touched = false;
                 }
             }
