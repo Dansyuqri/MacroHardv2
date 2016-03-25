@@ -24,6 +24,7 @@ import com.mygdx.game.objects.UI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by Syuqri on 3/7/2016.
@@ -38,14 +39,14 @@ public abstract class PlayState extends State{
 
     //values
     public boolean running;
-    private boolean touchHeld = false;
+    private boolean touchHeld;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
     public float tracker;
     public float trackerBG;
 
     //boolean arrays
-    public MapTile[] path = {MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY};
+    public MapTile[] path = createArray(MapTile.EMPTY);
     boolean[] current = createArray(true);
 
     //Arraylists
@@ -69,6 +70,7 @@ public abstract class PlayState extends State{
     protected PlayState(GameStateManager gsm) {
         super(gsm);
         running = true;
+        touchHeld = false;
 
         //camera initialization
         cam = new OrthographicCamera();
@@ -145,7 +147,7 @@ public abstract class PlayState extends State{
         // tell the camera to update its matrices.
         while (tracker < 1050) {
             synchronized (this) {
-                while (mapBuffer.size() == 0){
+                while (mapBuffer.size() <= 5){
                     try {
                         wait();
                     } catch (InterruptedException ignored){}
@@ -471,6 +473,14 @@ public abstract class PlayState extends State{
                 player.setActivePowerEffectTaken(false);
             }
         }
+    }
+
+    protected MapTile[] createArray(MapTile m){
+        MapTile[] array = new MapTile[GAME_WIDTH];
+        for (int i = 0; i < GAME_WIDTH; i++) {
+            array[i] = m;
+        }
+        return array;
     }
 
     protected boolean[] createArray(boolean b){
