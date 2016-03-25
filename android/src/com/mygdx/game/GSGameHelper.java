@@ -431,6 +431,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         // and show the popup on the screen.
         mIncomingInvitationId = invitation.getInvitationId();
         BaseGameUtils.showAlert(activity, "Received Invitation");
+        seeinvites();
         /*((TextView) findViewById(R.id.incoming_invitation_text)).setText(
                 invitation.getInviter().getDisplayName() + " " +
                         getString(R.string.is_inviting_you));
