@@ -32,12 +32,12 @@ public abstract class PlayState extends State{
 
     //objects
     private JoyStick joystick;
-    protected Player player;
+    public static Player player;
     private Vector3 touchPos = new Vector3();
     protected final int GAME_WIDTH = 9;
 
     //values
-    public boolean running;
+    public boolean running = true;
     private boolean touchHeld = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;

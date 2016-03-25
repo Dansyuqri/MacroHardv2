@@ -9,6 +9,9 @@ import com.mygdx.game.states.GameStateManager;
 import com.mygdx.game.states.MenuState;
 import com.mygdx.game.states.PlayState;
 import com.mygdx.game.states.PlayStateHost;
+import com.mygdx.game.states.PlayStateNonHost;
+
+import java.awt.Menu;
 
 public class MacroHardv2 extends ApplicationAdapter {
 	public static final int WIDTH = 480;
@@ -17,7 +20,8 @@ public class MacroHardv2 extends ApplicationAdapter {
 	private GameStateManager gsm;
 	private SpriteBatch batch;
 	public static ActionResolver actionResolver;
-	public static GameWorld gamew;
+	public static PlayStateNonHost game;
+
 	
 	@Override
 	public void create () {
@@ -42,11 +46,14 @@ public class MacroHardv2 extends ApplicationAdapter {
 	}
 
 	public void multiplayerGameReady(){
-		//gamew.multiplayer = true;
+		if(this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){
+			MenuState.goToPlay=true;
+		}
 
-		//gsm.set(new PlayStateHost(gsm));
-		MenuState.goToPlay=true;
-		dispose();
+
+
+
+
 
 		//Used to send players coorindates to everyone else
 		//this.actionResolver.sendPos((float) 1, (float) 1);
@@ -64,20 +71,21 @@ public class MacroHardv2 extends ApplicationAdapter {
 	}
 
 	//Used to receive player's cooridinates
-	public void updateGameWorld(float x, float y){
-		gamew = new GameWorld(this);
-		gamew.px = x;
-		gamew.py = y;
-		System.out.println("Receiveda");
-		if (gamew.px == 1){
-			gsm.set(new PlayStateHost(gsm));
-			dispose();
+	public static void updateGameWorld(float x, float y){
+		if(!actionResolver.gethostid().equals(actionResolver.getyourid()) && (MenuState.gotoPlayP != true)) {
+			MenuState.gotoPlayP = true;
 		}
+		if(MenuState.ready == true){
+			PlayStateNonHost.player.x = x;
+			PlayStateNonHost.player.y = y;
+			System.out.println(x);
+		}
+
 	}
 
 	//Used to receive for Map Generation, Boolean array of size 9
 	public void updateMapWorld(float a, float b,float c, float d,float e, float f,float g, float h,float i){
-		gamew = new GameWorld(this);
+		/*gamew = new GameWorld(this);
 		gamew.x = a;
 		gamew.y = b;
 		gamew.px = c;
@@ -95,7 +103,7 @@ public class MacroHardv2 extends ApplicationAdapter {
 		System.out.println(f);
 		System.out.println(g);
 		System.out.println(h);
-		System.out.println(i);
+		System.out.println(i);*/
 	}
 
 }

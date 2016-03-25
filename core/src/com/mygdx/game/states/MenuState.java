@@ -21,6 +21,8 @@ public class MenuState extends State{
     private float bufferFromBottom = 200;
     private boolean touched = false;
     public static volatile boolean goToPlay = false;
+    public static volatile boolean gotoPlayP = false;
+    public static volatile boolean ready = false;
 
 
     //Resize variables
@@ -60,6 +62,13 @@ public class MenuState extends State{
             gsm.set(new PlayStateHost(gsm));
             dispose();
         }
+
+        if(gotoPlayP == true){
+            gsm.set(new PlayStateNonHost(gsm));
+            dispose();
+            ready = true;
+        }
+
         if(Gdx.input.isTouched() && touched == false){
             if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
                 if(touchPos.y<=(graphicsY/2)+(playBtnY/2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){

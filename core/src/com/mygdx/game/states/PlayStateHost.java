@@ -29,6 +29,8 @@ public class PlayStateHost extends PlayState {
         }
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
+        PlayerCoor playercoor = new PlayerCoor(this);
+        playercoor.start();
     }
 
     void wallCoord(){
