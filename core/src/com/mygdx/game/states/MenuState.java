@@ -74,6 +74,7 @@ public class MenuState extends State{
                 if(touchPos.y<=(graphicsY/2)+(playBtnY/2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     playBtn.dispose();
                     playBtn = new Texture("playBtn_pressed.png");
+
                     touched = true;
                 }
             }
@@ -83,7 +84,7 @@ public class MenuState extends State{
                 if(touchPos.y<=(graphicsY/2) + (playBtnY / 2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     gsm.set(new PlayStateHost(gsm));
                     dispose();
-
+                    MacroHardv2.actionResolver.Acceptinvites();
                     touched = false;
 
                 }
@@ -116,7 +117,6 @@ public class MenuState extends State{
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+bufferFromBottom-instructionBtnY/2)){
                     gsm.set(new InstructionState(gsm));
                     dispose();
-                    MacroHardv2.actionResolver.Acceptinvites();
                     touched = false;
                 }
             }
