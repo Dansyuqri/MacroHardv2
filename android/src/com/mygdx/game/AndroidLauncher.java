@@ -99,6 +99,42 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 			Gdx.app.log("CIRUS", "Google Services Logout Failed " + e.getMessage());
 		}
 	}
+	public void Inviteplayers(){
+		try{
+			runOnUiThread(new Runnable(){
+				public void run(){
+					_gameHelper.inviteplayers();
+				}
+			});
+		}
+		catch (Exception e){
+			Gdx.app.log("CIRUS", "Google Services Logout Failed " + e.getMessage());
+		}
+	}
+	public void Seeinvites(){
+		try{
+			runOnUiThread(new Runnable(){
+				public void run(){
+					_gameHelper.seeinvites();
+				}
+			});
+		}
+		catch (Exception e){
+			Gdx.app.log("CIRUS", "Google Services Logout Failed " + e.getMessage());
+		}
+	}
+	public void Acceptinvites(){
+		try{
+			runOnUiThread(new Runnable(){
+				public void run(){
+					_gameHelper.acceptinvites();
+				}
+			});
+		}
+		catch (Exception e){
+			Gdx.app.log("CIRUS", "Google Services Logout Failed " + e.getMessage());
+		}
+	}
 
 	@Override
 	public void initMatch(){

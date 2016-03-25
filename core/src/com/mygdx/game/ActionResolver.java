@@ -16,4 +16,7 @@ public interface ActionResolver {
     public void sendMap(boolean[] map);
     public String gethostid();
     public String getyourid();
+    public void Inviteplayers();
+    public void Acceptinvites();
+    public void Seeinvites();
 }

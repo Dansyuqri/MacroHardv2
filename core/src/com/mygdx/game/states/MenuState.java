@@ -83,7 +83,9 @@ public class MenuState extends State{
                 if(touchPos.y<=(graphicsY/2) + (playBtnY / 2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     gsm.set(new PlayStateHost(gsm));
                     dispose();
+
                     touched = false;
+
                 }
             }
             else{
@@ -114,6 +116,7 @@ public class MenuState extends State{
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+bufferFromBottom) && touchPos.y>=(graphicsY/2+playBtnY/2+bufferFromBottom-instructionBtnY/2)){
                     gsm.set(new InstructionState(gsm));
                     dispose();
+                    MacroHardv2.actionResolver.Acceptinvites();
                     touched = false;
                 }
             }
@@ -144,6 +147,7 @@ public class MenuState extends State{
                     //TODO: put your method call here
                     if(MacroHardv2.actionResolver.isSignedIn()){
                         MacroHardv2.actionResolver.QuickGame();
+                        //MacroHardv2.actionResolver.Inviteplayers();
                     }
                     quickGameBtn.dispose();
                     System.out.println("qg");

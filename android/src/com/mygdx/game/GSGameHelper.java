@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.badlogic.gdx.Gdx;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.games.GamesStatusCodes;
+import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Multiplayer;
+import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
@@ -30,10 +33,11 @@ import java.util.List;
 /**
  * Created by Nayr on 10/3/2016.
  */
-public class GSGameHelper extends GameHelper implements RoomUpdateListener, RealTimeMessageReceivedListener,RoomStatusUpdateListener {
+public class GSGameHelper extends GameHelper implements RoomUpdateListener, RealTimeMessageReceivedListener,RoomStatusUpdateListener,OnInvitationReceivedListener {
     final static String TAG = "ButtonClicker2000";
     static final int RC_SELECT_PLAYERS = 10000;
     static final int RC_WAITING_ROOM = 10002;
+    final static int RC_INVITATION_INBOX = 10001;
     private Activity activity;
     private String mRoomID;
     private MacroHardv2 game;
@@ -41,6 +45,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     private String mRoomId = null;
     public String mMyId = null;
     public String host;
+    String mIncomingInvitationId = null;
 
     public GSGameHelper(Activity activity, int clientsToUse) {
         super(activity, clientsToUse);
@@ -126,7 +131,11 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             // prevent screen from sleeping during handshake
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        }else{
+        }
+        else if(request == GSGameHelper.RC_INVITATION_INBOX){
+            handleInvitationInboxResult(response, data);
+        }
+        else{
             super.onActivityResult(request, response, data);
         }
     }
@@ -138,8 +147,10 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         }else{
             Gdx.app.log("R", "Joined Room");
         }
-
-
+        Gdx.app.log("R", "Room Created");
+        mRoomID = arg1.getRoomId();
+        Intent i = Games.RealTimeMultiplayer.getWaitingRoomIntent(getApiClient(), arg1, 2);
+        this.activity.startActivityForResult(i, RC_WAITING_ROOM);
     }
 
     @Override
@@ -151,8 +162,19 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     @Override
     public void onRoomConnected(int arg0, Room arg1) {
-        // TODO Auto-generated method stub
+        Log.d(TAG, "onRoomConnected(" + arg0 + ", " + arg1 + ")");
+        if (arg0 != GamesStatusCodes.STATUS_OK) {
+            Log.e(TAG, "*** Error: onRoomConnected, status " + arg0);
+            return;
+        }
+        updateRoom(arg1);
 
+    }
+
+    void updateRoom(Room room) {
+        if (room != null) {
+            invitees = room.getParticipants();
+        }
     }
 
     public void setGame(MacroHardv2 game){
@@ -232,7 +254,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         if(id == 1){
             a = bf.getFloat();
             b = bf.getFloat();
-            game.updateGameWorld(a,b);
+            game.updateGameWorld(a, b);
         }
         else if(id == 2){
             a = bf.getFloat();
@@ -289,6 +311,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     @Override
     public void onPeerDeclined(Room arg0, List<String> arg1) {
+        updateRoom(arg0);
         // TODO Auto-generated method stub
 
     }
@@ -296,29 +319,34 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     @Override
     public void onPeerInvitedToRoom(Room arg0, List<String> arg1) {
         // TODO Auto-generated method stub
+        updateRoom(arg0);
 
     }
 
     @Override
     public void onPeerJoined(Room arg0, List<String> arg1) {
+        updateRoom(arg0);
         // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onPeerLeft(Room arg0, List<String> arg1) {
+        updateRoom(arg0);
         // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onPeersConnected(Room arg0, List<String> arg1) {
+        updateRoom(arg0);
         // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onPeersDisconnected(Room arg0, List<String> arg1) {
+        updateRoom(arg0);
         // TODO Auto-generated method stub
 
     }
@@ -334,5 +362,106 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         // TODO Auto-generated method stub
 
     }
+    private void handleSelectPlayersResult(int response, Intent data) {
+        if (response != Activity.RESULT_OK) {
+            Log.w(TAG, "*** select players UI cancelled, " + response);
+            return;
+        }
+
+        Log.d(TAG, "Select players UI succeeded.");
+
+        // get the invitee list
+        final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
+        Log.d(TAG, "Invitee count: " + invitees.size());
+
+        // get the automatch criteria
+        Bundle autoMatchCriteria = null;
+        int minAutoMatchPlayers = data.getIntExtra(Multiplayer.EXTRA_MIN_AUTOMATCH_PLAYERS, 0);
+        int maxAutoMatchPlayers = data.getIntExtra(Multiplayer.EXTRA_MAX_AUTOMATCH_PLAYERS, 0);
+        if (minAutoMatchPlayers > 0 || maxAutoMatchPlayers > 0) {
+            autoMatchCriteria = RoomConfig.createAutoMatchCriteria(
+                    minAutoMatchPlayers, maxAutoMatchPlayers, 0);
+            Log.d(TAG, "Automatch criteria: " + autoMatchCriteria);
+        }
+
+        // create the room
+        Log.d(TAG, "Creating room...");
+        RoomConfig.Builder rtmConfigBuilder = RoomConfig.builder(this);
+        rtmConfigBuilder.addPlayersToInvite(invitees);
+        rtmConfigBuilder.setMessageReceivedListener(this);
+        rtmConfigBuilder.setRoomStatusUpdateListener(this);
+        if (autoMatchCriteria != null) {
+            rtmConfigBuilder.setAutoMatchCriteria(autoMatchCriteria);
+        }
+        Games.RealTimeMultiplayer.create(getApiClient(), rtmConfigBuilder.build());
+        Log.d(TAG, "Room created, waiting for it to be ready...");
+    }
+
+    // Handle the result of the invitation inbox UI, where the player can pick an invitation
+    // to accept. We react by accepting the selected invitation, if any.
+    private void handleInvitationInboxResult(int response, Intent data) {
+        if (response != Activity.RESULT_OK) {
+            Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
+            return;
+        }
+
+        Log.d(TAG, "Invitation inbox UI succeeded.");
+        Invitation inv = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
+
+        // accept invitation
+        acceptInviteToRoom(inv.getInvitationId());
+    }
+
+    // Accept the given invitation.
+    void acceptInviteToRoom(String invId) {
+        // accept the invitation
+        Log.d(TAG, "Accepting invitation: " + invId);
+        RoomConfig.Builder roomConfigBuilder = RoomConfig.builder(this);
+        roomConfigBuilder.setInvitationIdToAccept(invId)
+                .setMessageReceivedListener(this)
+                .setRoomStatusUpdateListener(this);
+        Games.RealTimeMultiplayer.join(getApiClient(), roomConfigBuilder.build());
+    }
+
+    // Called when we get an invitation to play a game. We react by showing that to the user.
+    @Override
+    public void onInvitationReceived(Invitation invitation) {
+        // We got an invitation to play a game! So, store it in
+        // mIncomingInvitationId
+        // and show the popup on the screen.
+        mIncomingInvitationId = invitation.getInvitationId();
+        /*((TextView) findViewById(R.id.incoming_invitation_text)).setText(
+                invitation.getInviter().getDisplayName() + " " +
+                        getString(R.string.is_inviting_you));
+        switchToScreen(mCurScreen); // This will show the invitation popup*/
+    }
+
+    @Override
+    public void onInvitationRemoved(String invitationId) {
+
+        if (mIncomingInvitationId.equals(invitationId)&&mIncomingInvitationId!=null) {
+            mIncomingInvitationId = null;
+            /*switchToScreen(mCurScreen); // This will hide the invitation popup*/
+        }
+
+    }
+
+    public void inviteplayers(){
+        Intent intent;
+        intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 3);
+        activity.startActivityForResult(intent, RC_SELECT_PLAYERS);
+    }
+    public void seeinvites(){
+        Intent intent;
+        intent = Games.Invitations.getInvitationInboxIntent(getApiClient());
+        activity.startActivityForResult(intent, RC_INVITATION_INBOX);
+    }
+    public void acceptinvites(){
+        System.out.println("I am invite " + mIncomingInvitationId);
+        acceptInviteToRoom(mIncomingInvitationId);
+        mIncomingInvitationId = null;
+    }
+
+
 
 }
