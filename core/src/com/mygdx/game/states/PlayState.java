@@ -205,7 +205,6 @@ public abstract class PlayState extends State{
                 }
             }
         }
-
     }
     @Override
     public void update(float dt) {
@@ -279,7 +278,8 @@ public abstract class PlayState extends State{
                     obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength));
                     break;
                 case POWER:
-                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    //powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    powers.add(new Power(PowerType.DESTROY_WALL,tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
@@ -354,36 +354,28 @@ public abstract class PlayState extends State{
         if (player.y > 750){
             player.y = 750;
         }
-        // GO_THROUGH_WALL implementation
-
-        if (player.canGoThrough() && System.currentTimeMillis()>=player.getEndPassivePowerTime()) {
-            player.setPassivePower(PowerType.NOTHING);
-        } else if (!player.canGoThrough()) {
 //    		collides with normal wall obstacle
-            Iterator<GameObject> obstacleIterator = obstacles.iterator();
-            while (obstacleIterator.hasNext()){
-                if (((Obstacle)obstacleIterator.next()).collides(player, this)){
-//                  DESTROY_WALL implementation
-                    if (player.canDestroy()) {
-                        obstacleIterator.remove();
-                        if (System.currentTimeMillis() < player.getEndActivePowerTime()) return false;
-                        else player.setActivePower(PowerType.NOTHING);
-                    }
-                    return true;
+        Iterator<GameObject> obstacleIterator = obstacles.iterator();
+        while (obstacleIterator.hasNext()) {
+            if (((Obstacle) obstacleIterator.next()).collides(player, this)) {
+//                DESTROY_WALL implementation
+                if (player.getCanDestroy()) {
+                    obstacleIterator.remove();
+                    return false;
                 }
+                return true;
             }
-    //		collides with doors
-            Iterator<GameObject> doorIterator = doors.iterator();
-            while (doorIterator.hasNext()){
-                if (((Door)doorIterator.next()).collides(player, this)){
-//                  DESTROY_WALL implementation
-                    if (player.canDestroy()) {
-                        doorIterator.remove();
-                        if (System.currentTimeMillis() < player.getEndActivePowerTime()) return false;
-                        else player.setActivePower(PowerType.NOTHING);
-                    }
-                    return true;
+        }
+            //		collides with doors
+        Iterator<GameObject> doorIterator = doors.iterator();
+        while (doorIterator.hasNext()) {
+            if (((Door) doorIterator.next()).collides(player, this)) {
+//                 DESTROY_WALL implementation
+                if (player.getCanDestroy()) {
+                    doorIterator.remove();
+                    return false;
                 }
+                return true;
             }
         }
         return false;
@@ -460,10 +452,8 @@ public abstract class PlayState extends State{
     }
 
     private void activateActivePower(){
-        if (!player.getActivePower().equals(PowerType.NOTHING)) {
-            player.setActivePowerState(true);
-            player.setEndActivePowerTime(System.currentTimeMillis()+5000);
-        }
+        player.setActivePowerState(true);
+        player.setEndActivePowerTime(System.currentTimeMillis() + 5000);
     }
 
     private void effectActivePower(){
@@ -471,14 +461,18 @@ public abstract class PlayState extends State{
             if (!player.getActivePowerEffectTaken()) {
                 if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
                     dangerZone -= 20;
+                } else if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
+                    player.setCanDestroy(true);
                 }
                 player.setActivePowerEffectTaken(true);
             }
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
                     dangerZone += 20;
+                } else if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
+                    player.setCanDestroy(false);
                 }
-                player.setActivePower(PowerType.NOTHING);
+//                player.setActivePower(PowerType.NOTHING);
                 player.setActivePowerState(false);
                 player.setActivePowerEffectTaken(false);
             }

@@ -12,14 +12,14 @@ public class Player extends Movable {
     private PowerType activePower;
     private long endPassivePowerTime;
     private long endActivePowerTime;
-    private boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken;
+    private boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken, canDestroy;
 
     public Player(){
-        super(480/2-50/2, 400, 40, 40);
+        super(480 / 2 - 50 / 2, 400, 40, 40);
         this.setImage(new Texture(Gdx.files.internal("player_temp.png")));
         this.activePower = this.passivePower = PowerType.NOTHING;
         endActivePowerTime = endPassivePowerTime = System.currentTimeMillis();
-        passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = false;
+        passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = canDestroy = false;
     }
 
     public long getEndPassivePowerTime() {
@@ -54,12 +54,8 @@ public class Player extends Movable {
         return passivePower;
     }
 
-    public boolean canGoThrough() {
-        return (passivePower.equals(PowerType.GO_THROUGH_WALL));
-    }
-
-    public boolean canDestroy() {
-        return (activePower.equals(PowerType.DESTROY_WALL));
+    public boolean getCanDestroy() {
+        return canDestroy;
     }
 
     public boolean isDead() {
@@ -80,6 +76,10 @@ public class Player extends Movable {
 
     public void setActivePowerState(boolean activePowerState) {
         this.activePowerState = activePowerState;
+    }
+
+    public void setCanDestroy(boolean canDestroy) {
+        this.canDestroy = canDestroy;
     }
 
     public boolean getActivePowerEffectTaken() {
