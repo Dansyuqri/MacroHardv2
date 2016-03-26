@@ -128,6 +128,7 @@ public abstract class PlayState extends State{
                 float sin = (float) Math.sin(angle);
 
                 omniMove(cos, sin);
+                collidesBoundaries();
             } else {
                 if (!icons.isEmpty()){
                     if (icons.get(0).contains(touchPos.x, touchPos.y)){
@@ -205,6 +206,7 @@ public abstract class PlayState extends State{
                 }
             }
         }
+
     }
     @Override
     public void update(float dt) {
@@ -278,8 +280,7 @@ public abstract class PlayState extends State{
                     obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength));
                     break;
                 case POWER:
-                    //powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
-                    powers.add(new Power(PowerType.DESTROY_WALL,tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
@@ -341,8 +342,9 @@ public abstract class PlayState extends State{
      Method handling collision. If there is an overlap over an object that should be impassable,
      the player will be moved back to his previous position (remembered by a temporary variable)
      */
-    private boolean collidesObstacle(){
-    // collision with screen boundaries
+
+    private void collidesBoundaries(){
+        // collision with screen boundaries
         if (player.x > 465 - player.width ){
             player.x = 465 - player.height;
         }
@@ -353,6 +355,9 @@ public abstract class PlayState extends State{
 
         if (player.y > 750){
             player.y = 750;
+        }
+        if (player.y < 150){
+            //TODO: implement restart method here
         }
 //    		collides with normal wall obstacle
         Iterator<GameObject> obstacleIterator = obstacles.iterator();
@@ -452,8 +457,10 @@ public abstract class PlayState extends State{
     }
 
     private void activateActivePower(){
-        player.setActivePowerState(true);
-        player.setEndActivePowerTime(System.currentTimeMillis() + 5000);
+        if (!player.getActivePower().equals(PowerType.NOTHING)) {
+            player.setActivePowerState(true);
+            player.setEndActivePowerTime(System.currentTimeMillis()+5000);
+        }
     }
 
     private void effectActivePower(){
@@ -461,18 +468,14 @@ public abstract class PlayState extends State{
             if (!player.getActivePowerEffectTaken()) {
                 if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
                     dangerZone -= 20;
-                } else if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
-                    player.setCanDestroy(true);
                 }
                 player.setActivePowerEffectTaken(true);
             }
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
                     dangerZone += 20;
-                } else if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
-                    player.setCanDestroy(false);
                 }
-//                player.setActivePower(PowerType.NOTHING);
+                player.setActivePower(PowerType.NOTHING);
                 player.setActivePowerState(false);
                 player.setActivePowerEffectTaken(false);
             }

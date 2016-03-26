@@ -73,12 +73,12 @@ public class MenuState extends State{
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.input.getY();
         //System.out.println(touchPos.y);
-        if(goToPlay == true){
+        if(goToPlay){
             gsm.set(new PlayStateHost(gsm));
             dispose();
         }
 
-        if(gotoPlayP == true){
+        if(gotoPlayP){
             gsm.set(new PlayStateNonHost(gsm));
             dispose();
             ready = true;
@@ -88,7 +88,7 @@ public class MenuState extends State{
          * **************************************************************************************
          */
 
-        if(Gdx.input.isTouched() && touched == false){
+        if(Gdx.input.isTouched() && !touched){
             if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
                 if(touchPos.y<=(graphicsY/2)+(playBtnY/2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     playBtn.dispose();
@@ -97,7 +97,7 @@ public class MenuState extends State{
                 }
             }
         }
-        else if(!Gdx.input.isTouched() && touched == true){
+        else if(!Gdx.input.isTouched() && touched){
             if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
                 if(touchPos.y<=(graphicsY/2) + (playBtnY / 2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
                     gsm.set(new PlayStateHost(gsm));
@@ -116,7 +116,7 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the instruction button when pressed
          * *********************************************************************************************
          */
-        if(Gdx.input.isTouched() && touched == false){
+        if(Gdx.input.isTouched() && !touched){
             if(touchPos.x<=(graphicsX/2)+(instructionBtnX/2) && touchPos.x>=(graphicsX/2)-(instructionBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+instructionBtnY + bufferFromTop) && touchPos.y>=(graphicsY/2+playBtnY/2+ bufferFromTop)){
                     instructionBtn.dispose();
@@ -126,7 +126,7 @@ public class MenuState extends State{
                 }
             }
         }
-        else if(!Gdx.input.isTouched() && touched == true){
+        else if(!Gdx.input.isTouched() && touched){
             if(touchPos.x<=(graphicsX/2)+(instructionBtnX/ 2) && touchPos.x >= (graphicsX/2)-(instructionBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+instructionBtnY + bufferFromTop) && touchPos.y>=(graphicsY/2+playBtnY/2+ bufferFromTop)){
                     gsm.set(new InstructionState(gsm));
@@ -145,7 +145,7 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the quick game button when pressed
          * *********************************************************************************************
          */
-        if(Gdx.input.isTouched() && touched == false){
+        if(Gdx.input.isTouched() && !touched){
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+instructionBtnY+ 2*bufferFromTop + quickGameBtnY) && touchPos.y>=(graphicsY/2+playBtnY/2+instructionBtnY+ bufferFromTop)){
                     quickGameBtn.dispose();
@@ -155,7 +155,7 @@ public class MenuState extends State{
                 }
             }
         }
-        else if(!Gdx.input.isTouched() && touched == true){
+        else if(!Gdx.input.isTouched() && touched){
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2+playBtnY/2+instructionBtnY+ 2*bufferFromTop + quickGameBtnY) && touchPos.y>=(graphicsY/2+playBtnY/2+instructionBtnY+ bufferFromTop)){
                     quickGameBtn.dispose();
@@ -175,7 +175,7 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the send invite button when pressed
          * *********************************************************************************************
          */
-        if(Gdx.input.isTouched() && touched == false){
+        if(Gdx.input.isTouched() && !touched){
             if(touchPos.x<=(graphicsX/2)+(sendInviteBtnX/2) && touchPos.x>=(graphicsX/2)-(sendInviteBtnX/2)){
                 if(touchPos.y<=(graphicsY/2-playBtnY/2-bufferFromTop) && touchPos.y>=(graphicsY/2-playBtnY/2-bufferFromTop-sendInviteBtnY)){
                     sendInviteBtn.dispose();
@@ -185,7 +185,7 @@ public class MenuState extends State{
                 }
             }
         }
-        else if(!Gdx.input.isTouched() && touched == true){
+        else if(!Gdx.input.isTouched() && touched){
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2-playBtnY/2-bufferFromTop) && touchPos.y>=(graphicsY/2-playBtnY/2-bufferFromTop-sendInviteBtnY)){
                     sendInviteBtn.dispose();
@@ -203,25 +203,39 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the invitation button when pressed
          * *********************************************************************************************
          */
-        if(Gdx.input.isTouched() && touched == false){
-            if(touchPos.x<=(graphicsX/2)+(sendInviteBtnX/2) && touchPos.x>=(graphicsX/2)-(sendInviteBtnX/2)){
-                if(touchPos.y<=(graphicsY/2-playBtnY/2-sendInviteBtnY - 2*bufferFromTop) && touchPos.y>=(graphicsY/2-playBtnY/2-2*bufferFromTop-sendInviteBtnY - invitationBtnY)){
-                    invitationBtn.dispose();
-                    invitationBtn = new Texture("invitationBtn_pressed.png");
-                    touched = true;
+        if (!touched)
+            if (Gdx.input.isTouched()) {
+                if (touchPos.x <= (graphicsX / 2) + (sendInviteBtnX / 2) && touchPos.x >= (graphicsX / 2) - (sendInviteBtnX / 2)) {
+                    if (touchPos.y <= (graphicsY / 2 - playBtnY / 2 - sendInviteBtnY - 2 * bufferFromTop) && touchPos.y >= (graphicsY / 2 - playBtnY / 2 - 2 * bufferFromTop - sendInviteBtnY - invitationBtnY)) {
+                        invitationBtn.dispose();
+                        invitationBtn = new Texture("invitationBtn_pressed.png");
+                        touched = true;
 
+                    }
+                }
+            } else {
+                if (!Gdx.input.isTouched() && touched) {
+                    if (touchPos.x <= (graphicsX / 2) + (quickGameBtnX / 2) && touchPos.x >= (graphicsX / 2) - (quickGameBtnX / 2)) {
+                        if (touchPos.y <= (graphicsY / 2 - playBtnY / 2 - sendInviteBtnY - 2 * bufferFromTop) && touchPos.y >= (graphicsY / 2 - playBtnY / 2 - 2 * bufferFromTop - sendInviteBtnY - invitationBtnY)) {
+                            invitationBtn.dispose();
+                            invitationBtn = new Texture("invitationBtn.png");
+                            touched = false;
+                        }
+                    } else {
+                        invitationBtn.dispose();
+                        invitationBtn = new Texture("invitationBtn.png");
+                        touched = false;
+                    }
                 }
             }
-        }
-        else if(!Gdx.input.isTouched() && touched == true){
-            if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
-                if(touchPos.y<=(graphicsY/2-playBtnY/2-sendInviteBtnY - 2*bufferFromTop) && touchPos.y>=(graphicsY/2-playBtnY/2-2*bufferFromTop-sendInviteBtnY - invitationBtnY)){
+        else if (!Gdx.input.isTouched() && touched) {
+            if (touchPos.x <= (graphicsX / 2) + (quickGameBtnX / 2) && touchPos.x >= (graphicsX / 2) - (quickGameBtnX / 2)) {
+                if (touchPos.y <= (graphicsY / 2 - playBtnY / 2 - sendInviteBtnY - 2 * bufferFromTop) && touchPos.y >= (graphicsY / 2 - playBtnY / 2 - 2 * bufferFromTop - sendInviteBtnY - invitationBtnY)) {
                     invitationBtn.dispose();
                     invitationBtn = new Texture("invitationBtn.png");
                     touched = false;
                 }
-            }
-            else{
+            } else {
                 invitationBtn.dispose();
                 invitationBtn = new Texture("invitationBtn.png");
                 touched = false;
@@ -232,7 +246,7 @@ public class MenuState extends State{
          * This is a set of conditions to handle the highlighting of the sign in button when pressed
          * *********************************************************************************************
          */
-        if(Gdx.input.isTouched() && touched == false){
+        if(Gdx.input.isTouched() && !touched){
             if(touchPos.x<=(graphicsX/2)+(sendInviteBtnX/2) && touchPos.x>=(graphicsX/2)-(sendInviteBtnX/2)){
                 if(touchPos.y<=(graphicsY/2-playBtnY/2-sendInviteBtnY - invitationBtnY - 3*bufferFromTop) && touchPos.y>=(graphicsY/2-playBtnY/2-3*bufferFromTop-sendInviteBtnY - invitationBtnY - signInBtnY)){
                     signInBtn.dispose();
@@ -242,7 +256,7 @@ public class MenuState extends State{
                 }
             }
         }
-        else if(!Gdx.input.isTouched() && touched == true){
+        else if(!Gdx.input.isTouched() && touched){
             if(touchPos.x<=(graphicsX/2)+(quickGameBtnX/2) && touchPos.x>=(graphicsX/2)-(quickGameBtnX/2)){
                 if(touchPos.y<=(graphicsY/2-playBtnY/2-sendInviteBtnY - invitationBtnY - 3*bufferFromTop) && touchPos.y>=(graphicsY/2-playBtnY/2-3*bufferFromTop-sendInviteBtnY - invitationBtnY - signInBtnY)){
                     signInBtn.dispose();
