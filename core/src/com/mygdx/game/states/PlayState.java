@@ -128,6 +128,7 @@ public abstract class PlayState extends State{
                 float sin = (float) Math.sin(angle);
 
                 omniMove(cos, sin);
+                collidesBoundaries();
             } else {
                 if (!icons.isEmpty()){
                     if (icons.get(0).contains(touchPos.x, touchPos.y)){
@@ -341,8 +342,9 @@ public abstract class PlayState extends State{
      Method handling collision. If there is an overlap over an object that should be impassable,
      the player will be moved back to his previous position (remembered by a temporary variable)
      */
-    private boolean collidesObstacle(){
-    // collision with screen boundaries
+
+    private void collidesBoundaries(){
+        // collision with screen boundaries
         if (player.x > 465 - player.width ){
             player.x = 465 - player.height;
         }
@@ -354,6 +356,12 @@ public abstract class PlayState extends State{
         if (player.y > 750){
             player.y = 750;
         }
+
+        if (player.y < 150){
+            //TODO: implement restart method here
+        }
+    }
+    private boolean collidesObstacle(){
         // GO_THROUGH_WALL implementation
 
         if (player.canGoThrough() && System.currentTimeMillis()>=player.getEndPassivePowerTime()) {
