@@ -84,6 +84,15 @@ public class PlayStateHost extends PlayState {
             }
         }
 
+        // creating random spikes
+        int spikeNo = MathUtils.random(0,3);
+        for (int j = 0; j < spikeNo; j++) {
+            int pos = MathUtils.random(0,8);
+            if (new_row[pos] == MapTile.OBSTACLES){
+                new_row[pos] = MapTile.SPIKES;
+            }
+        }
+
         // spawning power ups after a certain time. 20 is default. 5 is for testing
         if (powerCounter > 20){
             while (true){
@@ -107,46 +116,8 @@ public class PlayStateHost extends PlayState {
         }
 
         // updating the memory
-        // 0 = wall, 1 = empty but unreachable, 2 = empty and reachable
-
         memory.remove(memory.size()-1);
         memory.add(0, new_row);
-
-//        for (int i = memory.length-1; i > 0; i--){
-//            System.arraycopy(memory[i-1],0,memory[i],0,memory[i-1].length);
-//        }
-//        for (int i = 0; i < new_row.length; i++){
-//            if (new_row[i] == MapTile.OBSTACLES){
-//                memory[0][i] = 0;
-//            }
-//            else if (new_row[i] == MapTile.EMPTY){
-//                memory[0][i] = 1;
-//            }
-//            if (current[i]){
-//                memory[0][i] = 2;
-//            }
-//        }
-//        for (int i = 1; i < memory.length; i++){
-//            int temp = 0;
-//            for (int j = 0; j < memory[i].length; j++){
-//                if ((memory[i-1][j] == 2) && (memory[i][j] == 1)){
-//                    memory[i][j] = 2;
-//                    temp = j;
-//                }
-//            }
-//            for (int j = 0; j < memory[i].length; j++){
-//                if (temp-j >= 0){
-//                    if ((memory[i][temp-j] == 1) && (memory[i][temp-j+1] == 2)){
-//                        memory[i][temp-j] = 2;
-//                    }
-//                }
-//                if ((temp+j < 9) && (temp+j-1 > 0)){
-//                    if ((memory[i][temp+j] == 1) && (memory[i][temp+j-1] == 2)){
-//                        memory[i][temp+j] = 2;
-//                    }
-//                }
-//            }
-//        }
 
         int i = out_index;
         int j = 0;

@@ -16,6 +16,7 @@ import com.mygdx.game.objects.Door;
 import com.mygdx.game.objects.Obstacle;
 import com.mygdx.game.objects.Power;
 import com.mygdx.game.objects.SideWall;
+import com.mygdx.game.objects.Spikes;
 import com.mygdx.game.objects.Switch;
 import com.mygdx.game.objects.JoyStick;
 import com.mygdx.game.objects.Player;
@@ -58,9 +59,9 @@ public abstract class PlayState extends State{
     private ArrayList<GameObject> switches = new ArrayList<GameObject>();
     private ArrayList<GameObject> doors = new ArrayList<GameObject>();
     private ArrayList<GameObject> powers = new ArrayList<GameObject>();
+    private ArrayList<GameObject> spikes = new ArrayList<GameObject>();
     private ArrayList<GameObject> bg = new ArrayList<GameObject>();
     private ArrayList<GameObject> effects = new ArrayList<GameObject>();
-    private ArrayList<GameObject> dz = new ArrayList<GameObject>();
     private ArrayList<GameObject> ui = new ArrayList<GameObject>();
     private ArrayList<GameObject> icons = new ArrayList<GameObject>();
 
@@ -98,11 +99,11 @@ public abstract class PlayState extends State{
         gameObjects.add(powers);
         gameObjects.add(doors);
         gameObjects.add(obstacles);
+        gameObjects.add(spikes);
         gameObjects.add(sideWalls);
         gameObjects.add(switches);
         gameObjects.add(new ArrayList<GameObject>(Collections.singletonList(player)));
         gameObjects.add(effects);
-        gameObjects.add(dz);
         gameObjects.add(ui);
         gameObjects.add(icons);
 
@@ -162,7 +163,7 @@ public abstract class PlayState extends State{
         }
         if (trackerBG <= 800) {
             spawnBg();
-            trackerBG += 800;
+            trackerBG += 200;
         }
         // tell the camera to update its matrices.
         cam.update();
@@ -237,13 +238,15 @@ public abstract class PlayState extends State{
     }
 
     private void createBg(){
-        Background backg = new Background(0);
-        Overlay effect = new Overlay(0);
-        DangerZone danger = new DangerZone(0);
+        int counter = 0;
+        while (counter*200 < 800) {
+            Background backg = new Background(counter*200);
+            Overlay effect = new Overlay(counter*200);
+            bg.add(backg);
+            effects.add(effect);
+            counter++;
+        }
         UI inter = new UI(0);
-        bg.add(backg);
-        effects.add(effect);
-        dz.add(danger);
         ui.add(inter);
     }
 
@@ -281,6 +284,8 @@ public abstract class PlayState extends State{
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
                     break;
+                case SPIKES:
+                    spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
             }
         }
     }

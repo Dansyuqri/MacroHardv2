@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
  */
 public class Background extends Movable{
     public Background(float y){
-        super(0, y, 480, 800);
+        super(0, y, 480, 200);
         this.setImage(new Texture(Gdx.files.internal("bg.png")));
     }
 }
