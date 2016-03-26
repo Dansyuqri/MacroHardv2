@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.objects.Switch;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,18 +15,17 @@ import java.util.Collections;
 public class PlayStateHost extends PlayState {
     private int doorCounter;
     private int powerCounter;
-    private int[][] memory;
+    private ArrayList<MapTile[]> memory;
 
     public PlayStateHost(GameStateManager gsm){
         super(gsm);
         //spawning initialization
         doorCounter = 0;
         powerCounter = 0;
-        memory = new int[5][9];
+        memory = new ArrayList<MapTile[]>();
+        MapTile[] init = {MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY};
         for (int i = 0; i < 5; i++){
-            for (int j = 0; j < 9; j++){
-                memory[i][j] = 0;
-            }
+            memory.add(init);
         }
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
@@ -108,54 +108,78 @@ public class PlayStateHost extends PlayState {
 
         // updating the memory
         // 0 = wall, 1 = empty but unreachable, 2 = empty and reachable
-        for (int i = memory.length-1; i > 0; i--){
-            System.arraycopy(memory[i-1],0,memory[i],0,memory[i-1].length);
-        }
-        for (int i = 0; i < new_row.length; i++){
-            if (new_row[i] == MapTile.OBSTACLES){
-                memory[0][i] = 0;
-            }
-            else if (new_row[i] == MapTile.EMPTY){
-                memory[0][i] = 1;
-            }
-            if (current[i]){
-                memory[0][i] = 2;
-            }
-        }
-        for (int i = 1; i < memory.length; i++){
-            int temp = 0;
-            for (int j = 0; j < memory[i].length; j++){
-                if ((memory[i-1][j] == 2) && (memory[i][j] == 1)){
-                    memory[i][j] = 2;
-                    temp = j;
-                }
-            }
-            for (int j = 0; j < memory[i].length; j++){
-                if (temp-j >= 0){
-                    if ((memory[i][temp-j] == 1) && (memory[i][temp-j+1] == 2)){
-                        memory[i][temp-j] = 2;
-                    }
-                }
-                if ((temp+j < 9) && (temp+j-1 > 0)){
-                    if ((memory[i][temp+j] == 1) && (memory[i][temp+j-1] == 2)){
-                        memory[i][temp+j] = 2;
-                    }
-                }
-            }
-        }
 
-        int i = 0;
+        memory.remove(memory.size()-1);
+        memory.add(0, new_row);
+
+//        for (int i = memory.length-1; i > 0; i--){
+//            System.arraycopy(memory[i-1],0,memory[i],0,memory[i-1].length);
+//        }
+//        for (int i = 0; i < new_row.length; i++){
+//            if (new_row[i] == MapTile.OBSTACLES){
+//                memory[0][i] = 0;
+//            }
+//            else if (new_row[i] == MapTile.EMPTY){
+//                memory[0][i] = 1;
+//            }
+//            if (current[i]){
+//                memory[0][i] = 2;
+//            }
+//        }
+//        for (int i = 1; i < memory.length; i++){
+//            int temp = 0;
+//            for (int j = 0; j < memory[i].length; j++){
+//                if ((memory[i-1][j] == 2) && (memory[i][j] == 1)){
+//                    memory[i][j] = 2;
+//                    temp = j;
+//                }
+//            }
+//            for (int j = 0; j < memory[i].length; j++){
+//                if (temp-j >= 0){
+//                    if ((memory[i][temp-j] == 1) && (memory[i][temp-j+1] == 2)){
+//                        memory[i][temp-j] = 2;
+//                    }
+//                }
+//                if ((temp+j < 9) && (temp+j-1 > 0)){
+//                    if ((memory[i][temp+j] == 1) && (memory[i][temp+j-1] == 2)){
+//                        memory[i][temp+j] = 2;
+//                    }
+//                }
+//            }
+//        }
+
+        int i = out_index;
         int j = 0;
 
         // spawning door switch
         boolean switchCoord = false;
-        if (doorCounter == 44){
+        if (doorCounter == 44) {
             switchCoord = true;
-            while (true){
-                i = MathUtils.random(0,8);
-                j = MathUtils.random(0,4);
-                if (memory[j][i] == 2){
+            int counter = 0;
+            while (true) {
+                int dir = MathUtils.random(0, 3);
+                // move left
+                if (counter > 10) {
                     break;
+                }
+                if (dir == 0 && i > 0 && memory.get(j)[i - 1] == MapTile.EMPTY) {
+                    i--;
+                    counter++;
+                }
+                // move down
+                else if (dir == 1 && j < memory.size() - 1 && memory.get(j + 1)[i] == MapTile.EMPTY) {
+                    j++;
+                    counter++;
+                }
+                // move right
+                else if (dir == 2 && i < new_row.length - 1 && memory.get(j)[i + 1] == MapTile.EMPTY) {
+                    i++;
+                    counter++;
+                }
+                // move up
+                else if (dir == 3 && j > 0 && memory.get(j - 1)[i] == MapTile.EMPTY) {
+                    j--;
+                    counter++;
                 }
             }
         }

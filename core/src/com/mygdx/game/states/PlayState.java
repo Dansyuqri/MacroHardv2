@@ -193,9 +193,14 @@ public abstract class PlayState extends State{
 //      move the obstacles, remove any that are beneath the bottom edge of the screen.
 
         for (ArrayList<GameObject> gameObj: gameObjects){
-            for (GameObject gameObject : gameObj) {
+            Iterator<GameObject> gameObjectIterator = gameObj.iterator();
+            while (gameObjectIterator.hasNext()){
+                GameObject gameObject = gameObjectIterator.next();
                 if (gameObject instanceof Movable) {
                     ((Movable) gameObject).scroll(gameSpeed);
+                    if (gameObject.y + ((Movable) gameObject).height < 0){
+                        gameObjectIterator.remove();
+                    }
                 }
             }
         }
