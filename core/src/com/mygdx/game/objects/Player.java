@@ -58,8 +58,8 @@ public class Player extends Movable {
         return canDestroy;
     }
 
-    public boolean isDead() {
-        return y>=0;
+    public void setCanDestroy(boolean canDestroy) {
+        this.canDestroy = canDestroy;
     }
 
     public void setActivePowerEffectTaken(boolean activePowerEffectTaken) {
@@ -76,10 +76,6 @@ public class Player extends Movable {
 
     public void setActivePowerState(boolean activePowerState) {
         this.activePowerState = activePowerState;
-    }
-
-    public void setCanDestroy(boolean canDestroy) {
-        this.canDestroy = canDestroy;
     }
 
     public boolean getActivePowerEffectTaken() {

@@ -263,9 +263,9 @@ public abstract class PlayState extends State{
     }
 
     /***********************************************
-    *  SPAWN METHODS HERE
+     *  SPAWN METHODS HERE
      ***********************************************
-    */
+     */
     /**
      Method to spawn the walls using the coordinates from the wallCoord() method
      */
@@ -334,9 +334,9 @@ public abstract class PlayState extends State{
     }
 
     /***********************************************
-    * MISC METHODS HERE
-    ************************************************
-    */
+     * MISC METHODS HERE
+     ************************************************
+     */
 
     /**
      Method handling collision. If there is an overlap over an object that should be impassable,
@@ -356,33 +356,38 @@ public abstract class PlayState extends State{
         if (player.y > 750){
             player.y = 750;
         }
+
         if (player.y < 150){
             //TODO: implement restart method here
         }
+    }
+    private boolean collidesObstacle(){
+
 //    		collides with normal wall obstacle
         Iterator<GameObject> obstacleIterator = obstacles.iterator();
-        while (obstacleIterator.hasNext()) {
-            if (((Obstacle) obstacleIterator.next()).collides(player, this)) {
-//                DESTROY_WALL implementation
+        while (obstacleIterator.hasNext()){
+            if (((Obstacle)obstacleIterator.next()).collides(player, this)){
+//              DESTROY_WALL implementation
                 if (player.getCanDestroy()) {
                     obstacleIterator.remove();
-                    return false;
+                    break;
                 }
                 return true;
             }
         }
-            //		collides with doors
+        //		collides with doors
         Iterator<GameObject> doorIterator = doors.iterator();
-        while (doorIterator.hasNext()) {
-            if (((Door) doorIterator.next()).collides(player, this)) {
-//                 DESTROY_WALL implementation
+        while (doorIterator.hasNext()){
+            if (((Door)doorIterator.next()).collides(player, this)){
+//              DESTROY_WALL implementation
                 if (player.getCanDestroy()) {
                     doorIterator.remove();
-                    return false;
+                    break;
                 }
                 return true;
             }
         }
+
         return false;
     }
 
@@ -394,7 +399,7 @@ public abstract class PlayState extends State{
      */
 
     private void checkSwitchCollision(){
-    //		collides with switch
+        //		collides with switch
         for (GameObject eachSwitch:switches){
             if (((Switch) eachSwitch).collides(player, this)){
                 for (GameObject door: doors){
@@ -404,7 +409,7 @@ public abstract class PlayState extends State{
             }
         }
 
-    //		collides with power up
+        //		collides with power up
         Iterator<GameObject> powerIterator = powers.iterator();
         while (powerIterator.hasNext()){
             if (((Power)powerIterator.next()).collides(player, this)){
