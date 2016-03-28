@@ -362,38 +362,32 @@ public abstract class PlayState extends State{
         }
     }
     private boolean collidesObstacle(){
-        // GO_THROUGH_WALL implementation
 
-        if (player.canGoThrough() && System.currentTimeMillis()>=player.getEndPassivePowerTime()) {
-            player.setPassivePower(PowerType.NOTHING);
-        } else if (!player.canGoThrough()) {
 //    		collides with normal wall obstacle
-            Iterator<GameObject> obstacleIterator = obstacles.iterator();
-            while (obstacleIterator.hasNext()){
-                if (((Obstacle)obstacleIterator.next()).collides(player, this)){
-//                  DESTROY_WALL implementation
-                    if (player.canDestroy()) {
-                        obstacleIterator.remove();
-                        if (System.currentTimeMillis() < player.getEndActivePowerTime()) return false;
-                        else player.setActivePower(PowerType.NOTHING);
-                    }
-                    return true;
+        Iterator<GameObject> obstacleIterator = obstacles.iterator();
+        while (obstacleIterator.hasNext()){
+            if (((Obstacle)obstacleIterator.next()).collides(player, this)){
+//              DESTROY_WALL implementation
+                if (player.getCanDestroy()) {
+                    obstacleIterator.remove();
+                    break;
                 }
-            }
-            //		collides with doors
-            Iterator<GameObject> doorIterator = doors.iterator();
-            while (doorIterator.hasNext()){
-                if (((Door)doorIterator.next()).collides(player, this)){
-//                  DESTROY_WALL implementation
-                    if (player.canDestroy()) {
-                        doorIterator.remove();
-                        if (System.currentTimeMillis() < player.getEndActivePowerTime()) return false;
-                        else player.setActivePower(PowerType.NOTHING);
-                    }
-                    return true;
-                }
+                return true;
             }
         }
+        //		collides with doors
+        Iterator<GameObject> doorIterator = doors.iterator();
+        while (doorIterator.hasNext()){
+            if (((Door)doorIterator.next()).collides(player, this)){
+//              DESTROY_WALL implementation
+                if (player.getCanDestroy()) {
+                    doorIterator.remove();
+                    break;
+                }
+                return true;
+            }
+        }
+
         return false;
     }
 
