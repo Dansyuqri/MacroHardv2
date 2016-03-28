@@ -38,8 +38,7 @@ public class PlayStateHost extends PlayState {
         doorCounter += 1;
         boolean test = false;
         int out_index = 0;
-        MapTile[] new_row = {MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES, MapTile.OBSTACLES};
-
+        MapTile[] new_row = createArray(MapTile.OBSTACLES);
         // random generator
         while (!test) {
             int temp = MathUtils.random(1, 9);
@@ -146,32 +145,31 @@ public class PlayStateHost extends PlayState {
             }
         }
 
-        int temp0 = 0;
-        int temp1 = 0;
+        int i = 0;
+        int j = 0;
 
         // spawning door switch
         boolean switchCoord = false;
         if (doorCounter == 44){
             switchCoord = true;
             while (true){
-                temp0 = MathUtils.random(0,8);
-                temp1 = MathUtils.random(0,4);
-                if (memory[temp1][temp0] == 2){
+                i = MathUtils.random(0,8);
+                j = MathUtils.random(0,4);
+                if (memory[j][i] == 2){
                     break;
                 }
             }
         }
 
         synchronized (this) {
-            while (mapBuffer.size() > 5){
+            while (mapBuffer.size() > 10){
                 try {
                     wait();
                 } catch (InterruptedException ignored){}
             }
             mapBuffer.add(new_row);
             if (switchCoord) {
-                mapBuffer.get(5 - temp1)[temp0] = MapTile.SWITCH;
-            }
+                mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;            }
             notifyAll();
         }
     }
