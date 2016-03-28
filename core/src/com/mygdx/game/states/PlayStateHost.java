@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * Created by hj on 19/3/16.
@@ -128,29 +129,35 @@ public class PlayStateHost extends PlayState {
             switchCoord = true;
             int counter = 0;
             while (true) {
-                int dir = MathUtils.random(0, 3);
-                // move left
                 if (counter > 10) {
                     break;
                 }
-                if (dir == 0 && i > 0 && memory.get(j)[i - 1] == MapTile.EMPTY) {
-                    i--;
-                    counter++;
-                }
-                // move down
-                else if (dir == 1 && j < memory.size() - 1 && memory.get(j + 1)[i] == MapTile.EMPTY) {
-                    j++;
-                    counter++;
-                }
-                // move right
-                else if (dir == 2 && i < new_row.length - 1 && memory.get(j)[i + 1] == MapTile.EMPTY) {
-                    i++;
-                    counter++;
-                }
-                // move up
-                else if (dir == 3 && j > 0 && memory.get(j - 1)[i] == MapTile.EMPTY) {
-                    j--;
-                    counter++;
+                int dir = MathUtils.random(0, 3);
+                switch (dir){
+                    case 0:
+                        if (i > 0 && memory.get(j)[i - 1] == MapTile.EMPTY) {
+                            i--;
+                            counter++;
+                        }
+                        break;
+                    case 1:
+                        if (j < memory.size() - 1 && memory.get(j + 1)[i] == MapTile.EMPTY) {
+                            j++;
+                            counter++;
+                        }
+                        break;
+                    case 2:
+                        if (i < GAME_WIDTH - 1 && memory.get(j)[i + 1] == MapTile.EMPTY) {
+                            i++;
+                            counter++;
+                        }
+                        break;
+                    case 3:
+                        if (j > 0 && memory.get(j - 1)[i] == MapTile.EMPTY) {
+                            j--;
+                            counter++;
+                        }
+                        break;
                 }
             }
         }
