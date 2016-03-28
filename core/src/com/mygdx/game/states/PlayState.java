@@ -34,12 +34,12 @@ public abstract class PlayState extends State{
 
     //objects
     private JoyStick joystick;
-    public static Player player;
+    protected Player player;
     private Vector3 touchPos = new Vector3();
     protected final int GAME_WIDTH = 9;
 
     //values
-    public boolean running = true;
+    public boolean running;
     private boolean touchHeld;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
@@ -128,6 +128,7 @@ public abstract class PlayState extends State{
                 float sin = (float) Math.sin(angle);
 
                 omniMove(cos, sin);
+                collidesBoundaries();
             } else {
                 if (!icons.isEmpty()){
                     if (icons.get(0).contains(touchPos.x, touchPos.y)){
@@ -249,13 +250,7 @@ public abstract class PlayState extends State{
         UI inter = new UI(0);
         ui.add(inter);
     }
-    protected MapTile[] createArray(MapTile m){
-        MapTile[] array = new MapTile[GAME_WIDTH];
-        for (int i= 0; i < GAME_WIDTH; i++){
-            array[i] = m;
-        }
-        return array;
-    }
+
     private void createSides(){
         int counter = 0;
         while (counter* tileLength <= 800) {
@@ -292,7 +287,6 @@ public abstract class PlayState extends State{
                     break;
                 case SPIKES:
                     spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
-                    break;
             }
         }
     }
@@ -348,7 +342,8 @@ public abstract class PlayState extends State{
      Method handling collision. If there is an overlap over an object that should be impassable,
      the player will be moved back to his previous position (remembered by a temporary variable)
      */
-    private boolean collidesObstacle(){
+
+    private void collidesBoundaries(){
         // collision with screen boundaries
         if (player.x > 465 - player.width ){
             player.x = 465 - player.height;
@@ -361,6 +356,12 @@ public abstract class PlayState extends State{
         if (player.y > 750){
             player.y = 750;
         }
+
+        if (player.y < 150){
+            //TODO: implement restart method here
+        }
+    }
+    private boolean collidesObstacle(){
         // GO_THROUGH_WALL implementation
 
         if (player.canGoThrough() && System.currentTimeMillis()>=player.getEndPassivePowerTime()) {
@@ -490,6 +491,14 @@ public abstract class PlayState extends State{
                 player.setActivePowerEffectTaken(false);
             }
         }
+    }
+
+    protected MapTile[] createArray(MapTile m){
+        MapTile[] array = new MapTile[GAME_WIDTH];
+        for (int i = 0; i < GAME_WIDTH; i++) {
+            array[i] = m;
+        }
+        return array;
     }
 
     protected boolean[] createArray(boolean b){
