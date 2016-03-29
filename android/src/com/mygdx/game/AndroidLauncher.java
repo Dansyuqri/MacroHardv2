@@ -20,6 +20,8 @@ import com.google.example.games.basegameutils.GameHelper.GameHelperListener;
 
 import com.mygdx.game.ActionResolver;
 
+import java.util.ArrayList;
+
 public class AndroidLauncher extends AndroidApplication implements ActionResolver{
 	private GSGameHelper _gameHelper;
 
@@ -176,5 +178,8 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 	}
 	public String getyourid(){
 		return _gameHelper.mMyId;
+	}
+	public int getmyidint(){
+		return _gameHelper.myidno;
 	}
 }

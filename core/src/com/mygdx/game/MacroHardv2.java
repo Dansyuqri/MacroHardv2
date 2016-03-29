@@ -76,9 +76,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 			MenuState.gotoPlayP = true;
 		}
 		if(MenuState.ready == true){
-			PlayStateNonHost.player.x = x;
-			PlayStateNonHost.player.y = y;
-			System.out.println(x);
+
 		}
 
 	}

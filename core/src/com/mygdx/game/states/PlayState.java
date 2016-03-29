@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
@@ -45,6 +46,8 @@ public abstract class PlayState extends State{
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
     public float tracker;
     public float trackerBG;
+    protected int playerid0 = MacroHardv2.actionResolver.getmyidint();
+
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);

@@ -46,6 +46,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     public String mMyId = null;
     public String host;
     String mIncomingInvitationId = null;
+    public int myidno;
 
     public GSGameHelper(Activity activity, int clientsToUse) {
         super(activity, clientsToUse);
@@ -87,6 +88,11 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                 //BaseGameUtils.showAlert(activity, "Game Starting!");
                 Participant host = invitees.get(0);
                 this.host = host.getParticipantId();
+                for(int i = 0; i < invitees.size();i++){
+                    if (mMyId.equals(invitees.get(i).getParticipantId())){
+                        this.myidno = i;
+                    }
+                }
                 this.game.multiplayerGameReady();
             }
 

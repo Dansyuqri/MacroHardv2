@@ -19,4 +19,5 @@ public interface ActionResolver {
     public void Inviteplayers();
     public void Acceptinvites();
     public void Seeinvites();
+    public int getmyidint();
 }
