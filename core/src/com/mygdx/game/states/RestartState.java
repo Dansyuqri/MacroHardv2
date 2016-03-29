@@ -71,6 +71,7 @@ public class RestartState extends State{
             if(playAgainBtn.contains(touchPos.x,touchPos.y)){
                 //TODO: add restart game here
                 dispose();
+                generateTextures();
                 touched = false;
             }
             else if(mainMenuBtn.contains(touchPos.x,touchPos.y)){
