@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 /**
  * Created by Syuqri on 3/7/2016.
@@ -35,8 +36,10 @@ import java.util.Map;
 public abstract class PlayState extends State{
 
     //objects
-    protected final Object mapLock1 = new Object();
-    protected final Object mapLock2 = new Object();
+    protected Semaphore mapPro = new Semaphore(10);
+    protected Semaphore mapCon = new Semaphore(-5);
+    protected Semaphore mapMod = new Semaphore(1);
+
     private JoyStick joystick;
     protected Player player;
     private Vector3 touchPos = new Vector3();
@@ -174,15 +177,22 @@ public abstract class PlayState extends State{
         checkSwitchCollision();
         // tell the camera to update its matrices.
         while (tracker < 1050) {
-            while (mapBuffer.size() <= 5);
-            synchronized (this) {
+            try {
+                mapCon.acquire();
+                mapMod.acquire();
                 path = mapBuffer.remove(0);
+                mapMod.release();
+                mapPro.release();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
             score += scoreIncrement;
             spawnObjects();
             spawnSides(tracker + tileLength);
             tracker += tileLength;
         }
+
         if (trackerBG <= 800) {
             spawnBg();
             trackerBG += 200;

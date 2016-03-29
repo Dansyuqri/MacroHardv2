@@ -113,7 +113,7 @@ public class PlayStateHost extends PlayState {
         return new_row;
     }
 
-    void wallCoord(){
+    void wallCoord() {
         powerCounter += 1;
         doorCounter += 1;
         spikeCounter += 1;
@@ -133,23 +133,23 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning power ups after a certain time. 20 is default. 20 is for testing
-        if (powerCounter > 20){
+        if (powerCounter > 20) {
             new_row = genPower(new_row);
         }
 
         // spawning door
-        if (doorCounter > 44){
+        if (doorCounter > 44) {
             new_row = genDoor(new_row);
             doorCounter = 0;
         }
 
         // updating the memory
-        memory.remove(memory.size()-1);
+        memory.remove(memory.size() - 1);
         memory.add(0, new_row);
 
         int i;
         for (i = 0; i < current.length; i++) {
-            if (current[i]){
+            if (current[i]) {
                 break;
             }
         }
@@ -165,7 +165,7 @@ public class PlayStateHost extends PlayState {
                     break;
                 }
                 int dir = MathUtils.random(0, 3);
-                switch (dir){
+                switch (dir) {
                     case 0:
                         if (i > 0 && memory.get(j)[i - 1] == MapTile.EMPTY) {
                             i--;
@@ -195,13 +195,18 @@ public class PlayStateHost extends PlayState {
         }
 
 
-        while (mapBuffer.size() > 10);
-        synchronized (this) {
+        try {
+            mapPro.acquire();
+            mapMod.acquire();
             mapBuffer.add(new_row);
             MacroHardv2.actionResolver.sendMap(tobyte(new_row));
             if (switchCoord) {
                 mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;
             }
+            mapMod.release();
+            mapCon.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

@@ -30,9 +30,14 @@ public class PlayStateNonHost extends PlayState {
                     new_row[i-1] = MapTile.fromByte(message[i]);
                 }
 
-                while (mapBuffer.size() > 10);
-                synchronized (this) {
+                try {
+                    mapPro.acquire();
+                    mapMod.acquire();
                     mapBuffer.add(new_row);
+                    mapMod.release();
+                    mapCon.release();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
             if (message[0] == 2){
