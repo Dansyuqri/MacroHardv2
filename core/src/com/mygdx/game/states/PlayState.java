@@ -280,7 +280,8 @@ public abstract class PlayState extends State{
                     obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength));
                     break;
                 case POWER:
-                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    //powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    powers.add(new Power(PowerType.DESTROY_WALL,tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
@@ -434,9 +435,6 @@ public abstract class PlayState extends State{
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     tempGameSpeed = gameSpeed;
                     gameSpeed = 0;
-                } else if (player.getPassivePower().equals(PowerType.DANGER_ZONE_HIGHER)) {
-                    dangerZone += 20;
-                    // change photo
                 } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
                     gameSpeed /= speedChange;
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
@@ -447,9 +445,6 @@ public abstract class PlayState extends State{
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     gameSpeed = tempGameSpeed;
-                } else if (player.getPassivePower().equals(PowerType.DANGER_ZONE_HIGHER)) {
-                    dangerZone -= 20;
-                    // change photo
                 } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
                     gameSpeed *= speedChange;
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
@@ -462,25 +457,22 @@ public abstract class PlayState extends State{
     }
 
     private void activateActivePower(){
-        if (!player.getActivePower().equals(PowerType.NOTHING)) {
-            player.setActivePowerState(true);
-            player.setEndActivePowerTime(System.currentTimeMillis()+5000);
-        }
+        player.setActivePowerState(true);
+        player.setEndActivePowerTime(System.currentTimeMillis()+5000);
     }
 
     private void effectActivePower(){
         if (player.getActivePowerState()) {
             if (!player.getActivePowerEffectTaken()) {
-                if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
-                    dangerZone -= 20;
-                }
                 player.setActivePowerEffectTaken(true);
-            }
-            if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
-                if (player.getActivePower().equals(PowerType.DANGER_ZONE_LOWER)) {
-                    dangerZone += 20;
+                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
+                    player.setCanDestroy(true);
                 }
-                player.setActivePower(PowerType.NOTHING);
+            }
+            if (System.currentTimeMillis() >= player.getEndActivePowerTime()) {
+                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
+                    player.setCanDestroy(false);
+                }
                 player.setActivePowerState(false);
                 player.setActivePowerEffectTaken(false);
             }
