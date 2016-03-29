@@ -528,4 +528,8 @@ public abstract class PlayState extends State{
     }
 
     public abstract void update(byte[] message);
+
+    public void goToRestartState(){
+        gsm.set(new RestartState(gsm));
+    }
 }
