@@ -76,12 +76,12 @@ public class MenuState extends State{
         touchPos.y = Gdx.graphics.getHeight() - Gdx.input.getY();
         //System.out.println(touchPos.y);
         if(goToPlay){
-            gsm.set(new PlayStateHost(gsm, 0));
+            gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()));
             dispose();
         }
 
         if(gotoPlayP){
-            gsm.set(new PlayStateNonHost(gsm, 0));
+            gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()));
             dispose();
         }
 

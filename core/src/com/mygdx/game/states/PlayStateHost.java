@@ -27,6 +27,8 @@ public class PlayStateHost extends PlayState {
         }
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
+        PlayerCoor coorsend = new PlayerCoor();
+        coorsend.start();
     }
 
     public MapTile[] generator(MapTile[] new_row){
@@ -145,7 +147,7 @@ public class PlayStateHost extends PlayState {
         memory.remove(memory.size()-1);
         memory.add(0, new_row);
 
-        int i = out_index;
+        int i;
         for (i = 0; i < current.length; i++) {
             if (current[i]){
                 break;
@@ -192,18 +194,14 @@ public class PlayStateHost extends PlayState {
             }
         }
 
+
+        while (mapBuffer.size() > 10);
         synchronized (this) {
-            while (mapBuffer.size() > 10){
-                try {
-                    wait();
-                } catch (InterruptedException ignored){}
-            }
             mapBuffer.add(new_row);
             MacroHardv2.actionResolver.sendMap(tobyte(new_row));
             if (switchCoord) {
                 mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;
             }
-            notifyAll();
         }
     }
 
@@ -218,5 +216,34 @@ public class PlayStateHost extends PlayState {
             temp[i]=row[i-1].toByte();
         }
         return temp;
+    }
+
+    private static byte[] wrapCoords(int id, float x, float y){
+        byte[] result = new byte[6];
+        result[0] = 0;
+        result[1] = (byte) id;
+        result[2] = (byte) (x/10);
+        result[3] = (byte)((x*10)%100);
+        result[4] = (byte)(y/10);
+        result[5] = (byte)((y*10)%100);
+        return result;
+    }
+
+    public class PlayerCoor extends Thread {
+        @Override
+        public void run() {
+            while (true) {
+                if (isInterrupted()){
+                    break;
+                }
+                    long start = System.currentTimeMillis();
+                    while(System.currentTimeMillis()-start < 0.01){
+
+                }
+                byte[] message = wrapCoords(MacroHardv2.actionResolver.getmyidint(),player.x,player.y);
+                MacroHardv2.actionResolver.sendPos(message);
+
+            }
+        }
     }
 }

@@ -35,6 +35,8 @@ import java.util.Map;
 public abstract class PlayState extends State{
 
     //objects
+    protected final Object mapLock1 = new Object();
+    protected final Object mapLock2 = new Object();
     private JoyStick joystick;
     protected Player player;
     private Vector3 touchPos = new Vector3();
@@ -48,7 +50,6 @@ public abstract class PlayState extends State{
     protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
     public float tracker;
     public float trackerBG;
-    protected int playerid0 = MacroHardv2.actionResolver.getmyidint();
 
 
     //boolean arrays
@@ -173,16 +174,11 @@ public abstract class PlayState extends State{
         checkSwitchCollision();
         // tell the camera to update its matrices.
         while (tracker < 1050) {
+            while (mapBuffer.size() <= 5);
             synchronized (this) {
-                while (mapBuffer.size() <= 5){
-                    try {
-                        wait();
-                    } catch (InterruptedException ignored){}
-                }
                 path = mapBuffer.remove(0);
-                notifyAll();
-                score += scoreIncrement;
             }
+            score += scoreIncrement;
             spawnObjects();
             spawnSides(tracker + tileLength);
             tracker += tileLength;

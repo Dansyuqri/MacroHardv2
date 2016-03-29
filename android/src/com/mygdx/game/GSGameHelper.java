@@ -203,10 +203,8 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     }
 
-    public void sendPos(float x,float y){
+    public void sendPos(byte[] mensaje){
         try{
-            byte[] mensaje;
-            mensaje = ByteBuffer.allocate(12).putFloat(1).putFloat(x).putFloat(y).array();
             Games.RealTimeMultiplayer.sendUnreliableMessageToOthers(getApiClient(), mensaje, mRoomID);
         }
         catch(Exception e){

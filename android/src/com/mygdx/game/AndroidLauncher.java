@@ -167,8 +167,8 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 		_gameHelper.setGame(game);
 	}
 
-	public void sendPos(float x,float y){
-		_gameHelper.sendPos(x, y);
+	public void sendPos(byte[] coor){
+		_gameHelper.sendPos(coor);
 	}
 	public void sendMap(byte[] map){
 		_gameHelper.sendMap(map);
