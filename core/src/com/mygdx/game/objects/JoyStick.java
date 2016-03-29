@@ -16,18 +16,22 @@ public class JoyStick {
 
     public JoyStick(){
         joystickImage = new Texture(Gdx.files.internal("joystick.png"));
-        joystickCentreImage = new Texture(Gdx.files.internal("joystick_centre.png"));
+        joystickCentreImage = new Texture(Gdx.files.internal("joystick_centre_stone.png"));
         joystick = new Rectangle();
 
-        joystick.x = 405;
-        joystick.y = 80;
+        joystick.x = 385;
+        joystick.y = 70;
 
         joystick.height = 135;
         joystick.width = 135;
 
         joystickCentre = new Rectangle();
-        joystickCentre.height = 21;
-        joystickCentre.width = 21;
+
+        joystickCentre.height = 115;
+        joystickCentre.width = 115;
+
+        joystickCentre.x = joystick.x - joystickCentre.width/2;
+        joystickCentre.y = joystick.y - joystickCentre.height/2;
     }
     public Texture getJoystickImage() {return joystickImage;}
 

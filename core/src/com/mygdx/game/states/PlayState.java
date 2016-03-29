@@ -127,15 +127,27 @@ public abstract class PlayState extends State{
             cam.unproject(touchPos);
             float relativex = touchPos.x - (joystick.getX());
             float relativey = touchPos.y - (joystick.getY());
-            if (touchHeld || (Math.abs(relativex) < joystick.getJoystickWidth() / 2
-                    && (Math.abs(relativey) < joystick.getJoystickHeight() / 2))) {
+            if (touchHeld ||
+                    (Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
+                            Math.abs(relativey) < joystick.getJoystickWidth()/2)) {
                 touchHeld = true;
                 //calculates the relevant numbers needed for omnidirectional movement
                 float angle = (float) Math.atan2(relativey, relativex);
                 float cos = (float) Math.cos(angle);
                 float sin = (float) Math.sin(angle);
-
-                omniMove(cos, sin);
+                //setting joystick centre coordinates
+                if ((Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
+                        Math.abs(relativey) < joystick.getJoystickWidth()/2)){
+                    joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
+                    joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
+                } else {
+                    joystick.setCX(joystick.getX() - joystick.getJoystickCenterWidth()/2 + joystick.getJoystickWidth()/2*cos);
+                    joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight()/2 + joystick.getJoystickWidth()/2*sin);
+                }
+                //joystick centre buffer region
+                if (Math.pow(relativex, 2) + Math.pow(relativey, 2) > 300) {
+                    omniMove(cos, sin);
+                }
                 collidesBoundaries();
             } else {
                 if (!icons.isEmpty()){
@@ -147,6 +159,8 @@ public abstract class PlayState extends State{
             }
         } else {
             touchHeld = false;
+            joystick.setCX(joystick.getX() - joystick.getJoystickCenterWidth()/2);
+            joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight()/2);
         }
     }
 
@@ -184,11 +198,7 @@ public abstract class PlayState extends State{
         // begin a new batch and draw the player and all objects
         sb.begin();
         draw(sb);
-
-//        if(touched){
-//            sb.draw(joystick.getJoystickImage(), joystick.getX(), joystick.getY());
-//            sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
-//        }
+        sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
 
         sb.end();
 
