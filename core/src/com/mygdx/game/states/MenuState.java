@@ -74,7 +74,6 @@ public class MenuState extends State{
     public void handleInput() {
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.graphics.getHeight() - Gdx.input.getY();
-        //System.out.println(touchPos.y);
         if(goToPlay){
             gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()));
             dispose();
@@ -96,7 +95,6 @@ public class MenuState extends State{
                 touched = true;
             }
             else if(instructionBtn.contains(touchPos.x,touchPos.y)){
-                System.out.println(true);
                 instructionBtnImage.dispose();
                 instructionBtnImage = new Texture("instructionBtn_pressed.png");
                 touched = true;

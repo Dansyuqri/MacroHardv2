@@ -47,5 +47,4 @@ public class PlayStateNonHost extends PlayState {
 
 
     }
-
-    }
+}

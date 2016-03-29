@@ -241,8 +241,8 @@ public class PlayStateHost extends PlayState {
                 if (isInterrupted()){
                     break;
                 }
-                    long start = System.currentTimeMillis();
-                    while(System.currentTimeMillis()-start < 0.01){
+                long start = System.currentTimeMillis();
+                while(System.currentTimeMillis()-start < 0.01){
 
                 }
                 byte[] message = wrapCoords(MacroHardv2.actionResolver.getmyidint(),player.x,player.y);

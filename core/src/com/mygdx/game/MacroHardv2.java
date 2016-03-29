@@ -49,9 +49,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 
 		if(!this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){
 			MenuState.gotoPlayP = true;
-			System.out.println("I AM TRUE");
-		}
-		else{
+		} else{
 			MenuState.goToPlay=true;
 		}
 

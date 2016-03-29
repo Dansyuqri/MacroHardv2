@@ -66,7 +66,7 @@ public abstract class PlayState extends State{
     protected ArrayList<GameObject> players = new ArrayList<GameObject>(
             Arrays.asList(
                     new Player[]{
-                            new Player(), new Player(), new Player()
+                            new Player(), new Player()
                     }));
     private ArrayList<GameObject> obstacles = new ArrayList<GameObject>();
     private ArrayList<GameObject> sideWalls = new ArrayList<GameObject>();
@@ -227,9 +227,6 @@ public abstract class PlayState extends State{
                 GameObject gameObject = gameObjectIterator.next();
                 if (gameObject instanceof Movable) {
                     ((Movable) gameObject).scroll(gameSpeed);
-                    if (gameObject.y + ((Movable) gameObject).height < 0){
-                        gameObjectIterator.remove();
-                    }
                 }
             }
         }
@@ -521,8 +518,10 @@ public abstract class PlayState extends State{
             while (gameObjectIterator.hasNext()){
                 GameObject gameObject = gameObjectIterator.next();
                 if (gameObject.y < -gameObject.height){
-                    gameObjectIterator.remove();
-                    continue;
+                    if (!(gameObject instanceof Player)) {
+                        gameObjectIterator.remove();
+                        continue;
+                    }
                 }
                 gameObject.draw(sb);
             }

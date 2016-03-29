@@ -208,6 +208,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             Games.RealTimeMultiplayer.sendUnreliableMessageToOthers(getApiClient(), mensaje, mRoomID);
         }
         catch(Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -224,6 +225,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             }
         }
         catch(Exception e){
+            e.printStackTrace();
         }
     }
 
