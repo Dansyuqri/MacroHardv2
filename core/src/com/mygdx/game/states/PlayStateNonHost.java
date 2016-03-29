@@ -11,8 +11,8 @@ import java.nio.ByteBuffer;
  */
 public class PlayStateNonHost extends PlayState {
 
-    public PlayStateNonHost(GameStateManager gsm) {
-        super(gsm);
+    public PlayStateNonHost(GameStateManager gsm, int playerID) {
+        super(gsm, playerID);
     }
 
     public void update(byte[] message) {

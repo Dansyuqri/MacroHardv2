@@ -24,6 +24,7 @@ import com.mygdx.game.objects.Player;
 import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -37,9 +38,10 @@ public abstract class PlayState extends State{
     private JoyStick joystick;
     protected Player player;
     private Vector3 touchPos = new Vector3();
-    protected final int GAME_WIDTH = 9;
 
     //values
+    protected final int GAME_WIDTH = 9;
+    protected final int playerID;
     public boolean running;
     private boolean touchHeld;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
@@ -57,6 +59,11 @@ public abstract class PlayState extends State{
     protected ArrayList<MapTile[]> mapBuffer = new ArrayList<MapTile[]>();
 
     private ArrayList<ArrayList<GameObject>> gameObjects = new ArrayList<ArrayList<GameObject>>();
+    protected ArrayList<GameObject> players = new ArrayList<GameObject>(
+            Arrays.asList(
+                    new Player[]{
+                            new Player(), new Player(), new Player()
+                    }));
     private ArrayList<GameObject> obstacles = new ArrayList<GameObject>();
     private ArrayList<GameObject> sideWalls = new ArrayList<GameObject>();
     private ArrayList<GameObject> switches = new ArrayList<GameObject>();
@@ -71,8 +78,10 @@ public abstract class PlayState extends State{
     //final values
     final int tileLength = 50;
 
-    protected PlayState(GameStateManager gsm) {
+    protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
+        this.playerID = playerID;
+        player = (Player) players.get(playerID);
         running = true;
         touchHeld = false;
 
@@ -81,7 +90,6 @@ public abstract class PlayState extends State{
         cam.setToOrtho(false, 480, 800);
 
         //object initialization
-        player = new Player();
         joystick = new JoyStick();
 
         //misc values initialization
@@ -105,7 +113,7 @@ public abstract class PlayState extends State{
         gameObjects.add(spikes);
         gameObjects.add(sideWalls);
         gameObjects.add(switches);
-        gameObjects.add(new ArrayList<GameObject>(Collections.singletonList(player)));
+        gameObjects.add(players);
         gameObjects.add(effects);
         gameObjects.add(ui);
         gameObjects.add(icons);
@@ -122,15 +130,27 @@ public abstract class PlayState extends State{
             cam.unproject(touchPos);
             float relativex = touchPos.x - (joystick.getX());
             float relativey = touchPos.y - (joystick.getY());
-            if (touchHeld || (Math.abs(relativex) < joystick.getJoystickWidth() / 2
-                    && (Math.abs(relativey) < joystick.getJoystickHeight() / 2))) {
+            if (touchHeld ||
+                    (Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
+                            Math.abs(relativey) < joystick.getJoystickWidth()/2)) {
                 touchHeld = true;
                 //calculates the relevant numbers needed for omnidirectional movement
                 float angle = (float) Math.atan2(relativey, relativex);
                 float cos = (float) Math.cos(angle);
                 float sin = (float) Math.sin(angle);
-
-                omniMove(cos, sin);
+                //setting joystick centre coordinates
+                if ((Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
+                        Math.abs(relativey) < joystick.getJoystickWidth()/2)){
+                    joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
+                    joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
+                } else {
+                    joystick.setCX(joystick.getX() - joystick.getJoystickCenterWidth()/2 + joystick.getJoystickWidth()/2*cos);
+                    joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight()/2 + joystick.getJoystickWidth()/2*sin);
+                }
+                //joystick centre buffer region
+                if (Math.pow(relativex, 2) + Math.pow(relativey, 2) > 300) {
+                    omniMove(cos, sin);
+                }
                 collidesBoundaries();
             } else {
                 if (!icons.isEmpty()){
@@ -142,6 +162,8 @@ public abstract class PlayState extends State{
             }
         } else {
             touchHeld = false;
+            joystick.setCX(joystick.getX() - joystick.getJoystickCenterWidth()/2);
+            joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight()/2);
         }
     }
 
@@ -179,11 +201,7 @@ public abstract class PlayState extends State{
         // begin a new batch and draw the player and all objects
         sb.begin();
         draw(sb);
-
-//        if(touched){
-//            sb.draw(joystick.getJoystickImage(), joystick.getX(), joystick.getY());
-//            sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
-//        }
+        sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
 
         sb.end();
 
@@ -280,8 +298,7 @@ public abstract class PlayState extends State{
                     obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength));
                     break;
                 case POWER:
-                    //powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
-                    powers.add(new Power(PowerType.DESTROY_WALL,tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
@@ -457,22 +474,19 @@ public abstract class PlayState extends State{
     }
 
     private void activateActivePower(){
-        player.setActivePowerState(true);
-        player.setEndActivePowerTime(System.currentTimeMillis()+5000);
+        if (!player.getActivePower().equals(PowerType.NOTHING)) {
+            player.setActivePowerState(true);
+            player.setEndActivePowerTime(System.currentTimeMillis()+5000);
+        }
     }
 
     private void effectActivePower(){
         if (player.getActivePowerState()) {
             if (!player.getActivePowerEffectTaken()) {
                 player.setActivePowerEffectTaken(true);
-                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
-                    player.setCanDestroy(true);
-                }
             }
             if (System.currentTimeMillis() >= player.getEndActivePowerTime()) {
-                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
-                    player.setCanDestroy(false);
-                }
+                player.setActivePower(PowerType.NOTHING);
                 player.setActivePowerState(false);
                 player.setActivePowerEffectTaken(false);
             }

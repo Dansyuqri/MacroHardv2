@@ -80,12 +80,12 @@ public class MenuState extends State{
         touchPos.y = Gdx.input.getY();
         //System.out.println(touchPos.y);
         if(goToPlay){
-            gsm.set(new PlayStateHost(gsm));
+            gsm.set(new PlayStateHost(gsm, 0));
             dispose();
         }
 
         if(gotoPlayP){
-            gsm.set(new PlayStateNonHost(gsm));
+            gsm.set(new PlayStateNonHost(gsm, 0));
             dispose();
             ready = true;
         }
@@ -106,7 +106,7 @@ public class MenuState extends State{
         else if(!Gdx.input.isTouched() && touched){
             if(touchPos.x<=(graphicsX/2)+(playBtnX/2) && touchPos.x>=(graphicsX/2)-(playBtnX/2)){
                 if(touchPos.y<=(graphicsY/2) + (playBtnY / 2) && touchPos.y>=(graphicsY/2)-(playBtnY/2)){
-                    gsm.set(new PlayStateHost(gsm));
+                    gsm.set(new PlayStateHost(gsm, 0));
                     dispose();
                     touched = false;
                 }

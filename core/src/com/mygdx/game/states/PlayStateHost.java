@@ -2,13 +2,8 @@ package com.mygdx.game.states;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.customEnum.MapTile;
-import com.mygdx.game.objects.Switch;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 
 /**
  * Created by hj on 19/3/16.
@@ -16,15 +11,16 @@ import java.util.HashSet;
 public class PlayStateHost extends PlayState {
     private int doorCounter, powerCounter, spikeCounter;
     private ArrayList<MapTile[]> memory;
+    private boolean[] current = createArray(true);
 
-    public PlayStateHost(GameStateManager gsm){
-        super(gsm);
+    public PlayStateHost(GameStateManager gsm, int playerID){
+        super(gsm, playerID);
         //spawning initialization
         doorCounter = 0;
         powerCounter = 0;
         spikeCounter = 0;
         memory = new ArrayList<MapTile[]>();
-        MapTile[] init = {MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY, MapTile.EMPTY};
+        MapTile[] init = createArray(MapTile.EMPTY);
         for (int i = 0; i < 5; i++){
             memory.add(init);
         }
@@ -118,7 +114,6 @@ public class PlayStateHost extends PlayState {
         powerCounter += 1;
         doorCounter += 1;
         spikeCounter += 1;
-        boolean test = false;
         int out_index = 0;
         MapTile[] new_row = createArray(MapTile.OBSTACLES);
 
@@ -150,6 +145,11 @@ public class PlayStateHost extends PlayState {
         memory.add(0, new_row);
 
         int i = out_index;
+        for (i = 0; i < current.length; i++) {
+            if (current[i]){
+                break;
+            }
+        }
         int j = 0;
 
         // spawning door switch
@@ -170,7 +170,7 @@ public class PlayStateHost extends PlayState {
                         }
                         break;
                     case 1:
-                        if (j < memory.size() - 1 && memory.get(j + 1)[i] == MapTile.EMPTY) {
+                        if (j < 4 && memory.get(j + 1)[i] == MapTile.EMPTY) {
                             j++;
                             counter++;
                         }
