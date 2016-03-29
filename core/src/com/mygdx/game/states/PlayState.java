@@ -23,6 +23,7 @@ import com.mygdx.game.objects.Player;
 import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -36,9 +37,10 @@ public abstract class PlayState extends State{
     private JoyStick joystick;
     protected Player player;
     private Vector3 touchPos = new Vector3();
-    protected final int GAME_WIDTH = 9;
 
     //values
+    protected final int GAME_WIDTH = 9;
+    protected final int playerID;
     public boolean running;
     private boolean touchHeld;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
@@ -54,6 +56,11 @@ public abstract class PlayState extends State{
     protected ArrayList<MapTile[]> mapBuffer = new ArrayList<MapTile[]>();
 
     private ArrayList<ArrayList<GameObject>> gameObjects = new ArrayList<ArrayList<GameObject>>();
+    protected ArrayList<GameObject> players = new ArrayList<GameObject>(
+            Arrays.asList(
+                    new Player[]{
+                            new Player(), new Player(), new Player()
+                    }));
     private ArrayList<GameObject> obstacles = new ArrayList<GameObject>();
     private ArrayList<GameObject> sideWalls = new ArrayList<GameObject>();
     private ArrayList<GameObject> switches = new ArrayList<GameObject>();
@@ -68,8 +75,10 @@ public abstract class PlayState extends State{
     //final values
     final int tileLength = 50;
 
-    protected PlayState(GameStateManager gsm) {
+    protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
+        this.playerID = playerID;
+        player = (Player) players.get(playerID);
         running = true;
         touchHeld = false;
 
@@ -78,7 +87,6 @@ public abstract class PlayState extends State{
         cam.setToOrtho(false, 480, 800);
 
         //object initialization
-        player = new Player();
         joystick = new JoyStick();
 
         //misc values initialization
@@ -102,7 +110,7 @@ public abstract class PlayState extends State{
         gameObjects.add(spikes);
         gameObjects.add(sideWalls);
         gameObjects.add(switches);
-        gameObjects.add(new ArrayList<GameObject>(Collections.singletonList(player)));
+        gameObjects.add(players);
         gameObjects.add(effects);
         gameObjects.add(ui);
         gameObjects.add(icons);
@@ -191,6 +199,7 @@ public abstract class PlayState extends State{
 
         tracker -= gameSpeed * Gdx.graphics.getDeltaTime();
         trackerBG -= gameSpeed * Gdx.graphics.getDeltaTime();
+
 //      move the obstacles, remove any that are beneath the bottom edge of the screen.
 
         for (ArrayList<GameObject> gameObj: gameObjects){
@@ -279,8 +288,7 @@ public abstract class PlayState extends State{
                     obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength));
                     break;
                 case POWER:
-                    //powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
-                    powers.add(new Power(PowerType.DESTROY_WALL,tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
@@ -456,22 +464,19 @@ public abstract class PlayState extends State{
     }
 
     private void activateActivePower(){
-        player.setActivePowerState(true);
-        player.setEndActivePowerTime(System.currentTimeMillis()+5000);
+        if (!player.getActivePower().equals(PowerType.NOTHING)) {
+            player.setActivePowerState(true);
+            player.setEndActivePowerTime(System.currentTimeMillis()+5000);
+        }
     }
 
     private void effectActivePower(){
         if (player.getActivePowerState()) {
             if (!player.getActivePowerEffectTaken()) {
                 player.setActivePowerEffectTaken(true);
-                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
-                    player.setCanDestroy(true);
-                }
             }
             if (System.currentTimeMillis() >= player.getEndActivePowerTime()) {
-                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
-                    player.setCanDestroy(false);
-                }
+                player.setActivePower(PowerType.NOTHING);
                 player.setActivePowerState(false);
                 player.setActivePowerEffectTaken(false);
             }
