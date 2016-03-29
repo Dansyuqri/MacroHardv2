@@ -148,6 +148,8 @@ public class MenuState extends State{
                 touched = false;
             }
             else if(invitationBtn.contains(touchPos.x,touchPos.y)){
+                //testing restartstate
+                //gsm.set(new RestartState(gsm));
                 invitationBtnImage.dispose();
                 invitationBtnImage = new Texture("invitationBtn.png");
                 touched = false;
@@ -174,12 +176,12 @@ public class MenuState extends State{
     public void render(SpriteBatch sb) {
         sb.begin();
         sb.draw(background, 0, 0, graphicsX, graphicsY);
-        sb.draw(playBtnImage,(graphicsX/2)-(playBtnX/2),graphicsY/2-playBtnY/2,playBtnX,playBtnY);
-        sb.draw(instructionBtnImage, (graphicsX/ 2) - (instructionBtnX/2), graphicsY/2 - playBtnY/2 - instructionBtnY - bufferFromTop, instructionBtnX, instructionBtnY);
-        sb.draw(quickGameBtnImage,(graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 - playBtnY/2 - instructionBtnY- quickGameBtnY- bufferFromTop*2),quickGameBtnX,quickGameBtnY);
-        sb.draw(sendInviteBtnImage,(graphicsX/2)-(sendInviteBtnX/2),(graphicsY/2 + playBtnY/2 + bufferFromTop),sendInviteBtnX,sendInviteBtnY);
-        sb.draw(invitationBtnImage,(graphicsX/2)-(invitationBtnX/2),(graphicsY/2 + playBtnY/2 + sendInviteBtnY+ 2*bufferFromTop),invitationBtnX,invitationBtnY);
-        sb.draw(signInBtnImage,(graphicsX/2)-(signInBtnX/2),(graphicsY/2 + playBtnY/2 + sendInviteBtnY + invitationBtnY + 3*bufferFromTop),signInBtnX,signInBtnY);
+        sb.draw(playBtnImage, (graphicsX / 2) - (playBtnX / 2), graphicsY / 2 - playBtnY / 2, playBtnX, playBtnY);
+        sb.draw(instructionBtnImage, (graphicsX / 2) - (instructionBtnX / 2), graphicsY / 2 - playBtnY / 2 - instructionBtnY - bufferFromTop, instructionBtnX, instructionBtnY);
+        sb.draw(quickGameBtnImage, (graphicsX / 2) - (quickGameBtnX / 2), (graphicsY / 2 - playBtnY / 2 - instructionBtnY - quickGameBtnY - bufferFromTop * 2), quickGameBtnX, quickGameBtnY);
+        sb.draw(sendInviteBtnImage, (graphicsX / 2) - (sendInviteBtnX / 2), (graphicsY / 2 + playBtnY / 2 + bufferFromTop), sendInviteBtnX, sendInviteBtnY);
+        sb.draw(invitationBtnImage, (graphicsX / 2) - (invitationBtnX / 2), (graphicsY / 2 + playBtnY / 2 + sendInviteBtnY + 2 * bufferFromTop), invitationBtnX, invitationBtnY);
+        sb.draw(signInBtnImage, (graphicsX / 2) - (signInBtnX / 2), (graphicsY / 2 + playBtnY / 2 + sendInviteBtnY + invitationBtnY + 3 * bufferFromTop), signInBtnX, signInBtnY);
         sb.end();
     }
 

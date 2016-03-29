@@ -526,4 +526,8 @@ public abstract class PlayState extends State{
     public void addIcon(Icon icon){
         icons.add(icon);
     }
+
+    public void goToRestartState(){
+        gsm.set(new RestartState(gsm));
+    }
 }
