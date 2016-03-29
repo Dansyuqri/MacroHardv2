@@ -16,25 +16,22 @@ public class PlayStateNonHost extends PlayState {
     }
 
     public void update(byte[] message) {
-        //// TODO: 29/3/2016
-        float id, a, b, c, d, e, f, g, h, i;
-        ByteBuffer bf = ByteBuffer.wrap(message);
-        id = bf.getFloat();
-        if (id == 1) {
-            a = bf.getFloat();
-            b = bf.getFloat();
-        } else if (id == 2) {
-            a = bf.getFloat();
-            b = bf.getFloat();
-            c = bf.getFloat();
-            d = bf.getFloat();
-            e = bf.getFloat();
-            f = bf.getFloat();
-            g = bf.getFloat();
-            h = bf.getFloat();
-            i = bf.getFloat();
+        System.out.println("Received123");
+        MapTile[] new_row = createArray(MapTile.OBSTACLES);
+        //update player coordinates
+        if(message[0] == 0){
 
+        }
+        //Incoming Message to update map
+        if (message[0] == 1){
+            for (int i = 1; i < message.length; i++) {
+                new_row[i-1] = MapTile.fromByte(message[i]);
+            }
+            mapBuffer.add(new_row);
+        }
+        if (message[0] == 2){
 
         }
     }
-}
+
+    }

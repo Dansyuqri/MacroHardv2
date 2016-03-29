@@ -12,7 +12,8 @@ import com.mygdx.game.states.PlayState;
 public class Spikes extends Movable implements Collidable {
     public Spikes(float x, float y, float width, float height){
         super(x, y, width, height);
-        this.setImage(new Texture(Gdx.files.internal("spikes.png")));
+        //change to spikes
+        this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
     }
 
     @Override

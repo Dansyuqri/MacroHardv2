@@ -1,6 +1,7 @@
 package com.mygdx.game.states;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
 
 import java.util.ArrayList;
@@ -198,6 +199,7 @@ public class PlayStateHost extends PlayState {
                 } catch (InterruptedException ignored){}
             }
             mapBuffer.add(new_row);
+            MacroHardv2.actionResolver.sendMap(tobyte(new_row));
             if (switchCoord) {
                 mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;
             }
@@ -208,5 +210,13 @@ public class PlayStateHost extends PlayState {
     @Override
     public void update(byte[] message) {
         //// TODO: 29/3/2016  
+    }
+    private byte[] tobyte(MapTile[] row){
+        byte[] temp = new byte[row.length+1];
+        temp[0] = 1;
+        for (int i = 1; i < temp.length; i++) {
+            temp[i]=row[i-1].toByte();
+        }
+        return temp;
     }
 }

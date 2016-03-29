@@ -208,42 +208,20 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             byte[] mensaje;
             mensaje = ByteBuffer.allocate(12).putFloat(1).putFloat(x).putFloat(y).array();
             Games.RealTimeMultiplayer.sendUnreliableMessageToOthers(getApiClient(), mensaje, mRoomID);
-            /*for (Participant p : invitees) {
-                if (p.getParticipantId().equals(mMyId))
-                    continue;
-                if (p.getStatus() != Participant.STATUS_JOINED)
-                    continue;
-                // final score notification must be sent via reliable message
-                Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, mensaje,
-                        mRoomId, p.getParticipantId());
-            }*/
         }
         catch(Exception e){
         }
     }
 
-    public void sendMap(boolean[] Map){
+    public void sendMap(byte[] Map){
         try{
-            ByteBuffer mensaje;
-            mensaje = ByteBuffer.allocate(80);
-            mensaje.putFloat(2);
-            for(int i = 0;i<Map.length;i++){
-                if (Map[i]){
-                    mensaje.putFloat(1);
-                }
-                else{
-                    mensaje.putFloat(0);
-                }
-            }
-            byte[] message;
-            message = mensaje.array();
             for (Participant p : invitees) {
                 if (p.getParticipantId().equals(mMyId))
                     continue;
                 if (p.getStatus() != Participant.STATUS_JOINED)
                     continue;
                 // final score notification must be sent via reliable message
-                Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, message,
+                Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, Map,
                         mRoomId, p.getParticipantId());
             }
         }
@@ -253,28 +231,8 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
-//        float id, a,b,c,d,e,f,g,h,i;
         byte[] message = rtm.getMessageData();
-//        ByteBuffer bf = ByteBuffer.wrap(message);
-//        id = bf.getFloat();
-//        if(id == 1){
-//            a = bf.getFloat();
-//            b = bf.getFloat();
-//            game.updateGameWorld(a, b);
-//        }
-//        else if(id == 2){
-//            a = bf.getFloat();
-//            b = bf.getFloat();
-//            c = bf.getFloat();
-//            d = bf.getFloat();
-//            e = bf.getFloat();
-//            f = bf.getFloat();
-//            g = bf.getFloat();
-//            h = bf.getFloat();
-//            i = bf.getFloat();
-//            game.updateMapWorld(a, b, c, d, e, f, g, h, i);
-//        }
-    game.getGsm().update(message);
+        game.getGsm().update(message);
     }
 
     @Override

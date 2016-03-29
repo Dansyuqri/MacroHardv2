@@ -20,7 +20,6 @@ public class MenuState extends State{
     private boolean touched = false;
     public static volatile boolean goToPlay = false;
     public static volatile boolean gotoPlayP = false;
-    public static volatile boolean ready = false;
 
 
     //Resize variables
@@ -84,7 +83,6 @@ public class MenuState extends State{
         if(gotoPlayP){
             gsm.set(new PlayStateNonHost(gsm, 0));
             dispose();
-            ready = true;
         }
 
         /****************************************************************************************

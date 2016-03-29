@@ -170,7 +170,7 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 	public void sendPos(float x,float y){
 		_gameHelper.sendPos(x, y);
 	}
-	public void sendMap(boolean[] map){
+	public void sendMap(byte[] map){
 		_gameHelper.sendMap(map);
 	}
 	public String gethostid(){

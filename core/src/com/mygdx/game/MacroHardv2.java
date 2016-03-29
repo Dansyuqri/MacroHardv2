@@ -46,65 +46,16 @@ public class MacroHardv2 extends ApplicationAdapter{
 	}
 
 	public void multiplayerGameReady(){
-		if(this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){
+
+		if(!this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){
+			MenuState.gotoPlayP = true;
+			System.out.println("I AM TRUE");
+		}
+		else{
 			MenuState.goToPlay=true;
 		}
 
-
-
-
-
-
-		//Used to send players coorindates to everyone else
-		//this.actionResolver.sendPos((float) 1, (float) 1);
-		//used to send map coordinates to everyone else
-		//boolean[] a = {false, false, true, false, false, true, false, false, true};
-		//this.actionResolver.sendMap(a);
-		//to get hostid
-		//if(this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){
-		//	gsm.set(new PlayStateHost(gsm));
-		//	dispose();
-		//}
-
-
-
 	}
-
-	//Used to receive player's cooridinates
-	public static void updateGameWorld(float x, float y){
-		if(!actionResolver.gethostid().equals(actionResolver.getyourid()) && (MenuState.gotoPlayP != true)) {
-			MenuState.gotoPlayP = true;
-		}
-		if(MenuState.ready == true){
-
-		}
-
-	}
-
-	//Used to receive for Map Generation, Boolean array of size 9
-	public void updateMapWorld(float a, float b,float c, float d,float e, float f,float g, float h,float i){
-//		gsm.getState()
-		/*gamew = new GameWorld(this);
-		gamew.x = a;
-		gamew.y = b;
-		gamew.px = c;
-		gamew.py = d;
-		gamew.pa = e;
-		gamew.pb = f;
-		gamew.pc = g;
-		gamew.pd = h;
-		gamew.pe = i;
-		System.out.println(a);
-		System.out.println(b);
-		System.out.println(c);
-		System.out.println(d);
-		System.out.println(e);
-		System.out.println(f);
-		System.out.println(g);
-		System.out.println(h);
-		System.out.println(i);*/
-	}
-
 	public GameStateManager getGsm() {
 		return gsm;
 	}
