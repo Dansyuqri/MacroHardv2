@@ -270,11 +270,6 @@ public class MenuState extends State{
     }
 
     @Override
-    public void update(float dt) {
-        handleInput();
-    }
-
-    @Override
     public void render(SpriteBatch sb) {
         sb.begin();
         sb.draw(background, 0, 0, graphicsX, graphicsY);
@@ -296,4 +291,8 @@ public class MenuState extends State{
 
     }
 
+    @Override
+    public void update(byte[] message) {
+        handleInput();
+    }
 }

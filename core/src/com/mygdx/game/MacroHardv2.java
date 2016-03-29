@@ -36,7 +36,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 	public void render () {
 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		gsm.update(Gdx.graphics.getDeltaTime());
+		gsm.update(null);
 
 		gsm.render(batch);
 	}
@@ -85,6 +85,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 
 	//Used to receive for Map Generation, Boolean array of size 9
 	public void updateMapWorld(float a, float b,float c, float d,float e, float f,float g, float h,float i){
+//		gsm.getState()
 		/*gamew = new GameWorld(this);
 		gamew.x = a;
 		gamew.y = b;
@@ -106,4 +107,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 		System.out.println(i);*/
 	}
 
+	public GameStateManager getGsm() {
+		return gsm;
+	}
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.game.MacroHardv2;
 
 /**
  * Created by Syuqri on 3/7/2016.
@@ -24,7 +25,7 @@ public abstract class State{
     }
 
     protected abstract void handleInput();
-    public abstract void update(float dt);
+    public abstract void update(byte[] message);
     public abstract void render(SpriteBatch sb);
     public abstract void dispose();
 

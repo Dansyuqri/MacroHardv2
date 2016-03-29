@@ -247,27 +247,28 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
-        float id, a,b,c,d,e,f,g,h,i;
+//        float id, a,b,c,d,e,f,g,h,i;
         byte[] message = rtm.getMessageData();
-        ByteBuffer bf = ByteBuffer.wrap(message);
-        id = bf.getFloat();
-        if(id == 1){
-            a = bf.getFloat();
-            b = bf.getFloat();
-            game.updateGameWorld(a, b);
-        }
-        else if(id == 2){
-            a = bf.getFloat();
-            b = bf.getFloat();
-            c = bf.getFloat();
-            d = bf.getFloat();
-            e = bf.getFloat();
-            f = bf.getFloat();
-            g = bf.getFloat();
-            h = bf.getFloat();
-            i = bf.getFloat();
-            game.updateMapWorld(a, b, c, d, e, f, g, h, i);
-        }
+//        ByteBuffer bf = ByteBuffer.wrap(message);
+//        id = bf.getFloat();
+//        if(id == 1){
+//            a = bf.getFloat();
+//            b = bf.getFloat();
+//            game.updateGameWorld(a, b);
+//        }
+//        else if(id == 2){
+//            a = bf.getFloat();
+//            b = bf.getFloat();
+//            c = bf.getFloat();
+//            d = bf.getFloat();
+//            e = bf.getFloat();
+//            f = bf.getFloat();
+//            g = bf.getFloat();
+//            h = bf.getFloat();
+//            i = bf.getFloat();
+//            game.updateMapWorld(a, b, c, d, e, f, g, h, i);
+//        }
+    game.getGsm().update(message);
     }
 
     @Override

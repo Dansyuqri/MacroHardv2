@@ -32,7 +32,7 @@ public class RestartState extends State{
     }
 
     @Override
-    public void update(float dt) {
+    public void update(byte[] message) {
         handleInput();
     }
 

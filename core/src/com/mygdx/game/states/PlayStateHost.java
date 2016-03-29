@@ -204,4 +204,9 @@ public class PlayStateHost extends PlayState {
             notifyAll();
         }
     }
+
+    @Override
+    public void update(byte[] message) {
+        //// TODO: 29/3/2016  
+    }
 }

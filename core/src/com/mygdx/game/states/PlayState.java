@@ -208,9 +208,6 @@ public abstract class PlayState extends State{
         }
 
     }
-    @Override
-    public void update(float dt) {
-    }
 
     @Override
     public void dispose() {
@@ -520,4 +517,6 @@ public abstract class PlayState extends State{
     public void addIcon(Icon icon){
         icons.add(icon);
     }
+
+    public abstract void update(byte[] message);
 }

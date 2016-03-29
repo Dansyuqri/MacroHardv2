@@ -61,7 +61,7 @@ public class InstructionState extends State{
     }
 
     @Override
-    public void update(float dt) {handleInput();}
+    public void update(byte[] message) {handleInput();}
 
     @Override
     public void render(SpriteBatch sb) {
