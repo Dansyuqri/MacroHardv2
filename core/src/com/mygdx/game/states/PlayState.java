@@ -34,7 +34,7 @@ public abstract class PlayState extends State{
 
     //objects
     private JoyStick joystick;
-    public static Player player;
+    protected Player player;
     private Vector3 touchPos = new Vector3();
     protected final int GAME_WIDTH = 9;
 
