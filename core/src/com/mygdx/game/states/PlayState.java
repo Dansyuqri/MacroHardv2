@@ -49,7 +49,7 @@ public abstract class PlayState extends State{
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     public boolean running;
-    private boolean touchHeld;
+    private boolean touchHeld, gotSwitch = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter;
     public float tracker;
@@ -185,7 +185,6 @@ public abstract class PlayState extends State{
     @Override
     public void render(SpriteBatch sb) {
         handleInput();
-        checkSwitchCollision();
         // tell the camera to update its matrices.
         while (tracker < 1050) {
             try {
@@ -221,6 +220,7 @@ public abstract class PlayState extends State{
 
         sb.end();
 
+        checkSwitchCollision();
         collidesBoundaries();
         collidesFatal();
 
@@ -477,6 +477,14 @@ public abstract class PlayState extends State{
 
     private void checkSwitchCollision(){
         //		collides with switch
+        synchronized (this) {
+            if (gotSwitch) {
+                gotSwitch = false;
+                for (GameObject door : doors) {
+                    ((Door) door).setOpen();
+                }
+            }
+        }
         for (GameObject eachSwitch:switches){
             if (((Switch) eachSwitch).collides(player, this)){
                 for (GameObject door: doors){
@@ -594,7 +602,7 @@ public abstract class PlayState extends State{
         }
     }
 
-    public void addIcon(Icon icon){
+    public void addIcon(Icon icon) {
         icons.add(icon);
     }
 
@@ -666,8 +674,8 @@ public abstract class PlayState extends State{
 
                 //open doors
                 case 2:
-                    for (GameObject door: doors){
-                        ((Door)door).setOpen();
+                    synchronized (this) {
+                        gotSwitch = true;
                     }
                     break;
 
