@@ -14,8 +14,24 @@ public class Power extends Movable implements Collidable {
     private PowerType type;
     public Power(PowerType powerType, float x, float y, float width, float height){
         super(x, y, width, height);
-        this.setImage(new Texture(Gdx.files.internal("droplet.png")));
         this.type = powerType;
+        switch(powerType){
+            case FREEZE_MAZE:
+                this.setImage(new Texture(Gdx.files.internal("power_freeze.png")));
+                break;
+            case SPEED_PLAYER_UP:
+                this.setImage(new Texture(Gdx.files.internal("power_speed_up.png")));
+                break;
+            case SLOW_GAME_DOWN:
+                this.setImage(new Texture(Gdx.files.internal("power_slow_down.png")));
+                break;
+            case DESTROY_WALL:
+                this.setImage(new Texture(Gdx.files.internal("power_destroy_walls.png")));
+                break;
+            default:
+                this.setImage(new Texture(Gdx.files.internal("power_ghost.png")));
+                break;
+        }
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.mygdx.game.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MacroHardv2;
@@ -9,6 +10,7 @@ import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.GameObject;
+import com.mygdx.game.objects.Ghost;
 import com.mygdx.game.objects.Icon;
 import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Overlay;
@@ -51,9 +53,12 @@ public abstract class PlayState extends State{
     public boolean running;
     private boolean touchHeld;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
-    protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
+    protected int playerSpeed, dangerZone, powerCounter, doorCounter;
     public float tracker;
     public float trackerBG;
+    private int score;
+    private String yourScoreName;
+    BitmapFont yourBitmapFontName;
 
     private HashMap<Integer, MapTile[]> messageBuffer = new HashMap<Integer, MapTile[]>();
 
@@ -80,6 +85,7 @@ public abstract class PlayState extends State{
     private ArrayList<GameObject> effects = new ArrayList<GameObject>();
     private ArrayList<GameObject> ui = new ArrayList<GameObject>();
     private ArrayList<GameObject> icons = new ArrayList<GameObject>();
+    private ArrayList<GameObject> ghosts = new ArrayList<GameObject>();
 
     //final values
     final int tileLength = 50;
@@ -107,10 +113,11 @@ public abstract class PlayState extends State{
         powerCounter = 0;
         doorCounter = 0;
         dangerZoneSpeedLimit = 250;
-        score = 0;
-        scoreIncrement = 1;
         tracker = 800;
         trackerBG = 800;
+        score = 0;
+        yourScoreName = "score: 0";
+        yourBitmapFontName = new BitmapFont();
 
         gameObjects.add(bg);
         gameObjects.add(powers);
@@ -120,6 +127,7 @@ public abstract class PlayState extends State{
         gameObjects.add(sideWalls);
         gameObjects.add(switches);
         gameObjects.add(players);
+        gameObjects.add(ghosts);
         gameObjects.add(effects);
         gameObjects.add(ui);
         gameObjects.add(icons);
@@ -192,7 +200,6 @@ public abstract class PlayState extends State{
                 e.printStackTrace();
             }
 
-            score += scoreIncrement;
             spawnObjects();
             spawnSides(tracker + tileLength);
             tracker += tileLength;
@@ -213,8 +220,12 @@ public abstract class PlayState extends State{
         sb.begin();
         draw(sb);
         sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
+        yourBitmapFontName.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        yourBitmapFontName.draw(sb, yourScoreName, 25, 100);
 
         sb.end();
+
+        collidesFatal();
 
 //		constantly check if any power/DangerZone's effect still lingers
         effectPassivePower();
@@ -312,7 +323,14 @@ public abstract class PlayState extends State{
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
                     break;
                 case SPIKES:
-                    spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
+                    if (score > 100) {
+                        spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 20, tracker + 5, 40, 40));
+                    }
+            }
+        }
+        if (score > 200) {
+            if (score % 15 == 0) {
+                ghosts.add(new Ghost((tileLength * 9) + 15, tracker, tileLength, tileLength));
             }
         }
     }
@@ -328,6 +346,8 @@ public abstract class PlayState extends State{
      Spawn side walls to fill up the gap between the playing field and the actual maze
      */
     private void spawnSides(float in){
+        score++;
+        yourScoreName = "score: " + score;
         for (int i = 0; i < 2; i++) {
             SideWall sideWall = new SideWall(tileLength,in,i);
             sideWalls.add(sideWall);
@@ -389,7 +409,7 @@ public abstract class PlayState extends State{
         }
 
         if (player.y < 150){
-            //TODO: implement restart method here
+            goToRestartState();
         }
     }
     private boolean collidesObstacle(){
@@ -401,6 +421,8 @@ public abstract class PlayState extends State{
 //              DESTROY_WALL implementation
                 if (player.getCanDestroy()) {
                     obstacleIterator.remove();
+                    score++;
+                    yourScoreName = "score: " + score;
                     break;
                 }
                 return true;
@@ -420,6 +442,24 @@ public abstract class PlayState extends State{
         }
 
         return false;
+    }
+
+    private void collidesFatal(){
+        //      collide with spikes
+        Iterator<GameObject> spikeIterator = spikes.iterator();
+        while (spikeIterator.hasNext()){
+            if (((Spikes)spikeIterator.next()).collides(player, this)){
+                goToRestartState();
+            }
+        }
+
+        //      collide with ghosts
+        Iterator<GameObject> ghostIterator = ghosts.iterator();
+        while (ghostIterator.hasNext()){
+            if (((Ghost)ghostIterator.next()).collides(player, this)){
+                goToRestartState();
+            }
+        }
     }
 
     /**
@@ -465,8 +505,8 @@ public abstract class PlayState extends State{
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     tempGameSpeed = gameSpeed;
                     gameSpeed = 0;
-                } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
-                    gameSpeed /= speedChange;
+                } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
+                    gameSpeed *= speedChange;
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
                     playerSpeed /= speedChange;
                 }
@@ -475,8 +515,8 @@ public abstract class PlayState extends State{
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     gameSpeed = tempGameSpeed;
-                } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
-                    gameSpeed *= speedChange;
+                } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
+                    gameSpeed /= speedChange;
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
                     playerSpeed *= speedChange;
                 }
@@ -487,18 +527,23 @@ public abstract class PlayState extends State{
     }
 
     private void activateActivePower(){
-        if (!player.getActivePower().equals(PowerType.NOTHING)) {
-            player.setActivePowerState(true);
-            player.setEndActivePowerTime(System.currentTimeMillis()+5000);
-        }
+        player.setActivePowerState(true);
+        player.setEndActivePowerTime(System.currentTimeMillis()+5000);
+
     }
 
     private void effectActivePower(){
         if (player.getActivePowerState()) {
             if (!player.getActivePowerEffectTaken()) {
+                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
+                    player.setCanDestroy(true);
+                }
                 player.setActivePowerEffectTaken(true);
             }
             if (System.currentTimeMillis() >= player.getEndActivePowerTime()) {
+                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
+                    player.setCanDestroy(false);
+                }
                 player.setActivePower(PowerType.NOTHING);
                 player.setActivePowerState(false);
                 player.setActivePowerEffectTaken(false);
@@ -590,5 +635,6 @@ public abstract class PlayState extends State{
 
     public void goToRestartState(){
         gsm.set(new RestartState(gsm));
+        dispose();
     }
 }
