@@ -23,6 +23,7 @@ import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.Semaphore;
@@ -53,7 +54,7 @@ public abstract class PlayState extends State{
     public float tracker;
     public float trackerBG;
 
-    private HashSet<byte[]> messageBuffer = new HashSet<byte[]>();
+    private HashMap<Integer, MapTile[]> messageBuffer = new HashMap<Integer, MapTile[]>();
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -100,7 +101,7 @@ public abstract class PlayState extends State{
         gameSpeed = 80;
         speedIncrease = (float) 0.00;
         speedChange = (float) 0.6;
-        playerSpeed = 300;
+        playerSpeed = 200;
         dangerZone = 200;
         powerCounter = 0;
         doorCounter = 0;
@@ -342,15 +343,12 @@ public abstract class PlayState extends State{
         if (collidesObstacle()){
             player.x = prevx;
             player.y = prevy;
-            if (x > 0) x = (float)2/3;
-            if (x < 0) x = -(float)2/3;
-            if (y > 0) y = (float)2/3;
-            if (y < 0) y = -(float)2/3;
-            player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
+
+            player.x += playerSpeed * Gdx.graphics.getDeltaTime();
             if (collidesObstacle()){
                 player.x = prevx;
             }
-            player.y += y * playerSpeed * Gdx.graphics.getDeltaTime();
+            player.y += playerSpeed * Gdx.graphics.getDeltaTime();
             if (collidesObstacle()){
                 player.y = prevy;
             }
@@ -556,20 +554,13 @@ public abstract class PlayState extends State{
                         mapMod.acquire();
                         if (message[1] == mapCounter){
                             mapBuffer.add(new_row);
-                            mapCounter = (mapCounter + 1) % 50;
+                            mapCounter = (mapCounter + 1) % 20;
                         } else {
-                            messageBuffer.add(message);
-                            Iterator<byte[]> messageIterator = messageBuffer.iterator();
-                            while (messageIterator.hasNext()){
-                                byte[] previousMessage = messageIterator.next();
-                                if (previousMessage[1] == mapCounter){
-                                    for (int i = 2; i < previousMessage.length; i++) {
-                                        new_row[i - 2] = MapTile.fromByte(previousMessage[i]);
-                                    }
-                                    mapBuffer.add(new_row);
-                                    mapCounter = (mapCounter + 1) % 50;
-                                    messageIterator.remove();
-                                }
+                            messageBuffer.put((int) message[1], new_row);
+                            if (messageBuffer.containsKey(mapCounter)){
+                                mapBuffer.add(messageBuffer.get(mapCounter));
+                                messageBuffer.remove(mapCounter);
+                                mapCounter = (mapCounter + 1) % 20;
                             }
                         }
                         mapMod.release();

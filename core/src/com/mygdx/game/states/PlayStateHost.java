@@ -10,14 +10,14 @@ import java.util.ArrayList;
  * Created by hj on 19/3/16.
  */
 public class PlayStateHost extends PlayState {
-    private int doorCounter, powerCounter, spikeCounter, mapCounter;
+    private int doorCounter, powerCounter, spikeCounter, HostMapCounter;
     private ArrayList<MapTile[]> memory;
     private boolean[] current = createArray(true);
 
     public PlayStateHost(GameStateManager gsm, int playerID){
         super(gsm, playerID);
         //spawning initialization
-        mapCounter = 0;
+        HostMapCounter = 0;
         doorCounter = 0;
         powerCounter = 0;
         spikeCounter = 0;
@@ -198,8 +198,8 @@ public class PlayStateHost extends PlayState {
             mapMod.acquire();
             mapBuffer.add(new_row);
 
-            MacroHardv2.actionResolver.sendMap(tobyte(new_row, mapCounter));
-            mapCounter = (mapCounter + 1) % 50;
+            MacroHardv2.actionResolver.sendMap(tobyte(new_row, HostMapCounter));
+            HostMapCounter = (HostMapCounter + 1) % 20;
 
             if (switchCoord) {
                 mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;
