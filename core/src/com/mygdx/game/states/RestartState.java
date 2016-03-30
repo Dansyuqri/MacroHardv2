@@ -26,9 +26,8 @@ public class RestartState extends State{
     public RestartState(GameStateManager gsm){
         super(gsm);
         System.out.println("in rs state");
-        cam = new OrthographicCamera();
-        cam.setToOrtho(false, 480, 800);
-
+        cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        cam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         graphicsX = Gdx.graphics.getWidth();
         graphicsY = Gdx.graphics.getHeight();
 
@@ -95,6 +94,9 @@ public class RestartState extends State{
     @Override
     public void render(SpriteBatch sb) {
         sb.begin();
+        cam.update();
+        cam.unproject(touchPos);
+        sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
         sb.draw(playAgainBtnImage, (graphicsX / 2) - (playAgainBtnX / 2), graphicsY / 2 - playAgainBtnY / 2, playAgainBtnX, playAgainBtnY);
         sb.draw(mainMenuBtnImage, (graphicsX/ 2) - (mainMenuBtnX/2), graphicsY/2 - playAgainBtnY/2 - mainMenuBtnY - bufferFromTop, mainMenuBtnX, mainMenuBtnY);

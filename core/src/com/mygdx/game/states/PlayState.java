@@ -90,6 +90,7 @@ public abstract class PlayState extends State{
 
     protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
+        System.out.println("this is gsm 2:" + gsm);
         this.playerID = playerID;
         player = (Player) players.get(playerID);
         running = true;

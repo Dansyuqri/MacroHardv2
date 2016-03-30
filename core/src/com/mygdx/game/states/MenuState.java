@@ -33,8 +33,9 @@ public class MenuState extends State{
             ;
     public MenuState(GameStateManager gsm) {
         super(gsm);
-        cam = new OrthographicCamera();
-        cam.setToOrtho(false, 480, 800);
+        System.out.println("this is gsm 1:" + gsm);
+        cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        cam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         graphicsX = Gdx.graphics.getWidth();
         graphicsY = Gdx.graphics.getHeight();
         generateTextures();
@@ -120,12 +121,12 @@ public class MenuState extends State{
         else if(!Gdx.input.isTouched() && touched){
             if(playBtn.contains(touchPos.x,touchPos.y)){
                 gsm.set(new PlayStateHost(gsm, 0));
-                dispose();
+               //dispose();
                 touched = false;
             }
             else if(instructionBtn.contains(touchPos.x,touchPos.y)){
                 gsm.set(new InstructionState(gsm));
-                dispose();
+                //dispose();
                 touched = false;
             }
             else if(quickGameBtn.contains(touchPos.x,touchPos.y)){
@@ -166,6 +167,9 @@ public class MenuState extends State{
     @Override
     public void render(SpriteBatch sb) {
         sb.begin();
+        cam.update();
+        cam.unproject(touchPos);
+        sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
         sb.draw(playBtnImage,(graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
         sb.draw(quickGameBtnImage, (graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
