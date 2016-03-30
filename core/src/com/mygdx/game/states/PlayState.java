@@ -36,8 +36,6 @@ import java.util.concurrent.Semaphore;
 public abstract class PlayState extends State{
 
     //objects
-    protected Semaphore go = new Semaphore(0);
-    protected Semaphore ready = new Semaphore(0);
     protected Semaphore mapPro = new Semaphore(10);
     protected Semaphore mapCon = new Semaphore(-4);
     protected Semaphore mapMod = new Semaphore(1);
@@ -139,7 +137,6 @@ public abstract class PlayState extends State{
         PlayerCoordinateSender coordSender = new PlayerCoordinateSender(this);
         coordSender.start();
         running = true;
-        ready.release();
     }
 
     @Override
@@ -626,16 +623,6 @@ public abstract class PlayState extends State{
         if(message != null){
             switch(message[0]) {
                 //other player's coordinates
-                case -2:
-                    go.release();
-                case -1:
-                    try {
-                        ready.acquire();
-                        MacroHardv2.actionResolver.sendReliable(new byte[]{-2});
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    break;
 
                 case 0:
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
