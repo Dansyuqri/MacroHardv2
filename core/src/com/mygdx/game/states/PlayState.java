@@ -461,8 +461,8 @@ public abstract class PlayState extends State{
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     tempGameSpeed = gameSpeed;
                     gameSpeed = 0;
-                } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
-                    gameSpeed /= speedChange;
+                } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
+                    gameSpeed *= speedChange;
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
                     playerSpeed /= speedChange;
                 }
@@ -471,8 +471,8 @@ public abstract class PlayState extends State{
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     gameSpeed = tempGameSpeed;
-                } else if (player.getPassivePower().equals(PowerType.SPEED_GAME_UP)) {
-                    gameSpeed *= speedChange;
+                } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
+                    gameSpeed /= speedChange;
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
                     playerSpeed *= speedChange;
                 }
@@ -483,19 +483,22 @@ public abstract class PlayState extends State{
     }
 
     private void activateActivePower(){
-        if (!player.getActivePower().equals(PowerType.NOTHING)) {
-            player.setActivePowerState(true);
-            player.setEndActivePowerTime(System.currentTimeMillis()+5000);
-        }
+        player.setActivePowerState(true);
+        player.setEndActivePowerTime(System.currentTimeMillis()+5000);
     }
 
     private void effectActivePower(){
         if (player.getActivePowerState()) {
             if (!player.getActivePowerEffectTaken()) {
+                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
+                    player.setCanDestroy(true);
+                }
                 player.setActivePowerEffectTaken(true);
             }
             if (System.currentTimeMillis() >= player.getEndActivePowerTime()) {
-                player.setActivePower(PowerType.NOTHING);
+                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
+                    player.setCanDestroy(false);
+                }
                 player.setActivePowerState(false);
                 player.setActivePowerEffectTaken(false);
             }
