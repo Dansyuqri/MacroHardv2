@@ -37,7 +37,7 @@ public abstract class PlayState extends State{
 
     //objects
     protected Semaphore mapPro = new Semaphore(10);
-    protected Semaphore mapCon = new Semaphore(-5);
+    protected Semaphore mapCon = new Semaphore(-4);
     protected Semaphore mapMod = new Semaphore(1);
 
     private JoyStick joystick;
@@ -55,6 +55,7 @@ public abstract class PlayState extends State{
     public float tracker;
     public float trackerBG;
     private int score;
+    private float[][] previousCoordinates = new float[2][2];
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
 
@@ -233,6 +234,12 @@ public abstract class PlayState extends State{
         trackerBG -= gameSpeed * Gdx.graphics.getDeltaTime();
 
 //      move the obstacles, remove any that are beneath the bottom edge of the screen.
+
+        for (int i = 0; i < players.size(); i++) {
+            if (i != playerID){
+                doSmoothInterpolation(i);
+            }
+        }
 
         for (ArrayList<GameObject> gameObj: gameObjects){
             Iterator<GameObject> gameObjectIterator = gameObj.iterator();
@@ -600,14 +607,30 @@ public abstract class PlayState extends State{
         MacroHardv2.actionResolver.sendReliable(message);
     }
 
+    private void doSmoothInterpolation(int player){
+        try {
+            float relX = players.get(player).x - previousCoordinates[player][0];
+            float relY = players.get(player).y - previousCoordinates[player][1] + gameSpeed * Gdx.graphics.getDeltaTime();
+            float angle = (float) Math.atan2(relY, relX);
+            float cos = (float) Math.cos(angle);
+            float sin = (float) Math.sin(angle);
+            players.get(player).x += cos * gameSpeed * Gdx.graphics.getDeltaTime();
+            players.get(player).y += sin * gameSpeed * Gdx.graphics.getDeltaTime();
+        } catch (NullPointerException ignored){}
+    }
+
     public void update(byte[] message) {
         //update player coordinates
         if(message != null){
             switch(message[0]) {
                 //other player's coordinates
                 case 0:
-                    players.get((int) message[1]).x = ((float) message[2] * 10 + (float) message[3] / 10);
-                    players.get((int) message[1]).y = ((float) message[4] * 10 + (float) message[5] / 10);
+                    float x = (float) message[2] * 10 + (float) message[3] / 10;
+                    float y = (float) message[4] * 10 + (float) message[5] / 10;
+                    players.get((int) message[1]).x = x;
+                    players.get((int) message[1]).y = y;
+                    previousCoordinates[(int) message[1]][0] = x;
+                    previousCoordinates[(int) message[1]][1] = y;
                     break;
 
                 //map
