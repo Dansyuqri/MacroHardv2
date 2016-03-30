@@ -567,7 +567,7 @@ public abstract class PlayState extends State{
                                         new_row[i - 2] = MapTile.fromByte(previousMessage[i]);
                                     }
                                     mapBuffer.add(new_row);
-                                    mapCounter++;
+                                    mapCounter = (mapCounter + 1) % 50;
                                     messageIterator.remove();
                                 }
                             }
