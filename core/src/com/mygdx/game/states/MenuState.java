@@ -38,36 +38,32 @@ public class MenuState extends State{
         graphicsX = Gdx.graphics.getWidth();
         graphicsY = Gdx.graphics.getHeight();
         generateTextures();
+
         playBtnX = playBtnImage.getWidth()*3;
         playBtnY = playBtnImage.getHeight()*3;
-        playBtn = new CustomButton((graphicsX/2)-(playBtnX/2),graphicsY/2-playBtnY/2,playBtnX,playBtnY);
-        playBtn.setImage(playBtnImage);
-
-        instructionBtnX = instructionBtnImage.getWidth()*3;
-        instructionBtnY = instructionBtnImage.getHeight()*3;
-        instructionBtn = new CustomButton((graphicsX/ 2) - (instructionBtnX/2), graphicsY/2 - playBtnY/2 - instructionBtnY - bufferFromTop, instructionBtnX, instructionBtnY);
-        instructionBtn.setImage(instructionBtnImage);
-
         quickGameBtnX = quickGameBtnImage.getWidth()*3;
         quickGameBtnY = quickGameBtnImage.getHeight()*3;
-        quickGameBtn = new CustomButton((graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 - playBtnY/2 - instructionBtnY- quickGameBtnY- bufferFromTop*2),quickGameBtnX,quickGameBtnY);
-        quickGameBtn.setImage(quickGameBtnImage);
-
+        instructionBtnX = instructionBtnImage.getWidth()*3;
+        instructionBtnY = instructionBtnImage.getHeight()*3;
         sendInviteBtnX = sendInviteBtnImage.getWidth()*3;
         sendInviteBtnY = sendInviteBtnImage.getHeight()*3;
-        sendInviteBtn = new CustomButton((graphicsX/2)-(sendInviteBtnX/2),(graphicsY/2 + playBtnY/2 + bufferFromTop),sendInviteBtnX,sendInviteBtnY);
-        sendInviteBtn.setImage(sendInviteBtnImage);
-
         invitationBtnX = invitationBtnImage.getWidth()*3;
         invitationBtnY = invitationBtnImage.getHeight()*3;
-        invitationBtn = new CustomButton((graphicsX/2)-(invitationBtnX/2),(graphicsY/2 + playBtnY/2 + sendInviteBtnY+ 2*bufferFromTop),invitationBtnX,invitationBtnY);
-        invitationBtn.setImage(instructionBtnImage);
-
         signInBtnX = signInBtnImage.getWidth()*3;
         signInBtnY = signInBtnImage.getHeight()*3;
-        signInBtn = new CustomButton((graphicsX/2)-(signInBtnX/2),(graphicsY/2 + playBtnY/2 + sendInviteBtnY + invitationBtnY + 3*bufferFromTop),signInBtnX,signInBtnY);
-        signInBtn.setImage(signInBtnImage);
 
+        playBtn = new CustomButton((graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
+        playBtn.setImage(playBtnImage);
+        quickGameBtn = new CustomButton( (graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
+        quickGameBtn.setImage(quickGameBtnImage);
+        instructionBtn = new CustomButton((graphicsX / 2) - (instructionBtnX/2), graphicsY / 2 - instructionBtnY/2, instructionBtnX, instructionBtnY);
+        instructionBtn.setImage(instructionBtnImage);
+        sendInviteBtn = new CustomButton((graphicsX/2)-(sendInviteBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY- bufferFromTop),sendInviteBtnX,sendInviteBtnY);
+        sendInviteBtn.setImage(sendInviteBtnImage);
+        invitationBtn = new CustomButton((graphicsX/2)-(invitationBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY-invitationBtnY- 2*bufferFromTop),invitationBtnX,invitationBtnY);
+        invitationBtn.setImage(instructionBtnImage);
+        signInBtn = new CustomButton((graphicsX/2)-(signInBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY- 3*bufferFromTop),signInBtnX,signInBtnY);
+        signInBtn.setImage(signInBtnImage);
     }
 
     @Override
@@ -171,12 +167,15 @@ public class MenuState extends State{
     public void render(SpriteBatch sb) {
         sb.begin();
         sb.draw(background, 0, 0, graphicsX, graphicsY);
-        sb.draw(playBtnImage,(graphicsX/2)-(playBtnX/2),graphicsY/2-playBtnY/2,playBtnX,playBtnY);
-        sb.draw(instructionBtnImage, (graphicsX/ 2) - (instructionBtnX/2), graphicsY/2 - playBtnY/2 - instructionBtnY - bufferFromTop, instructionBtnX, instructionBtnY);
-        sb.draw(quickGameBtnImage,(graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 - playBtnY/2 - instructionBtnY- quickGameBtnY- bufferFromTop*2),quickGameBtnX,quickGameBtnY);
-        sb.draw(sendInviteBtnImage,(graphicsX/2)-(sendInviteBtnX/2),(graphicsY/2 + playBtnY/2 + bufferFromTop),sendInviteBtnX,sendInviteBtnY);
-        sb.draw(invitationBtnImage,(graphicsX/2)-(invitationBtnX/2),(graphicsY/2 + playBtnY/2 + sendInviteBtnY+ 2*bufferFromTop),invitationBtnX,invitationBtnY);
-        sb.draw(signInBtnImage,(graphicsX/2)-(signInBtnX/2),(graphicsY/2 + playBtnY/2 + sendInviteBtnY + invitationBtnY + 3*bufferFromTop),signInBtnX,signInBtnY);
+
+        sb.draw(playBtnImage,(graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
+        sb.draw(quickGameBtnImage, (graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
+
+        sb.draw(instructionBtnImage, (graphicsX / 2) - (instructionBtnX/2), graphicsY / 2 - instructionBtnY/2, instructionBtnX, instructionBtnY);
+
+        sb.draw(sendInviteBtnImage,(graphicsX/2)-(sendInviteBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY- bufferFromTop),sendInviteBtnX,sendInviteBtnY);
+        sb.draw(invitationBtnImage,(graphicsX/2)-(invitationBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY-invitationBtnY- 2*bufferFromTop),invitationBtnX,invitationBtnY);
+        sb.draw(signInBtnImage,(graphicsX/2)-(signInBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY- 3*bufferFromTop),signInBtnX,signInBtnY);
         sb.end();
     }
 
