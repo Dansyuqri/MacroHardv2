@@ -344,11 +344,19 @@ public abstract class PlayState extends State{
             player.x = prevx;
             player.y = prevy;
 
-            player.x += playerSpeed * Gdx.graphics.getDeltaTime();
+            if (x > 0) {
+                player.x += playerSpeed * Gdx.graphics.getDeltaTime();
+            } else {
+                player.x -= playerSpeed * Gdx.graphics.getDeltaTime();
+            }
             if (collidesObstacle()){
                 player.x = prevx;
             }
-            player.y += playerSpeed * Gdx.graphics.getDeltaTime();
+            if (y > 0) {
+                player.y += playerSpeed * Gdx.graphics.getDeltaTime();
+            } else {
+                player.y -= playerSpeed * Gdx.graphics.getDeltaTime();
+            }
             if (collidesObstacle()){
                 player.y = prevy;
             }
