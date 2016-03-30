@@ -10,6 +10,7 @@ import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.DangerZone;
 import com.mygdx.game.objects.GameObject;
+import com.mygdx.game.objects.Ghost;
 import com.mygdx.game.objects.Icon;
 import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Overlay;
@@ -75,6 +76,7 @@ public abstract class PlayState extends State{
     private ArrayList<GameObject> effects = new ArrayList<GameObject>();
     private ArrayList<GameObject> ui = new ArrayList<GameObject>();
     private ArrayList<GameObject> icons = new ArrayList<GameObject>();
+    private ArrayList<GameObject> ghosts = new ArrayList<GameObject>();
 
     //final values
     final int tileLength = 50;
@@ -116,6 +118,7 @@ public abstract class PlayState extends State{
         gameObjects.add(sideWalls);
         gameObjects.add(switches);
         gameObjects.add(players);
+        gameObjects.add(ghosts);
         gameObjects.add(effects);
         gameObjects.add(ui);
         gameObjects.add(icons);
@@ -207,6 +210,7 @@ public abstract class PlayState extends State{
         yourBitmapFontName.draw(sb, yourScoreName, 25, 100);
         sb.end();
 
+        collidesFatal();
 //		constantly check if any power/DangerZone's effect still lingers
         effectPassivePower();
         effectActivePower();
@@ -309,7 +313,14 @@ public abstract class PlayState extends State{
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
                     break;
                 case SPIKES:
-                    spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
+                    if (score > 100) {
+                        spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 20, tracker + 5, 40, 40));
+                    }
+            }
+        }
+        if (score > 200) {
+            if (score % 15 == 0) {
+                ghosts.add(new Ghost((tileLength * 9) + 15, tracker, tileLength, tileLength));
             }
         }
     }
@@ -383,7 +394,7 @@ public abstract class PlayState extends State{
         }
 
         if (player.y < 150){
-            //TODO: implement restart method here
+            goToRestartState();
         }
     }
     private boolean collidesObstacle(){
@@ -416,6 +427,23 @@ public abstract class PlayState extends State{
         }
 
         return false;
+    }
+    private void collidesFatal(){
+        //      collide with spikes
+        Iterator<GameObject> spikeIterator = spikes.iterator();
+        while (spikeIterator.hasNext()){
+            if (((Spikes)spikeIterator.next()).collides(player, this)){
+                goToRestartState();
+            }
+        }
+
+        //      collide with ghosts
+        Iterator<GameObject> ghostIterator = ghosts.iterator();
+        while (ghostIterator.hasNext()){
+            if (((Ghost)ghostIterator.next()).collides(player, this)){
+                goToRestartState();
+            }
+        }
     }
 
     /**
@@ -541,5 +569,6 @@ public abstract class PlayState extends State{
 
     public void goToRestartState(){
         gsm.set(new RestartState(gsm));
+        dispose();
     }
 }
