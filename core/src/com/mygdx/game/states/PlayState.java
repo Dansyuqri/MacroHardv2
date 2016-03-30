@@ -2,6 +2,7 @@ package com.mygdx.game.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.customEnum.MapTile;
@@ -44,9 +45,12 @@ public abstract class PlayState extends State{
     public boolean running;
     private boolean touchHeld;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
-    protected int playerSpeed, dangerZone, powerCounter, doorCounter, score, scoreIncrement;
+    protected int playerSpeed, dangerZone, powerCounter, doorCounter;
     public float tracker;
     public float trackerBG;
+    private int score;
+    private String yourScoreName;
+    BitmapFont yourBitmapFontName;
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -98,10 +102,11 @@ public abstract class PlayState extends State{
         powerCounter = 0;
         doorCounter = 0;
         dangerZoneSpeedLimit = 250;
-        score = 0;
-        scoreIncrement = 1;
         tracker = 800;
         trackerBG = 800;
+        score = 0;
+        yourScoreName = "score: 0";
+        yourBitmapFontName = new BitmapFont();
 
         gameObjects.add(bg);
         gameObjects.add(powers);
@@ -178,7 +183,6 @@ public abstract class PlayState extends State{
                 }
                 path = mapBuffer.remove(0);
                 notifyAll();
-                score += scoreIncrement;
             }
             spawnObjects();
             spawnSides(tracker + tileLength);
@@ -199,7 +203,8 @@ public abstract class PlayState extends State{
         sb.begin();
         draw(sb);
         sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
-
+        yourBitmapFontName.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        yourBitmapFontName.draw(sb, yourScoreName, 25, 100);
         sb.end();
 
 //		constantly check if any power/DangerZone's effect still lingers
@@ -320,6 +325,8 @@ public abstract class PlayState extends State{
      Spawn side walls to fill up the gap between the playing field and the actual maze
      */
     private void spawnSides(float in){
+        score++;
+        yourScoreName = "score: " + score;
         for (int i = 0; i < 2; i++) {
             SideWall sideWall = new SideWall(tileLength,in,i);
             sideWalls.add(sideWall);
@@ -388,6 +395,8 @@ public abstract class PlayState extends State{
 //              DESTROY_WALL implementation
                 if (player.getCanDestroy()) {
                     obstacleIterator.remove();
+                    score++;
+                    yourScoreName = "score: " + score;
                     break;
                 }
                 return true;
