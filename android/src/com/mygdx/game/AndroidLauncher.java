@@ -1,26 +1,15 @@
 package com.mygdx.game;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.WindowManager;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.example.games.basegameutils.GameHelper;
-import com.mygdx.game.MacroHardv2;
 
-import com.google.android.gms.games.Games;
-import com.google.example.games.basegameutils.GameHelper;
 import com.google.example.games.basegameutils.GameHelper.GameHelperListener;
-
-import com.mygdx.game.ActionResolver;
-
-import java.util.ArrayList;
 
 public class AndroidLauncher extends AndroidApplication implements ActionResolver{
 	private GSGameHelper _gameHelper;
@@ -166,16 +155,13 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 	public void setGame(MacroHardv2 game) {
 		_gameHelper.setGame(game);
 	}
-
 	public void sendPos(byte[] coor){
 		_gameHelper.sendPos(coor);
 	}
-	public void sendMap(byte[] map){
-		_gameHelper.sendMap(map);
+	public void sendReliable(byte[] message){
+		_gameHelper.sendReliable(message);
 	}
-	public void sendOpenDoorMessage(){
-		_gameHelper.sendOpenDoorMessage();
-	}
+
 	public String gethostid(){
 		return _gameHelper.host;
 	}

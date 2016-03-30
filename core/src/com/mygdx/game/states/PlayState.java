@@ -27,7 +27,6 @@ import com.mygdx.game.objects.UI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.Semaphore;
 
@@ -47,7 +46,6 @@ public abstract class PlayState extends State{
 
     //values
     private int mapCounter = 0;
-    protected boolean received = false;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     public boolean running;
@@ -106,8 +104,8 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         gameSpeed = 80;
-        speedIncrease = (float) 0.00;
-        speedChange = (float) 0.6;
+        speedIncrease = (float) 0.07;
+        speedChange = (float) 0.4;
         playerSpeed = 200;
         dangerZone = 200;
         powerCounter = 0;
@@ -224,7 +222,6 @@ public abstract class PlayState extends State{
         yourBitmapFontName.draw(sb, yourScoreName, 25, 100);
 
         sb.end();
-
         collidesFatal();
 
 //		constantly check if any power/DangerZone's effect still lingers
@@ -409,6 +406,7 @@ public abstract class PlayState extends State{
         }
 
         if (player.y < 150){
+            MacroHardv2.actionResolver.sendReliable(new byte[]{4});
             goToRestartState();
         }
     }
@@ -449,6 +447,7 @@ public abstract class PlayState extends State{
         Iterator<GameObject> spikeIterator = spikes.iterator();
         while (spikeIterator.hasNext()){
             if (((Spikes)spikeIterator.next()).collides(player, this)){
+                MacroHardv2.actionResolver.sendReliable(new byte[]{4});
                 goToRestartState();
             }
         }
@@ -457,6 +456,7 @@ public abstract class PlayState extends State{
         Iterator<GameObject> ghostIterator = ghosts.iterator();
         while (ghostIterator.hasNext()){
             if (((Ghost)ghostIterator.next()).collides(player, this)){
+                MacroHardv2.actionResolver.sendReliable(new byte[]{4});
                 goToRestartState();
             }
         }
@@ -476,7 +476,7 @@ public abstract class PlayState extends State{
                 for (GameObject door: doors){
                     ((Door)door).setOpen();
                 }
-                MacroHardv2.actionResolver.sendOpenDoorMessage();
+                MacroHardv2.actionResolver.sendReliable(new byte[]{2});
             }
         }
 
@@ -496,6 +496,7 @@ public abstract class PlayState extends State{
     private void effectDangerZone(Player p) {
         if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
             gameSpeed += speedIncrease;
+            sendGameSpeed();
         }
     }
 
@@ -505,8 +506,10 @@ public abstract class PlayState extends State{
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     tempGameSpeed = gameSpeed;
                     gameSpeed = 0;
+                    sendGameSpeed();
                 } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
                     gameSpeed *= speedChange;
+                    sendGameSpeed();
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
                     playerSpeed /= speedChange;
                 }
@@ -515,8 +518,10 @@ public abstract class PlayState extends State{
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
                     gameSpeed = tempGameSpeed;
+                    sendGameSpeed();
                 } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
                     gameSpeed /= speedChange;
+                    sendGameSpeed();
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
                     playerSpeed *= speedChange;
                 }
@@ -587,16 +592,25 @@ public abstract class PlayState extends State{
         icons.add(icon);
     }
 
+    private void sendGameSpeed(){
+        byte[] message = new byte[3];
+        message[0] = 3;
+        message[1] = (byte) (gameSpeed/10);
+        message[2] = (byte)((gameSpeed*10)%100);
+        MacroHardv2.actionResolver.sendReliable(message);
+    }
+
     public void update(byte[] message) {
         //update player coordinates
         if(message != null){
             switch(message[0]) {
+                //other player's coordinates
                 case 0:
                     players.get((int) message[1]).x = ((float) message[2] * 10 + (float) message[3] / 10);
                     players.get((int) message[1]).y = ((float) message[4] * 10 + (float) message[5] / 10);
                     break;
-                //Incoming Message to update map
 
+                //map
                 case 1:
                     MapTile[] new_row = new MapTile[GAME_WIDTH];
                     for (int i = 2; i < message.length; i++) {
@@ -624,10 +638,20 @@ public abstract class PlayState extends State{
                     }
                     break;
 
+                //open doors
                 case 2:
                     for (GameObject door: doors){
                         ((Door)door).setOpen();
                     }
+                    break;
+
+                //game speed update
+                case 3:
+                    gameSpeed = ((float) message[1] * 10 + (float) message[2] / 10);
+                    break;
+                //end game
+                case 4:
+                    goToRestartState();
                     break;
             }
         }

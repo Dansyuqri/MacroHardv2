@@ -14,8 +14,7 @@ public interface ActionResolver {
     void setGame(MacroHardv2 game);
 
     void sendPos(byte[] coor);
-    void sendMap(byte[] map);
-    void sendOpenDoorMessage();
+    void sendReliable(byte[] message);
 
     String gethostid();
     String getyourid();

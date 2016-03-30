@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -243,7 +242,7 @@ public class PlayStateHost extends PlayState {
             mapMod.acquire();
             mapBuffer.add(new_row);
 
-            MacroHardv2.actionResolver.sendMap(tobyte(new_row, HostMapCounter));
+            MacroHardv2.actionResolver.sendReliable(tobyte(new_row, HostMapCounter));
             HostMapCounter = (HostMapCounter + 1) % 20;
 
             if (switchCoord) {
