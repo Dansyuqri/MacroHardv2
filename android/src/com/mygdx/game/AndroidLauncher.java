@@ -173,6 +173,9 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 	public void sendMap(byte[] map){
 		_gameHelper.sendMap(map);
 	}
+	public void sendOpenDoorMessage(){
+		_gameHelper.sendOpenDoorMessage();
+	}
 	public String gethostid(){
 		return _gameHelper.host;
 	}

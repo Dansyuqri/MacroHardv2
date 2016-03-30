@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
@@ -435,7 +436,7 @@ public abstract class PlayState extends State{
                 for (GameObject door: doors){
                     ((Door)door).setOpen();
                 }
-                // then notify server
+                MacroHardv2.actionResolver.sendOpenDoorMessage();
             }
         }
 
@@ -565,10 +566,13 @@ public abstract class PlayState extends State{
                             mapCounter = (mapCounter + 1) % 20;
                         } else {
                             messageBuffer.put((int) message[1], new_row);
-                            if (messageBuffer.containsKey(mapCounter)){
-                                mapBuffer.add(messageBuffer.get(mapCounter));
-                                messageBuffer.remove(mapCounter);
-                                mapCounter = (mapCounter + 1) % 20;
+                            while (true) {
+                                if (messageBuffer.containsKey(mapCounter)) {
+                                    mapBuffer.add(messageBuffer.get(mapCounter));
+                                    messageBuffer.remove(mapCounter);
+                                    mapCounter = (mapCounter + 1) % 20;
+                                    break;
+                                }
                             }
                         }
                         mapMod.release();
@@ -579,7 +583,9 @@ public abstract class PlayState extends State{
                     break;
 
                 case 2:
-                    received = true;
+                    for (GameObject door: doors){
+                        ((Door)door).setOpen();
+                    }
                     break;
             }
         }

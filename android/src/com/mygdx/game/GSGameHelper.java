@@ -231,6 +231,23 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         }
     }
 
+    public void sendOpenDoorMessage(){
+        try{
+            for (Participant p : invitees) {
+                if (p.getParticipantId().equals(mMyId))
+                    continue;
+                if (p.getStatus() != Participant.STATUS_JOINED)
+                    continue;
+                // final score notification must be sent via reliable message
+                Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, new byte[]{2},
+                        mRoomId, p.getParticipantId());
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
         byte[] message = rtm.getMessageData();
@@ -453,7 +470,4 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         acceptInviteToRoom(mIncomingInvitationId);
         mIncomingInvitationId = null;
     }
-
-
-
 }

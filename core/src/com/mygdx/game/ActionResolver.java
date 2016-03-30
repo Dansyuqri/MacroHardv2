@@ -6,15 +6,16 @@ import com.mygdx.game.MacroHardv2;
  * Created by Nayr on 12/3/2016.
  */
 public interface ActionResolver {
-    public void SignIn();
-    public void SignOut();
-    public boolean isSignedIn();
-    public void QuickGame();
-    public void initMatch();
-    public void setGame(MacroHardv2 game);
+    void SignIn();
+    void SignOut();
+    boolean isSignedIn();
+    void QuickGame();
+    void initMatch();
+    void setGame(MacroHardv2 game);
 
-    public void sendPos(byte[] coor);
-    public void sendMap(byte[] map);
+    void sendPos(byte[] coor);
+    void sendMap(byte[] map);
+    void sendOpenDoorMessage();
 
     public String gethostid();
     public String getyourid();
