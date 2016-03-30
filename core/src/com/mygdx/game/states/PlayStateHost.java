@@ -6,6 +6,8 @@ import com.mygdx.game.customEnum.MapTile;
 
 import java.util.ArrayList;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Created by hj on 19/3/16.
  */

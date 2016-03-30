@@ -91,10 +91,8 @@ public abstract class PlayState extends State{
 
     protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
-        System.out.println("this is gsm 2:" + gsm);
         this.playerID = playerID;
         player = (Player) players.get(playerID);
-        running = true;
         touchHeld = false;
 
         //camera initialization
@@ -138,6 +136,7 @@ public abstract class PlayState extends State{
 
         PlayerCoordinateSender coordSender = new PlayerCoordinateSender(this);
         coordSender.start();
+        running = true;
     }
 
     @Override
@@ -327,12 +326,12 @@ public abstract class PlayState extends State{
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
                     break;
                 case SPIKES:
-                    if (score > 100) {
+                    if (score > 40) {
                         spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 20, tracker + 5, 40, 40));
                     }
             }
         }
-        if (score > 200) {
+        if (score > 80) {
             if (score % 15 == 0) {
                 ghosts.add(new Ghost((tileLength * 9) + 15, tracker, tileLength, tileLength));
             }
@@ -642,20 +641,23 @@ public abstract class PlayState extends State{
 
                     try {
                         mapPro.acquire();
-                        mapMod.acquire();
                         if (message[1] == mapCounter){
+                            mapMod.acquire();
                             mapBuffer.add(new_row);
+                            mapMod.release();
                             mapCounter = (mapCounter + 1) % 20;
+                            mapCon.release();
                         } else {
                             messageBuffer.put((int) message[1], new_row);
                             if (messageBuffer.containsKey(mapCounter)) {
+                                mapMod.acquire();
                                 mapBuffer.add(messageBuffer.get(mapCounter));
+                                mapMod.release();
                                 messageBuffer.remove(mapCounter);
                                 mapCounter = (mapCounter + 1) % 20;
+                                mapCon.release();
                             }
                         }
-                        mapMod.release();
-                        mapCon.release();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

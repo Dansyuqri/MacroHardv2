@@ -13,6 +13,8 @@ import com.mygdx.game.states.PlayStateNonHost;
 
 import java.awt.Menu;
 
+import static java.lang.Thread.sleep;
+
 public class MacroHardv2 extends ApplicationAdapter{
 	public static final int WIDTH = 480;
 	public static final int HEIGHT = 800;
@@ -48,6 +50,11 @@ public class MacroHardv2 extends ApplicationAdapter{
 		if(!this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){
 			MenuState.gotoPlayP = true;
 		} else{
+			try {
+				sleep(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			MenuState.goToPlay=true;
 		}
 
