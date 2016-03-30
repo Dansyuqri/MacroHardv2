@@ -199,7 +199,7 @@ public class PlayStateHost extends PlayState {
             mapBuffer.add(new_row);
 
             MacroHardv2.actionResolver.sendMap(tobyte(new_row, mapCounter));
-            mapCounter = (mapCounter + 1) % 20;
+            mapCounter = (mapCounter + 1) % 50;
 
             if (switchCoord) {
                 mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;

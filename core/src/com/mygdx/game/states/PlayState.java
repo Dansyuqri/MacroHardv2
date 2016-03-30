@@ -556,7 +556,7 @@ public abstract class PlayState extends State{
                         mapMod.acquire();
                         if (message[1] == mapCounter){
                             mapBuffer.add(new_row);
-                            mapCounter = (mapCounter + 1) % 20;
+                            mapCounter = (mapCounter + 1) % 50;
                         } else {
                             messageBuffer.add(message);
                             Iterator<byte[]> messageIterator = messageBuffer.iterator();
