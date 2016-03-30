@@ -15,7 +15,6 @@ public interface ActionResolver {
 
     public void sendPos(byte[] coor);
     public void sendMap(byte[] map);
-    public void sendConfirmation();
 
     public String gethostid();
     public String getyourid();

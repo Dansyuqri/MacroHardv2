@@ -10,13 +10,14 @@ import java.util.ArrayList;
  * Created by hj on 19/3/16.
  */
 public class PlayStateHost extends PlayState {
-    private int doorCounter, powerCounter, spikeCounter;
+    private int doorCounter, powerCounter, spikeCounter, mapCounter;
     private ArrayList<MapTile[]> memory;
     private boolean[] current = createArray(true);
 
     public PlayStateHost(GameStateManager gsm, int playerID){
         super(gsm, playerID);
         //spawning initialization
+        mapCounter = 0;
         doorCounter = 0;
         powerCounter = 0;
         spikeCounter = 0;
@@ -197,9 +198,8 @@ public class PlayStateHost extends PlayState {
             mapMod.acquire();
             mapBuffer.add(new_row);
 
-            MacroHardv2.actionResolver.sendMap(tobyte(new_row));
-            while (!received);
-            received = false;
+            MacroHardv2.actionResolver.sendMap(tobyte(new_row, mapCounter));
+            mapCounter = (mapCounter + 1) % 20;
 
             if (switchCoord) {
                 mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;
@@ -211,11 +211,12 @@ public class PlayStateHost extends PlayState {
         }
     }
 
-    private byte[] tobyte(MapTile[] row){
-        byte[] temp = new byte[row.length+1];
+    private byte[] tobyte(MapTile[] row, int count){
+        byte[] temp = new byte[row.length+2];
         temp[0] = 1;
-        for (int i = 1; i < temp.length; i++) {
-            temp[i]=row[i-1].toByte();
+        temp[1] = (byte) count;
+        for (int i = 2; i < temp.length; i++) {
+            temp[i]=row[i-2].toByte();
         }
         return temp;
     }

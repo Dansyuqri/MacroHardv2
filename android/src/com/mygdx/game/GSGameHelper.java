@@ -231,17 +231,6 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         }
     }
 
-    public void sendConfirmation(){
-        try{
-            byte[] message = {(byte) 2};
-            Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, message, mRoomId,
-                    MacroHardv2.actionResolver.gethostid());
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
         byte[] message = rtm.getMessageData();

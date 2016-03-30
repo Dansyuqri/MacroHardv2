@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
-import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
@@ -24,6 +23,7 @@ import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.Semaphore;
 
@@ -42,6 +42,7 @@ public abstract class PlayState extends State{
     private Vector3 touchPos = new Vector3();
 
     //values
+    private int mapCounter = 0;
     protected boolean received = false;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
@@ -52,6 +53,7 @@ public abstract class PlayState extends State{
     public float tracker;
     public float trackerBG;
 
+    private HashSet<byte[]> messageBuffer = new HashSet<byte[]>();
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -544,16 +546,32 @@ public abstract class PlayState extends State{
                 //Incoming Message to update map
 
                 case 1:
-                    MacroHardv2.actionResolver.sendConfirmation();
                     MapTile[] new_row = new MapTile[GAME_WIDTH];
-                    for (int i = 1; i < message.length; i++) {
-                        new_row[i - 1] = MapTile.fromByte(message[i]);
+                    for (int i = 2; i < message.length; i++) {
+                        new_row[i - 2] = MapTile.fromByte(message[i]);
                     }
 
                     try {
                         mapPro.acquire();
                         mapMod.acquire();
-                        mapBuffer.add(new_row);
+                        if (message[1] == mapCounter){
+                            mapBuffer.add(new_row);
+                            mapCounter = (mapCounter + 1) % 20;
+                        } else {
+                            messageBuffer.add(message);
+                            Iterator<byte[]> messageIterator = messageBuffer.iterator();
+                            while (messageIterator.hasNext()){
+                                byte[] previousMessage = messageIterator.next();
+                                if (previousMessage[1] == mapCounter){
+                                    for (int i = 2; i < previousMessage.length; i++) {
+                                        new_row[i - 2] = MapTile.fromByte(previousMessage[i]);
+                                    }
+                                    mapBuffer.add(new_row);
+                                    mapCounter++;
+                                    messageIterator.remove();
+                                }
+                            }
+                        }
                         mapMod.release();
                         mapCon.release();
                     } catch (InterruptedException e) {
