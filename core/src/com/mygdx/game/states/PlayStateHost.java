@@ -160,7 +160,6 @@ public class PlayStateHost extends PlayState {
         powerCounter += 1;
         doorCounter += 1;
         spikeCounter += 1;
-        int out_index = 0;
         MapTile[] new_row = createArray(MapTile.OBSTACLES);
 
         // random generator
@@ -190,51 +189,9 @@ public class PlayStateHost extends PlayState {
         memory.remove(memory.size() - 1);
         memory.add(0, new_row);
 
-        int i;
-        for (i = 0; i < current.length; i++) {
-            if (current[i]) {
-                break;
-            }
-        }
-        int j = 0;
-
         // spawning door switch
-        boolean switchCoord = false;
         if (doorCounter == 44) {
-            switchCoord = true;
-            int counter = 0;
-            while (true) {
-                if (counter > 10) {
-                    break;
-                }
-                int dir = MathUtils.random(0, 3);
-                switch (dir) {
-                    case 0:
-                        if (i > 0 && memory.get(j)[i - 1] == MapTile.EMPTY) {
-                            i--;
-                            counter++;
-                        }
-                        break;
-                    case 1:
-                        if (j < 4 && memory.get(j + 1)[i] == MapTile.EMPTY) {
-                            j++;
-                            counter++;
-                        }
-                        break;
-                    case 2:
-                        if (i < GAME_WIDTH - 1 && memory.get(j)[i + 1] == MapTile.EMPTY) {
-                            i++;
-                            counter++;
-                        }
-                        break;
-                    case 3:
-                        if (j > 0 && memory.get(j - 1)[i] == MapTile.EMPTY) {
-                            j--;
-                            counter++;
-                        }
-                        break;
-                }
-            }
+            genSwitch(memory, current);
         }
 
         try {
@@ -245,9 +202,6 @@ public class PlayStateHost extends PlayState {
             MacroHardv2.actionResolver.sendReliable(tobyte(new_row, HostMapCounter));
             HostMapCounter = (HostMapCounter + 1) % 20;
 
-            if (switchCoord) {
-                mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;
-            }
             mapMod.release();
             mapCon.release();
         } catch (InterruptedException e) {
