@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
 
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 /**
@@ -14,7 +13,6 @@ public class PlayStateHost extends PlayState {
     private int doorCounter, powerCounter, spikeCounter;
     private ArrayList<MapTile[]> memory;
     private boolean[] current = createArray(true);
-    private boolean received = false;
 
     public PlayStateHost(GameStateManager gsm, int playerID){
         super(gsm, playerID);
@@ -194,15 +192,13 @@ public class PlayStateHost extends PlayState {
             }
         }
 
-
         try {
             mapPro.acquire();
             mapMod.acquire();
             mapBuffer.add(new_row);
 
-            while (!received) {
-                MacroHardv2.actionResolver.sendMap(tobyte(new_row));
-            }
+            MacroHardv2.actionResolver.sendMap(tobyte(new_row));
+            while (!received);
             received = false;
 
             if (switchCoord) {
@@ -222,9 +218,5 @@ public class PlayStateHost extends PlayState {
             temp[i]=row[i-1].toByte();
         }
         return temp;
-    }
-
-    public void setReceived(boolean b){
-        received = b;
     }
 }

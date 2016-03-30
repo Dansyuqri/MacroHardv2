@@ -42,6 +42,7 @@ public abstract class PlayState extends State{
     private Vector3 touchPos = new Vector3();
 
     //values
+    protected boolean received = false;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     public boolean running;
@@ -561,7 +562,7 @@ public abstract class PlayState extends State{
                     break;
 
                 case 2:
-
+                    received = true;
                     break;
             }
         }
