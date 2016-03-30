@@ -108,7 +108,6 @@ public class RestartState extends State{
         playAgainBtnImage.dispose();
     }
     public void generateTextures(){
-        System.out.println("generated");
         background = new Texture("menu_bg.png");
         playAgainBtnImage = new Texture("playAgainBtn.png");
         mainMenuBtnImage = new Texture("mainMenuBtn.png");

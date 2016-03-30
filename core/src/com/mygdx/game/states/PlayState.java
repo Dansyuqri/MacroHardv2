@@ -166,7 +166,6 @@ public abstract class PlayState extends State{
                 if (Math.pow(relativex, 2) + Math.pow(relativey, 2) > 300) {
                     omniMove(cos, sin);
                 }
-                collidesBoundaries();
             } else {
                 if (!icons.isEmpty()){
                     if (icons.get(0).contains(touchPos.x, touchPos.y)){
@@ -209,9 +208,7 @@ public abstract class PlayState extends State{
         }
         // tell the camera to update its matrices.
         cam.update();
-
-        // tell the SpriteBatch to render in the
-        // coordinate system specified by the camera.
+        // tell the SpriteBatch to render in the coordinate system specified by the camera.
         sb.setProjectionMatrix(cam.combined);
 
         // begin a new batch and draw the player and all objects
@@ -222,6 +219,8 @@ public abstract class PlayState extends State{
         yourBitmapFontName.draw(sb, yourScoreName, 25, 100);
 
         sb.end();
+
+        collidesBoundaries();
         collidesFatal();
 
 //		constantly check if any power/DangerZone's effect still lingers
