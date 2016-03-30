@@ -75,7 +75,6 @@ public class MenuState extends State{
             goToPlay = false;
             dispose();
             gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()));
-
         }
 
         if(gotoPlayP){

@@ -28,6 +28,12 @@ public class PlayStateHost extends PlayState {
         for (int i = 0; i < 5; i++){
             memory.add(init);
         }
+        MacroHardv2.actionResolver.sendReliable(new byte[]{-1});
+        try {
+            go.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
     }
