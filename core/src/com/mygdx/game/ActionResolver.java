@@ -12,8 +12,11 @@ public interface ActionResolver {
     public void QuickGame();
     public void initMatch();
     public void setGame(MacroHardv2 game);
+
     public void sendPos(byte[] coor);
     public void sendMap(byte[] map);
+    public void sendConfirmation();
+
     public String gethostid();
     public String getyourid();
     public void Inviteplayers();

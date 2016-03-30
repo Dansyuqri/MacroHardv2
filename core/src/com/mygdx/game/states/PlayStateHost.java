@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
 
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 /**
@@ -13,6 +14,7 @@ public class PlayStateHost extends PlayState {
     private int doorCounter, powerCounter, spikeCounter;
     private ArrayList<MapTile[]> memory;
     private boolean[] current = createArray(true);
+    private boolean received = false;
 
     public PlayStateHost(GameStateManager gsm, int playerID){
         super(gsm, playerID);
@@ -27,8 +29,6 @@ public class PlayStateHost extends PlayState {
         }
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
-        PlayerCoorSend coorsend = new PlayerCoorSend(this);
-        coorsend.start();
     }
 
     public MapTile[] generator(MapTile[] new_row){
@@ -199,7 +199,12 @@ public class PlayStateHost extends PlayState {
             mapPro.acquire();
             mapMod.acquire();
             mapBuffer.add(new_row);
-            MacroHardv2.actionResolver.sendMap(tobyte(new_row));
+
+            while (!received) {
+                MacroHardv2.actionResolver.sendMap(tobyte(new_row));
+            }
+            received = false;
+
             if (switchCoord) {
                 mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;
             }
@@ -210,10 +215,6 @@ public class PlayStateHost extends PlayState {
         }
     }
 
-    @Override
-    public void update(byte[] message) {
-        //// TODO: 29/3/2016  
-    }
     private byte[] tobyte(MapTile[] row){
         byte[] temp = new byte[row.length+1];
         temp[0] = 1;
@@ -223,7 +224,7 @@ public class PlayStateHost extends PlayState {
         return temp;
     }
 
-
-
-
+    public void setReceived(boolean b){
+        received = b;
+    }
 }

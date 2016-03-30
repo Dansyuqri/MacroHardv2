@@ -15,36 +15,4 @@ public class PlayStateNonHost extends PlayState {
     public PlayStateNonHost(GameStateManager gsm, int playerID) {
         super(gsm, playerID);
     }
-
-    public void update(byte[] message) {
-        //update player coordinates
-        if(message != null){
-            if(message[0] == 0) {
-                players.get((int)message[1]).x = ((float)message[2]*10 + (float) message[3]/10);
-                players.get((int)message[1]).y = ((float)message[4]*10 + (float) message[5]/10);
-            }
-            //Incoming Message to update map
-            if (message[0] == 1){
-                MapTile[] new_row = new MapTile[GAME_WIDTH];
-                for (int i = 1; i < message.length; i++) {
-                    new_row[i-1] = MapTile.fromByte(message[i]);
-                }
-
-                try {
-                    mapPro.acquire();
-                    mapMod.acquire();
-                    mapBuffer.add(new_row);
-                    mapMod.release();
-                    mapCon.release();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (message[0] == 2){
-
-            }
-        }
-
-
-    }
 }

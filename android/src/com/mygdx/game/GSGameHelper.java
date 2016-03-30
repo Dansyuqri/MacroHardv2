@@ -17,6 +17,7 @@ import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
+import com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
@@ -69,6 +70,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     public void initMatch(){
         Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1);
         this.activity.startActivityForResult(intent, RC_SELECT_PLAYERS);
+
     }
 
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
@@ -203,16 +205,16 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     }
 
-    public void sendPos(byte[] mensaje){
+    public void sendPos(byte[] message){
         try{
-            Games.RealTimeMultiplayer.sendUnreliableMessageToOthers(getApiClient(), mensaje, mRoomID);
+            Games.RealTimeMultiplayer.sendUnreliableMessageToOthers(getApiClient(), message, mRoomID);
         }
         catch(Exception e){
             e.printStackTrace();
         }
     }
 
-    public void sendMap(byte[] Map){
+    public void sendMap(byte[] map){
         try{
             for (Participant p : invitees) {
                 if (p.getParticipantId().equals(mMyId))
@@ -220,9 +222,20 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                 if (p.getStatus() != Participant.STATUS_JOINED)
                     continue;
                 // final score notification must be sent via reliable message
-                Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, Map,
+                Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, map,
                         mRoomId, p.getParticipantId());
             }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void sendConfirmation(){
+        try{
+            byte[] message = {(byte) 2};
+            Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, message, mRoomId,
+                    MacroHardv2.actionResolver.gethostid());
         }
         catch(Exception e){
             e.printStackTrace();

@@ -20,8 +20,6 @@ public class MacroHardv2 extends ApplicationAdapter{
 	private GameStateManager gsm;
 	private SpriteBatch batch;
 	public static ActionResolver actionResolver;
-	public static PlayStateNonHost game;
-
 	
 	@Override
 	public void create () {

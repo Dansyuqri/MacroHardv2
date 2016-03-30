@@ -5,9 +5,9 @@ import com.mygdx.game.MacroHardv2;
 /**
  * Created by Nayr on 30/3/2016.
  */
-public class PlayerCoorSend extends Thread {
+public class PlayerCoordinateSender extends Thread {
     private PlayState game;
-    PlayerCoorSend(PlayState game){
+    PlayerCoordinateSender(PlayState game){
         this.game = game;
     }
 

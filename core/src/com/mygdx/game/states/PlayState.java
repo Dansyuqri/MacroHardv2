@@ -8,7 +8,6 @@ import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.objects.Background;
-import com.mygdx.game.objects.DangerZone;
 import com.mygdx.game.objects.GameObject;
 import com.mygdx.game.objects.Icon;
 import com.mygdx.game.objects.Movable;
@@ -25,9 +24,7 @@ import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -125,6 +122,9 @@ public abstract class PlayState extends State{
         createBg();
         createObstacle();
         createSides();
+
+        PlayerCoordinateSender coordSender = new PlayerCoordinateSender(this);
+        coordSender.start();
     }
 
     @Override
@@ -532,7 +532,40 @@ public abstract class PlayState extends State{
         icons.add(icon);
     }
 
-    public abstract void update(byte[] message);
+    public void update(byte[] message) {
+        //update player coordinates
+        if(message != null){
+            switch(message[0]) {
+                case 0:
+                    players.get((int) message[1]).x = ((float) message[2] * 10 + (float) message[3] / 10);
+                    players.get((int) message[1]).y = ((float) message[4] * 10 + (float) message[5] / 10);
+                    break;
+                //Incoming Message to update map
+
+                case 1:
+                    MacroHardv2.actionResolver.sendConfirmation();
+                    MapTile[] new_row = new MapTile[GAME_WIDTH];
+                    for (int i = 1; i < message.length; i++) {
+                        new_row[i - 1] = MapTile.fromByte(message[i]);
+                    }
+
+                    try {
+                        mapPro.acquire();
+                        mapMod.acquire();
+                        mapBuffer.add(new_row);
+                        mapMod.release();
+                        mapCon.release();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+
+                case 2:
+
+                    break;
+            }
+        }
+    }
 
     public void goToRestartState(){
         gsm.set(new RestartState(gsm));
