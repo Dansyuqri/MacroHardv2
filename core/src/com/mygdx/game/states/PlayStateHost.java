@@ -191,6 +191,7 @@ public class PlayStateHost extends PlayState {
 
         // spawning door switch
         if (doorCounter == 44) {
+
             genSwitch(memory, current);
         }
 

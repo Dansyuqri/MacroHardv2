@@ -42,6 +42,7 @@ public class Power extends Movable implements Collidable {
                 player.setPassivePower(type);
                 player.setEndPassivePowerTime(System.currentTimeMillis()+5000);
             } else {
+
                 player.setActivePower(type);
                 game.addIcon(new Icon(this));
             }

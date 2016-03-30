@@ -25,6 +25,7 @@ public class RestartState extends State{
 
     public RestartState(GameStateManager gsm){
         super(gsm);
+        System.out.println("in rs state");
         cam = new OrthographicCamera();
         cam.setToOrtho(false, 480, 800);
 
@@ -107,6 +108,7 @@ public class RestartState extends State{
         playAgainBtnImage.dispose();
     }
     public void generateTextures(){
+        System.out.println("generated");
         background = new Texture("menu_bg.png");
         playAgainBtnImage = new Texture("playAgainBtn.png");
         mainMenuBtnImage = new Texture("mainMenuBtn.png");
