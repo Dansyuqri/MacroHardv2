@@ -17,10 +17,10 @@ public interface ActionResolver {
     void sendMap(byte[] map);
     void sendOpenDoorMessage();
 
-    public String gethostid();
-    public String getyourid();
-    public void Inviteplayers();
-    public void Acceptinvites();
-    public void Seeinvites();
-    public int getmyidint();
+    String gethostid();
+    String getyourid();
+    void Inviteplayers();
+    void Acceptinvites();
+    void Seeinvites();
+    int getmyidint();
 }

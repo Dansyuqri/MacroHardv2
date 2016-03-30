@@ -566,13 +566,10 @@ public abstract class PlayState extends State{
                             mapCounter = (mapCounter + 1) % 20;
                         } else {
                             messageBuffer.put((int) message[1], new_row);
-                            while (true) {
-                                if (messageBuffer.containsKey(mapCounter)) {
-                                    mapBuffer.add(messageBuffer.get(mapCounter));
-                                    messageBuffer.remove(mapCounter);
-                                    mapCounter = (mapCounter + 1) % 20;
-                                    break;
-                                }
+                            if (messageBuffer.containsKey(mapCounter)) {
+                                mapBuffer.add(messageBuffer.get(mapCounter));
+                                messageBuffer.remove(mapCounter);
+                                mapCounter = (mapCounter + 1) % 20;
                             }
                         }
                         mapMod.release();
