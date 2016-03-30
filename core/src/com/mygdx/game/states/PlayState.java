@@ -98,7 +98,7 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         gameSpeed = 80;
-        speedIncrease = (float) 0.07;
+        speedIncrease = (float) 0.00;
         speedChange = (float) 0.6;
         playerSpeed = 300;
         dangerZone = 200;

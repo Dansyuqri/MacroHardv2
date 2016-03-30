@@ -27,7 +27,7 @@ public class PlayStateHost extends PlayState {
         }
         MapMaker mapMaker = new MapMaker(this);
         mapMaker.start();
-        PlayerCoor coorsend = new PlayerCoor();
+        PlayerCoorSend coorsend = new PlayerCoorSend(this);
         coorsend.start();
     }
 
@@ -223,32 +223,7 @@ public class PlayStateHost extends PlayState {
         return temp;
     }
 
-    private static byte[] wrapCoords(int id, float x, float y){
-        byte[] result = new byte[6];
-        result[0] = 0;
-        result[1] = (byte) id;
-        result[2] = (byte) (x/10);
-        result[3] = (byte)((x*10)%100);
-        result[4] = (byte)(y/10);
-        result[5] = (byte)((y*10)%100);
-        return result;
-    }
 
-    public class PlayerCoor extends Thread {
-        @Override
-        public void run() {
-            while (true) {
-                if (isInterrupted()){
-                    break;
-                }
-                long start = System.currentTimeMillis();
-                while(System.currentTimeMillis()-start < 0.01){
 
-                }
-                byte[] message = wrapCoords(MacroHardv2.actionResolver.getmyidint(),player.x,player.y);
-                MacroHardv2.actionResolver.sendPos(message);
 
-            }
-        }
-    }
 }
