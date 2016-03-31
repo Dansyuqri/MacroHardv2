@@ -51,7 +51,7 @@ public abstract class PlayState extends State{
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     public boolean running;
-    private boolean touchHeld, gotSwitch = false;
+    private boolean touchHeld, gotSwitch = false, end = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter;
     public float tracker;
@@ -256,6 +256,12 @@ public abstract class PlayState extends State{
                 if (gameObject instanceof Movable) {
                     ((Movable) gameObject).scroll(gameSpeed);
                 }
+            }
+        }
+
+        synchronized (this) {
+            if (end) {
+                goToRestartState();
             }
         }
 
@@ -527,7 +533,7 @@ public abstract class PlayState extends State{
         if (player.getPassivePowerState()) {
             if (!player.getPassivePowerEffectTaken()) {
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
-                    synchronized (this) {
+                    synchronized (Player.class) {
                         tempGameSpeed = gameSpeed;
                     }
                     gameSpeed = 0;
@@ -542,7 +548,7 @@ public abstract class PlayState extends State{
             }
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
                 if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
-                    synchronized (this) {
+                    synchronized (Player.class) {
                         gameSpeed = tempGameSpeed;
                     }
                     sendGameSpeed();
@@ -705,13 +711,15 @@ public abstract class PlayState extends State{
 
                 //game speed update
                 case 3:
-                    synchronized (this) {
+                    synchronized (Player.class) {
                         gameSpeed = ((float) message[1] * 10 + (float) message[2] / 10);
                     }
                     break;
                 //end game
                 case 4:
-                    goToRestartState();
+                    synchronized (this){
+                        end = true;
+                    }
                     break;
             }
         }
