@@ -27,17 +27,13 @@ public class MacroHardv2 extends ApplicationAdapter{
 	public void create () {
 		batch = new SpriteBatch();
 		gsm = new GameStateManager();
-
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		gsm.push(new MenuState(gsm));
 	}
 
 	@Override
 	public void render () {
-
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		gsm.update(null);
-
 		gsm.render(batch);
 	}
 	public MacroHardv2(ActionResolver actionResolver) {

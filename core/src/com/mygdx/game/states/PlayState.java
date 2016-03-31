@@ -186,7 +186,6 @@ public abstract class PlayState extends State{
     @Override
     public void render(SpriteBatch sb) {
         handleInput();
-        // tell the camera to update its matrices.
         while (tracker < 1050) {
             try {
                 mapCon.acquire();

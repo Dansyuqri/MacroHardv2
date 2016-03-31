@@ -71,6 +71,8 @@ public class MenuState extends State{
     public void handleInput() {
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.graphics.getHeight() - Gdx.input.getY();
+        cam.unproject(touchPos);
+
         if(goToPlay){
             goToPlay = false;
             dispose();
@@ -81,7 +83,6 @@ public class MenuState extends State{
             gotoPlayP = false;
             dispose();
             gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()));
-
         }
 
         /****************************************************************************************
@@ -169,10 +170,10 @@ public class MenuState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
-        sb.begin();
+        handleInput();
         cam.update();
-        cam.unproject(touchPos);
         sb.setProjectionMatrix(cam.combined);
+        sb.begin();
         sb.draw(background, 0, 0, graphicsX, graphicsY);
         sb.draw(playBtnImage,(graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
         sb.draw(quickGameBtnImage, (graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
@@ -198,7 +199,6 @@ public class MenuState extends State{
     public void update(byte[] message) {
         handleInput();
     }
-
 
     public void generateTextures(){
         background = new Texture("Main_menu.png");
