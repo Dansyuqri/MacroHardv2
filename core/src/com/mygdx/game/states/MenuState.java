@@ -68,7 +68,7 @@ public class MenuState extends State{
     }
 
     @Override
-    public synchronized void handleInput() {
+    public void handleInput() {
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.input.getY();
         cam.unproject(touchPos);
@@ -77,7 +77,7 @@ public class MenuState extends State{
             goToPlay = false;
             dispose();
             gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()));
-    }
+        }
 
         if(gotoPlayP){
             gotoPlayP = false;
@@ -171,19 +171,17 @@ public class MenuState extends State{
     @Override
     public void render(SpriteBatch sb) {
         handleInput();
-        synchronized (this) {
-            sb.begin();
-            cam.update();
-            sb.setProjectionMatrix(cam.combined);
-            sb.draw(background, 0, 0, graphicsX, graphicsY);
-            sb.draw(playBtnImage, (graphicsX / 2) - (playBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + quickGameBtnY + 2 * bufferFromTop), playBtnX, playBtnY);
-            sb.draw(quickGameBtnImage, (graphicsX / 2) - (quickGameBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + bufferFromTop), quickGameBtnX, quickGameBtnY);
-            sb.draw(instructionBtnImage, (graphicsX / 2) - (instructionBtnX / 2), graphicsY / 2 - instructionBtnY / 2, instructionBtnX, instructionBtnY);
-            sb.draw(sendInviteBtnImage, (graphicsX / 2) - (sendInviteBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - bufferFromTop), sendInviteBtnX, sendInviteBtnY);
-            sb.draw(invitationBtnImage, (graphicsX / 2) - (invitationBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - 2 * bufferFromTop), invitationBtnX, invitationBtnY);
-            sb.draw(signInBtnImage, (graphicsX / 2) - (signInBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - signInBtnY - 3 * bufferFromTop), signInBtnX, signInBtnY);
-            sb.end();
-        }
+        sb.begin();
+        cam.update();
+        sb.setProjectionMatrix(cam.combined);
+        sb.draw(background, 0, 0, graphicsX, graphicsY);
+        sb.draw(playBtnImage, (graphicsX / 2) - (playBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + quickGameBtnY + 2 * bufferFromTop), playBtnX, playBtnY);
+        sb.draw(quickGameBtnImage, (graphicsX / 2) - (quickGameBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + bufferFromTop), quickGameBtnX, quickGameBtnY);
+        sb.draw(instructionBtnImage, (graphicsX / 2) - (instructionBtnX / 2), graphicsY / 2 - instructionBtnY / 2, instructionBtnX, instructionBtnY);
+        sb.draw(sendInviteBtnImage, (graphicsX / 2) - (sendInviteBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - bufferFromTop), sendInviteBtnX, sendInviteBtnY);
+        sb.draw(invitationBtnImage, (graphicsX / 2) - (invitationBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - 2 * bufferFromTop), invitationBtnX, invitationBtnY);
+        sb.draw(signInBtnImage, (graphicsX / 2) - (signInBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - signInBtnY - 3 * bufferFromTop), signInBtnX, signInBtnY);
+        sb.end();
     }
 
     @Override
@@ -198,7 +196,9 @@ public class MenuState extends State{
     }
 
     @Override
-    public void update(byte[] message) {}
+    public void update(byte[] message) {
+
+    }
 
     public void generateTextures(){
         background = new Texture("Main_menu.png");

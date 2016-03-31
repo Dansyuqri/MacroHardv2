@@ -86,7 +86,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                 Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomID);
                 activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 BaseGameUtils.showAlert(activity, "Left Room");
-            }else{
+            }else if (response == Activity.RESULT_OK){
                 //BaseGameUtils.showAlert(activity, "Game Starting!");
                 Participant host = invitees.get(0);
                 this.host = host.getParticipantId();

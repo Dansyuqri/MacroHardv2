@@ -7,6 +7,7 @@ import java.util.Stack;
 /**
  * Created by Syuqri on 3/7/2016.
  */
+
 public class GameStateManager {
     private Stack<State> states;
 
