@@ -162,8 +162,7 @@ public abstract class PlayState extends State{
                 //setting joystick centre coordinates
                 if ((Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
                         Math.abs(relativey) < joystick.getJoystickWidth()/2)){
-                    ratio = (float) ((Math.pow(relativex, 2) + Math.pow(relativey, 2))
-                            - Math.pow(joystick.getJoystickWidth()/2,2));
+                    ratio = (float) ((Math.pow(relativex, 2) + Math.pow(relativey, 2))/Math.pow(joystick.getJoystickWidth()/2,2));
                     joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth() / 2);
                     joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
                 } else {
