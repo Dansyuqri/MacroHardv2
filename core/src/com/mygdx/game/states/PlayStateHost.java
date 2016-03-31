@@ -7,7 +7,6 @@ import com.mygdx.game.customEnum.MapTile;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
-import static java.lang.Thread.sleep;
 
 /**
  * Created by hj on 19/3/16.
@@ -21,7 +20,8 @@ public class PlayStateHost extends PlayState {
     public PlayStateHost(GameStateManager gsm, int playerID){
         super(gsm, playerID);
         //spawning initialization
-        mapCon = new Semaphore(-9);
+
+        mapCon = new Semaphore(-4);
 
         HostMapCounter = 0;
         doorCounter = 0;
@@ -204,8 +204,8 @@ public class PlayStateHost extends PlayState {
         try {
             mapPro.acquire();
             mapMod.acquire();
-            mapBuffer.add(new_row);
 
+            mapBuffer.add(new_row);
             if (mapBuffer.size() > 5) {
                 MacroHardv2.actionResolver.sendReliable(tobyte(mapBuffer.get(mapBuffer.size() - 6), HostMapCounter));
                 HostMapCounter = (HostMapCounter + 1) % 15;
