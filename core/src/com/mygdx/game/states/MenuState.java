@@ -68,25 +68,21 @@ public class MenuState extends State{
     }
 
     @Override
-    public void handleInput() {
+    public synchronized void handleInput() {
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.input.getY();
         cam.unproject(touchPos);
 
-        if(goToPlay){
+        if (goToPlay) {
             goToPlay = false;
-            synchronized (SpriteBatch.class) {
-                dispose();
-                gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()));
-            }
-        }
+            dispose();
+            gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()));
+    }
 
         if(gotoPlayP){
             gotoPlayP = false;
-            synchronized (SpriteBatch.class) {
-                dispose();
-                gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()));
-            }
+            dispose();
+            gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()));
         }
 
         /****************************************************************************************
@@ -175,7 +171,7 @@ public class MenuState extends State{
     @Override
     public void render(SpriteBatch sb) {
         handleInput();
-        synchronized (SpriteBatch.class) {
+        synchronized (this) {
             sb.begin();
             cam.update();
             sb.setProjectionMatrix(cam.combined);
