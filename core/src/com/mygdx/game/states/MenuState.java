@@ -171,9 +171,10 @@ public class MenuState extends State{
     @Override
     public void render(SpriteBatch sb) {
         handleInput();
-        cam.update();
-        sb.setProjectionMatrix(cam.combined);
         sb.begin();
+        cam.update();
+        cam.unproject(touchPos);
+        sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
         sb.draw(playBtnImage,(graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
         sb.draw(quickGameBtnImage, (graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);

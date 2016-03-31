@@ -171,7 +171,7 @@ public abstract class PlayState extends State{
                     joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight()/2 + joystick.getJoystickWidth()/2*sin);
                 }
 
-                omniMove(cos, sin, ratio);
+                omniMove(cos, sin, (float) Math.pow(ratio, 0.5));
             } else {
                 if (!icons.isEmpty()){
                     if (icons.get(0).contains(touchPos.x, touchPos.y)){
