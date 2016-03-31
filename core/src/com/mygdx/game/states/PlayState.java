@@ -44,7 +44,7 @@ public abstract class PlayState extends State{
     protected Player player;
     private Vector3 touchPos = new Vector3();
 
-    PlayerCoordinateSender coordSender;
+    protected PlayerCoordinateSender coordSender;
 
     //values
     private int mapCounter = 0;
@@ -57,6 +57,7 @@ public abstract class PlayState extends State{
     public float tracker;
     public float trackerBG;
     private int score;
+    private float[] prevAngle = new float[2];
     private float[][] previousCoordinates = new float[2][2];
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
@@ -620,18 +621,14 @@ public abstract class PlayState extends State{
 
     private void doSmoothInterpolation(int player){
         try {
-            float relX = players.get(player).x - previousCoordinates[player][0];
-            float relY = players.get(player).y - previousCoordinates[player][1] + gameSpeed * Gdx.graphics.getDeltaTime();
-            float angle = (float) Math.atan2(relY, relX);
-            float cos = (float) Math.cos(angle);
-            float sin = (float) Math.sin(angle);
-            if (!(relX == 0 && relY == 0)) {
+            float angle = prevAngle[player];
+            if (angle != 2) {
+                float cos = (float) Math.cos(angle);
+                float sin = (float) Math.sin(angle);
                 players.get(player).x += cos * gameSpeed * Gdx.graphics.getDeltaTime();
                 players.get(player).y += sin * gameSpeed * Gdx.graphics.getDeltaTime();
             }
         } catch (NullPointerException ignored){}
-        previousCoordinates[player][0] = players.get(player).x;
-        previousCoordinates[player][1] = players.get(player).y;
     }
 
     public void update(byte[] message) {
@@ -641,10 +638,23 @@ public abstract class PlayState extends State{
 
                 //other player's coordinates
                 case 0:
+                    int other = (int) message[1];
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
                     float y = (float) message[4] * 10 + (float) message[5] / 10;
-                    players.get((int) message[1]).x = x;
-                    players.get((int) message[1]).y = y;
+                    players.get(other).x = x;
+                    players.get(other).y = y;
+                    try {
+                        float relX = players.get(other).x - previousCoordinates[other][0];
+                        float relY = players.get(other).y - previousCoordinates[other][1] + gameSpeed * Gdx.graphics.getDeltaTime();
+                        float angle = (float) Math.atan2(relY, relX);
+                        if (Math.pow(relX,2)+Math.pow(relY,2) < 1){
+                            prevAngle[other] = 2;
+                        } else {
+                            prevAngle[other] = angle;
+                        }
+                    } catch (NullPointerException ignored){}
+                    previousCoordinates[(int) message[1]][0] = x;
+                    previousCoordinates[(int) message[1]][1] = y;
                     break;
 
                 //map
