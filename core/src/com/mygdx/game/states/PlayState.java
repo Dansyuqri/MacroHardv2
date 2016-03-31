@@ -36,9 +36,9 @@ import java.util.concurrent.Semaphore;
 public abstract class PlayState extends State{
 
     //objects
-    protected Semaphore mapPro = new Semaphore(10);
-    protected Semaphore mapCon = new Semaphore(-4);
-    protected Semaphore mapMod = new Semaphore(1);
+    protected Semaphore mapPro;
+    protected Semaphore mapCon;
+    protected Semaphore mapMod;
 
     private JoyStick joystick;
     protected Player player;
@@ -47,7 +47,7 @@ public abstract class PlayState extends State{
     protected PlayerCoordinateSender coordSender;
 
     //values
-    private int mapCounter = 0;
+    private int mapCounter;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     public boolean running;
@@ -93,8 +93,15 @@ public abstract class PlayState extends State{
 
     protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
+
         this.playerID = playerID;
         player = (Player) players.get(playerID);
+
+        mapPro = new Semaphore(15);
+        mapCon = new Semaphore(-9);
+        mapMod = new Semaphore(1);
+        mapCounter = 0;
+
         touchHeld = false;
 
         //camera initialization
@@ -671,7 +678,7 @@ public abstract class PlayState extends State{
                             mapMod.acquire();
                             mapBuffer.add(new_row);
                             mapMod.release();
-                            mapCounter = (mapCounter + 1) % 20;
+                            mapCounter = (mapCounter + 1) % 15;
                             mapCon.release();
                         } else {
                             messageBuffer.put((int) message[1], new_row);
@@ -680,7 +687,7 @@ public abstract class PlayState extends State{
                                 mapBuffer.add(messageBuffer.get(mapCounter));
                                 mapMod.release();
                                 messageBuffer.remove(mapCounter);
-                                mapCounter = (mapCounter + 1) % 20;
+                                mapCounter = (mapCounter + 1) % 15;
                                 mapCon.release();
                             }
                         }

@@ -173,7 +173,6 @@ public class MenuState extends State{
         handleInput();
         sb.begin();
         cam.update();
-        cam.unproject(touchPos);
         sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
         sb.draw(playBtnImage,(graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);

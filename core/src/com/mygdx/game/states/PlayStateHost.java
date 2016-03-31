@@ -5,6 +5,7 @@ import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
 
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 
 import static java.lang.Thread.sleep;
 
@@ -203,8 +204,10 @@ public class PlayStateHost extends PlayState {
             mapMod.acquire();
             mapBuffer.add(new_row);
 
-            MacroHardv2.actionResolver.sendReliable(tobyte(new_row, HostMapCounter));
-            HostMapCounter = (HostMapCounter + 1) % 20;
+            if (mapBuffer.size() > 5) {
+                MacroHardv2.actionResolver.sendReliable(tobyte(mapBuffer.get(5), HostMapCounter));
+                HostMapCounter = (HostMapCounter + 1) % 15;
+            }
 
             mapMod.release();
             mapCon.release();
