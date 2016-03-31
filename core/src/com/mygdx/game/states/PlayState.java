@@ -148,27 +148,31 @@ public abstract class PlayState extends State{
             cam.unproject(touchPos);
             float relativex = touchPos.x - (joystick.getX());
             float relativey = touchPos.y - (joystick.getY());
+
             if (touchHeld ||
                     (Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
                             Math.abs(relativey) < joystick.getJoystickWidth()/2)) {
                 touchHeld = true;
+
                 //calculates the relevant numbers needed for omnidirectional movement
                 float angle = (float) Math.atan2(relativey, relativex);
                 float cos = (float) Math.cos(angle);
                 float sin = (float) Math.sin(angle);
+                float ratio;
                 //setting joystick centre coordinates
                 if ((Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
                         Math.abs(relativey) < joystick.getJoystickWidth()/2)){
-                    joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth()/2);
+                    ratio = (float) ((Math.pow(relativex, 2) + Math.pow(relativey, 2))
+                            - Math.pow(joystick.getJoystickWidth()/2,2));
+                    joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth() / 2);
                     joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
                 } else {
+                    ratio = 1;
                     joystick.setCX(joystick.getX() - joystick.getJoystickCenterWidth()/2 + joystick.getJoystickWidth()/2*cos);
                     joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight()/2 + joystick.getJoystickWidth()/2*sin);
                 }
-                //joystick centre buffer region
-                if (Math.pow(relativex, 2) + Math.pow(relativey, 2) > 300) {
-                    omniMove(cos, sin);
-                }
+
+                omniMove(cos, sin, ratio);
             } else {
                 if (!icons.isEmpty()){
                     if (icons.get(0).contains(touchPos.x, touchPos.y)){
@@ -360,27 +364,27 @@ public abstract class PlayState extends State{
     /**
      Method to move the player
      */
-    private void omniMove(float x, float y){
+    private void omniMove(float x, float y, float ratio){
         float prevx = player.x;
         float prevy = player.y;
-        player.x += x * playerSpeed * Gdx.graphics.getDeltaTime();
-        player.y += y * playerSpeed * Gdx.graphics.getDeltaTime();
+        player.x += ratio * x * playerSpeed * Gdx.graphics.getDeltaTime();
+        player.y += ratio * y * playerSpeed * Gdx.graphics.getDeltaTime();
         if (collidesObstacle()){
             player.x = prevx;
             player.y = prevy;
 
             if (x > 0) {
-                player.x += playerSpeed * Gdx.graphics.getDeltaTime();
+                player.x += ratio * playerSpeed * Gdx.graphics.getDeltaTime();
             } else {
-                player.x -= playerSpeed * Gdx.graphics.getDeltaTime();
+                player.x -= ratio * playerSpeed * Gdx.graphics.getDeltaTime();
             }
             if (collidesObstacle()){
                 player.x = prevx;
             }
             if (y > 0) {
-                player.y += playerSpeed * Gdx.graphics.getDeltaTime();
+                player.y += ratio * playerSpeed * Gdx.graphics.getDeltaTime();
             } else {
-                player.y -= playerSpeed * Gdx.graphics.getDeltaTime();
+                player.y -= ratio * playerSpeed * Gdx.graphics.getDeltaTime();
             }
             if (collidesObstacle()){
                 player.y = prevy;
