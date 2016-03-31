@@ -205,7 +205,7 @@ public class PlayStateHost extends PlayState {
             mapBuffer.add(new_row);
 
             if (mapBuffer.size() > 5) {
-                MacroHardv2.actionResolver.sendReliable(tobyte(mapBuffer.get(5), HostMapCounter));
+                MacroHardv2.actionResolver.sendReliable(tobyte(mapBuffer.get(mapBuffer.size() - 6), HostMapCounter));
                 HostMapCounter = (HostMapCounter + 1) % 15;
             }
 

@@ -201,8 +201,6 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             Intent i = Games.RealTimeMultiplayer.getWaitingRoomIntent(getApiClient(), arg1, 2);
             this.activity.startActivityForResult(i, RC_WAITING_ROOM);
         }
-
-
     }
 
     public void sendPing(byte[] message){
