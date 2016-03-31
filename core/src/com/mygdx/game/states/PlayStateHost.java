@@ -21,6 +21,11 @@ public class PlayStateHost extends PlayState {
     public PlayStateHost(GameStateManager gsm, int playerID){
         super(gsm, playerID);
         //spawning initialization
+        try {
+            mapCon.acquire(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         HostMapCounter = 0;
         doorCounter = 0;
         powerCounter = 0;
