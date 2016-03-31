@@ -45,6 +45,7 @@ public abstract class PlayState extends State{
     private Vector3 touchPos = new Vector3();
 
     //values
+    protected boolean nonHostsReady;
     private int mapCounter = 0;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
@@ -63,7 +64,6 @@ public abstract class PlayState extends State{
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
-    boolean[] current = createArray(true);
 
     //Arraylists
     protected ArrayList<MapTile[]> mapBuffer = new ArrayList<MapTile[]>();
@@ -630,8 +630,18 @@ public abstract class PlayState extends State{
         //update player coordinates
         if(message != null){
             switch(message[0]) {
-                //other player's coordinates
 
+                case -2:
+                    nonHostsReady = true;
+                    break;
+
+                case -1:
+                    if (running){
+                        MacroHardv2.actionResolver.sendPing(new byte[]{-2});
+                    }
+                    break;
+
+                //other player's coordinates
                 case 0:
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
                     float y = (float) message[4] * 10 + (float) message[5] / 10;

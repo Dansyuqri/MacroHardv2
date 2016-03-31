@@ -23,7 +23,7 @@ public class PlayerCoordinateSender extends Thread {
                 e.printStackTrace();
             }
             byte[] message = wrapCoords(MacroHardv2.actionResolver.getmyidint(),game.player.x,game.player.y);
-            MacroHardv2.actionResolver.sendPos(message);
+            MacroHardv2.actionResolver.sendPing(message);
         }
     }
 

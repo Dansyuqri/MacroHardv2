@@ -155,9 +155,7 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 	public void setGame(MacroHardv2 game) {
 		_gameHelper.setGame(game);
 	}
-	public void sendPos(byte[] coor){
-		_gameHelper.sendPos(coor);
-	}
+	public void sendPing(byte[] ping){_gameHelper.sendPing(ping);}
 	public void sendReliable(byte[] message){
 		_gameHelper.sendReliable(message);
 	}

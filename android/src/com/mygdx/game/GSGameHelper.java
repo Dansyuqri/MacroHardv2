@@ -205,7 +205,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     }
 
-    public void sendPos(byte[] message){
+    public void sendPing(byte[] message){
         try{
             Games.RealTimeMultiplayer.sendUnreliableMessageToOthers(getApiClient(), message, mRoomID);
         }

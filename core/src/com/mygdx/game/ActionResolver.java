@@ -13,7 +13,7 @@ public interface ActionResolver {
     void initMatch();
     void setGame(MacroHardv2 game);
 
-    void sendPos(byte[] coor);
+    void sendPing(byte[] ping);
     void sendReliable(byte[] message);
 
     String gethostid();
