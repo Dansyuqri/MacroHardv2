@@ -70,7 +70,7 @@ public class MenuState extends State{
     @Override
     public void handleInput() {
         touchPos.x = Gdx.input.getX();
-        touchPos.y = Gdx.graphics.getHeight() - Gdx.input.getY();
+        touchPos.y = Gdx.input.getY();
         cam.unproject(touchPos);
 
         if(goToPlay){
