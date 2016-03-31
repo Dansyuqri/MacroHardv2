@@ -226,12 +226,6 @@ public class PlayStateHost extends PlayState {
     public void goToRestartState(){
         coordSender.interrupt();
         mapMaker.interrupt();
-        try {
-            coordSender.join();
-            mapMaker.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         dispose();
         gsm.set(new RestartState(gsm));
     }

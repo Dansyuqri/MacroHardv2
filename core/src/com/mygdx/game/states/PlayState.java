@@ -230,8 +230,10 @@ public abstract class PlayState extends State{
         effectActivePower();
         effectDangerZone(player);
 
-        tracker -= gameSpeed * Gdx.graphics.getDeltaTime();
-        trackerBG -= gameSpeed * Gdx.graphics.getDeltaTime();
+        synchronized (this) {
+            tracker -= gameSpeed * Gdx.graphics.getDeltaTime();
+            trackerBG -= gameSpeed * Gdx.graphics.getDeltaTime();
+        }
 
 //      move the obstacles, remove any that are beneath the bottom edge of the screen.
 
@@ -246,7 +248,9 @@ public abstract class PlayState extends State{
             while (gameObjectIterator.hasNext()){
                 GameObject gameObject = gameObjectIterator.next();
                 if (gameObject instanceof Movable) {
-                    ((Movable) gameObject).scroll(gameSpeed);
+                    synchronized (this) {
+                        ((Movable) gameObject).scroll(gameSpeed);
+                    }
                 }
             }
         }
@@ -478,7 +482,7 @@ public abstract class PlayState extends State{
 
     private void checkSwitchCollision(){
         //		collides with switch
-        synchronized (this) {
+        synchronized (Switch.class) {
             if (gotSwitch) {
                 gotSwitch = false;
                 for (GameObject door : doors) {
@@ -508,7 +512,7 @@ public abstract class PlayState extends State{
      Methods handling power-ups/affecting game attributes
      */
 
-    private void effectDangerZone(Player p) {
+    private synchronized void effectDangerZone(Player p) {
         if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
             gameSpeed += speedIncrease;
             sendGameSpeed();
@@ -518,27 +522,31 @@ public abstract class PlayState extends State{
     private void effectPassivePower(){
         if (player.getPassivePowerState()) {
             if (!player.getPassivePowerEffectTaken()) {
-                if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
-                    tempGameSpeed = gameSpeed;
-                    gameSpeed = 0;
-                    sendGameSpeed();
-                } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
-                    gameSpeed *= speedChange;
-                    sendGameSpeed();
-                } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
-                    playerSpeed /= speedChange;
+                synchronized (this) {
+                    if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
+                        tempGameSpeed = gameSpeed;
+                        gameSpeed = 0;
+                        sendGameSpeed();
+                    } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
+                        gameSpeed *= speedChange;
+                        sendGameSpeed();
+                    } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
+                        playerSpeed /= speedChange;
+                    }
                 }
                 player.setPassivePowerEffectTaken(true);
             }
             if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
-                if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
-                    gameSpeed = tempGameSpeed;
-                    sendGameSpeed();
-                } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
-                    gameSpeed /= speedChange;
-                    sendGameSpeed();
-                } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
-                    playerSpeed *= speedChange;
+                synchronized (this) {
+                    if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
+                        gameSpeed = tempGameSpeed;
+                        sendGameSpeed();
+                    } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
+                        gameSpeed /= speedChange;
+                        sendGameSpeed();
+                    } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
+                        playerSpeed *= speedChange;
+                    }
                 }
                 player.setPassivePowerState(false);
                 player.setPassivePowerEffectTaken(false);
@@ -610,20 +618,26 @@ public abstract class PlayState extends State{
     private void sendGameSpeed(){
         byte[] message = new byte[3];
         message[0] = 3;
-        message[1] = (byte) (gameSpeed/10);
-        message[2] = (byte)((gameSpeed*10)%100);
+        synchronized (this) {
+            message[1] = (byte) (gameSpeed / 10);
+            message[2] = (byte) ((gameSpeed * 10) % 100);
+        }
         MacroHardv2.actionResolver.sendReliable(message);
     }
 
     private void doSmoothInterpolation(int player){
         try {
-            float relX = players.get(player).x - previousCoordinates[player][0];
-            float relY = players.get(player).y - previousCoordinates[player][1] + gameSpeed * Gdx.graphics.getDeltaTime();
-            float angle = (float) Math.atan2(relY, relX);
-            float cos = (float) Math.cos(angle);
-            float sin = (float) Math.sin(angle);
-            players.get(player).x += cos * gameSpeed * Gdx.graphics.getDeltaTime();
-            players.get(player).y += sin * gameSpeed * Gdx.graphics.getDeltaTime();
+            synchronized (this) {
+                float relX = players.get(player).x - previousCoordinates[player][0];
+                float relY = players.get(player).y - previousCoordinates[player][1] + gameSpeed * Gdx.graphics.getDeltaTime();
+                float angle = (float) Math.atan2(relY, relX);
+                float cos = (float) Math.cos(angle);
+                float sin = (float) Math.sin(angle);
+                if (!(relX == 0 && relY == 0)) {
+                    players.get(player).x += cos * gameSpeed * Gdx.graphics.getDeltaTime();
+                    players.get(player).y += sin * gameSpeed * Gdx.graphics.getDeltaTime();
+                }
+            }
         } catch (NullPointerException ignored){}
         previousCoordinates[player][0] = players.get(player).x;
         previousCoordinates[player][1] = players.get(player).y;
@@ -675,14 +689,16 @@ public abstract class PlayState extends State{
 
                 //open doors
                 case 2:
-                    synchronized (this) {
+                    synchronized (Switch.class) {
                         gotSwitch = true;
                     }
                     break;
 
                 //game speed update
                 case 3:
-                    gameSpeed = ((float) message[1] * 10 + (float) message[2] / 10);
+                    synchronized (this) {
+                        gameSpeed = ((float) message[1] * 10 + (float) message[2] / 10);
+                    }
                     break;
                 //end game
                 case 4:
@@ -694,11 +710,6 @@ public abstract class PlayState extends State{
 
     public void goToRestartState(){
         coordSender.interrupt();
-        try {
-            coordSender.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         dispose();
         gsm.set(new RestartState(gsm));
     }
