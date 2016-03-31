@@ -47,7 +47,8 @@ public class RestartState extends State{
     @Override
     protected void handleInput() {
         touchPos.x = Gdx.input.getX();
-        touchPos.y = Gdx.graphics.getHeight() - Gdx.input.getY();
+        touchPos.y = Gdx.input.getY();
+        cam.unproject(touchPos);
 
         /****************************************************************************************
          * This is a set of conditions to handle the highlighting of the buttons when pressed
@@ -93,9 +94,9 @@ public class RestartState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
+        handleInput();
         sb.begin();
         cam.update();
-        cam.unproject(touchPos);
         sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
         sb.draw(playAgainBtnImage, (graphicsX / 2) - (playAgainBtnX / 2), graphicsY / 2 - playAgainBtnY / 2, playAgainBtnX, playAgainBtnY);

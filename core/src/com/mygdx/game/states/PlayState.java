@@ -236,8 +236,6 @@ public abstract class PlayState extends State{
         tracker -= gameSpeed * Gdx.graphics.getDeltaTime();
         trackerBG -= gameSpeed * Gdx.graphics.getDeltaTime();
 
-//      move the obstacles, remove any that are beneath the bottom edge of the screen.
-
 //        for (int i = 0; i < players.size(); i++) {
 //            if (i != playerID){
 //                doSmoothInterpolation(i);
