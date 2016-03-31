@@ -44,8 +44,9 @@ public abstract class PlayState extends State{
     protected Player player;
     private Vector3 touchPos = new Vector3();
 
+    PlayerCoordinateSender coordSender;
+
     //values
-    protected boolean nonHostsReady;
     private int mapCounter = 0;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
@@ -134,7 +135,7 @@ public abstract class PlayState extends State{
         createObstacle();
         createSides();
 
-        PlayerCoordinateSender coordSender = new PlayerCoordinateSender(this);
+        coordSender = new PlayerCoordinateSender(this);
         coordSender.start();
         running = true;
     }
@@ -631,16 +632,6 @@ public abstract class PlayState extends State{
         if(message != null){
             switch(message[0]) {
 
-                case -2:
-                    nonHostsReady = true;
-                    break;
-
-                case -1:
-                    if (running){
-                        MacroHardv2.actionResolver.sendPing(new byte[]{-2});
-                    }
-                    break;
-
                 //other player's coordinates
                 case 0:
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
@@ -702,7 +693,13 @@ public abstract class PlayState extends State{
     }
 
     public void goToRestartState(){
-        gsm.set(new RestartState(gsm));
+        coordSender.interrupt();
+        try {
+            coordSender.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         dispose();
+        gsm.set(new RestartState(gsm));
     }
 }

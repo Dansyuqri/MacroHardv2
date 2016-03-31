@@ -15,6 +15,7 @@ public class PlayStateHost extends PlayState {
     private int doorCounter, powerCounter, spikeCounter, HostMapCounter;
     private ArrayList<MapTile[]> memory;
     private boolean[] current = createArray(true);
+    private MapMaker mapMaker;
 
     public PlayStateHost(GameStateManager gsm, int playerID){
         super(gsm, playerID);
@@ -28,13 +29,8 @@ public class PlayStateHost extends PlayState {
         for (int i = 0; i < 5; i++){
             memory.add(init);
         }
-        nonHostsReady = false;
-        //wait for non-hosts
-        while (!nonHostsReady){
-            MacroHardv2.actionResolver.sendPing(new byte[]{-1});
-        }
 
-        MapMaker mapMaker = new MapMaker(this);
+        mapMaker = new MapMaker(this);
         mapMaker.start();
     }
 
@@ -225,5 +221,18 @@ public class PlayStateHost extends PlayState {
             temp[i]=row[i-2].toByte();
         }
         return temp;
+    }
+
+    public void goToRestartState(){
+        coordSender.interrupt();
+        mapMaker.interrupt();
+        try {
+            coordSender.join();
+            mapMaker.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        dispose();
+        gsm.set(new RestartState(gsm));
     }
 }
