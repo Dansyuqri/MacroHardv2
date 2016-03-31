@@ -239,11 +239,11 @@ public abstract class PlayState extends State{
 
 //      move the obstacles, remove any that are beneath the bottom edge of the screen.
 
-        for (int i = 0; i < players.size(); i++) {
-            if (i != playerID){
-                doSmoothInterpolation(i);
-            }
-        }
+//        for (int i = 0; i < players.size(); i++) {
+//            if (i != playerID){
+//                doSmoothInterpolation(i);
+//            }
+//        }
 
         for (ArrayList<GameObject> gameObj: gameObjects){
             Iterator<GameObject> gameObjectIterator = gameObj.iterator();
