@@ -198,9 +198,7 @@ public class MenuState extends State{
     }
 
     @Override
-    public void update(byte[] message) {
-        handleInput();
-    }
+    public void update(byte[] message) {}
 
     public void generateTextures(){
         background = new Texture("Main_menu.png");
