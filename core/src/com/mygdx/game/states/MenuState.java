@@ -75,14 +75,18 @@ public class MenuState extends State{
 
         if(goToPlay){
             goToPlay = false;
-            dispose();
-            gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()));
+            synchronized (SpriteBatch.class) {
+                dispose();
+                gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()));
+            }
         }
 
         if(gotoPlayP){
             gotoPlayP = false;
-            dispose();
-            gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()));
+            synchronized (SpriteBatch.class) {
+                dispose();
+                gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()));
+            }
         }
 
         /****************************************************************************************
@@ -171,17 +175,19 @@ public class MenuState extends State{
     @Override
     public void render(SpriteBatch sb) {
         handleInput();
-        sb.begin();
-        cam.update();
-        sb.setProjectionMatrix(cam.combined);
-        sb.draw(background, 0, 0, graphicsX, graphicsY);
-        sb.draw(playBtnImage,(graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
-        sb.draw(quickGameBtnImage, (graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
-        sb.draw(instructionBtnImage, (graphicsX / 2) - (instructionBtnX/2), graphicsY / 2 - instructionBtnY/2, instructionBtnX, instructionBtnY);
-        sb.draw(sendInviteBtnImage,(graphicsX/2)-(sendInviteBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY- bufferFromTop),sendInviteBtnX,sendInviteBtnY);
-        sb.draw(invitationBtnImage,(graphicsX/2)-(invitationBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY-invitationBtnY- 2*bufferFromTop),invitationBtnX,invitationBtnY);
-        sb.draw(signInBtnImage,(graphicsX/2)-(signInBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY- 3*bufferFromTop),signInBtnX,signInBtnY);
-        sb.end();
+        synchronized (SpriteBatch.class) {
+            sb.begin();
+            cam.update();
+            sb.setProjectionMatrix(cam.combined);
+            sb.draw(background, 0, 0, graphicsX, graphicsY);
+            sb.draw(playBtnImage, (graphicsX / 2) - (playBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + quickGameBtnY + 2 * bufferFromTop), playBtnX, playBtnY);
+            sb.draw(quickGameBtnImage, (graphicsX / 2) - (quickGameBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + bufferFromTop), quickGameBtnX, quickGameBtnY);
+            sb.draw(instructionBtnImage, (graphicsX / 2) - (instructionBtnX / 2), graphicsY / 2 - instructionBtnY / 2, instructionBtnX, instructionBtnY);
+            sb.draw(sendInviteBtnImage, (graphicsX / 2) - (sendInviteBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - bufferFromTop), sendInviteBtnX, sendInviteBtnY);
+            sb.draw(invitationBtnImage, (graphicsX / 2) - (invitationBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - 2 * bufferFromTop), invitationBtnX, invitationBtnY);
+            sb.draw(signInBtnImage, (graphicsX / 2) - (signInBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - signInBtnY - 3 * bufferFromTop), signInBtnX, signInBtnY);
+            sb.end();
+        }
     }
 
     @Override

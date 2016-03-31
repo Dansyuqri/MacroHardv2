@@ -51,7 +51,7 @@ public abstract class PlayState extends State{
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     public boolean running;
-    private boolean touchHeld, gotSwitch = false, end = false;
+    private boolean touchHeld;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter;
     public float tracker;
@@ -217,19 +217,21 @@ public abstract class PlayState extends State{
             spawnBg();
             trackerBG += 200;
         }
-        // tell the camera to update its matrices.
-        cam.update();
-        // tell the SpriteBatch to render in the coordinate system specified by the camera.
-        sb.setProjectionMatrix(cam.combined);
 
-        // begin a new batch and draw the player and all objects
-        sb.begin();
-        draw(sb);
-        sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
-        yourBitmapFontName.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-        yourBitmapFontName.draw(sb, yourScoreName, 25, 100);
+        synchronized (SpriteBatch.class) {
+            // tell the camera to update its matrices.
+            cam.update();
+            // tell the SpriteBatch to render in the coordinate system specified by the camera.
+            sb.setProjectionMatrix(cam.combined);
 
-        sb.end();
+            // begin a new batch and draw the player and all objects
+            sb.begin();
+            draw(sb);
+            sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
+            yourBitmapFontName.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+            yourBitmapFontName.draw(sb, yourScoreName, 25, 100);
+            sb.end();
+        }
 
         checkSwitchCollision();
         collidesBoundaries();
@@ -258,13 +260,6 @@ public abstract class PlayState extends State{
                 }
             }
         }
-
-        synchronized (this) {
-            if (end) {
-                goToRestartState();
-            }
-        }
-
     }
 
     @Override
@@ -492,14 +487,6 @@ public abstract class PlayState extends State{
 
     private void checkSwitchCollision(){
         //		collides with switch
-        synchronized (Switch.class) {
-            if (gotSwitch) {
-                gotSwitch = false;
-                for (GameObject door : doors) {
-                    ((Door) door).setOpen();
-                }
-            }
-        }
         for (GameObject eachSwitch:switches){
             if (((Switch) eachSwitch).collides(player, this)){
                 for (GameObject door: doors){
@@ -704,8 +691,10 @@ public abstract class PlayState extends State{
 
                 //open doors
                 case 2:
-                    synchronized (Switch.class) {
-                        gotSwitch = true;
+                    synchronized (SpriteBatch.class) {
+                        for (GameObject door : doors) {
+                            ((Door) door).setOpen();
+                        }
                     }
                     break;
 
@@ -717,8 +706,8 @@ public abstract class PlayState extends State{
                     break;
                 //end game
                 case 4:
-                    synchronized (this){
-                        end = true;
+                    synchronized (SpriteBatch.class) {
+                        goToRestartState();
                     }
                     break;
             }
