@@ -625,6 +625,8 @@ public abstract class PlayState extends State{
             players.get(player).x += cos * gameSpeed * Gdx.graphics.getDeltaTime();
             players.get(player).y += sin * gameSpeed * Gdx.graphics.getDeltaTime();
         } catch (NullPointerException ignored){}
+        previousCoordinates[player][0] = players.get(player).x;
+        previousCoordinates[player][1] = players.get(player).y;
     }
 
     public void update(byte[] message) {
@@ -638,8 +640,6 @@ public abstract class PlayState extends State{
                     float y = (float) message[4] * 10 + (float) message[5] / 10;
                     players.get((int) message[1]).x = x;
                     players.get((int) message[1]).y = y;
-                    previousCoordinates[(int) message[1]][0] = x;
-                    previousCoordinates[(int) message[1]][1] = y;
                     break;
 
                 //map
