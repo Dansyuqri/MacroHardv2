@@ -97,7 +97,7 @@ public abstract class PlayState extends State{
         touchHeld = false;
 
         //camera initialization
-        cam = new OrthographicCamera();
+        cam = new OrthographicCamera(480,800);
         cam.setToOrtho(false, 480, 800);
 
         //object initialization
