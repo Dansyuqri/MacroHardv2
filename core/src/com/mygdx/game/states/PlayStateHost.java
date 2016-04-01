@@ -118,7 +118,8 @@ public class PlayStateHost extends PlayState {
         }
         return new_row;
     }
-    public void genSwitch(ArrayList<MapTile[]> memory, boolean[] current){
+
+    public MapTile[] genSwitch(ArrayList<MapTile[]> memory, boolean[] current, MapTile[] new_row){
         int i;
         for (i = 0; i < current.length; i++) {
             if (current[i]){
@@ -130,7 +131,7 @@ public class PlayStateHost extends PlayState {
 
         int counter = 0;
         while (true) {
-            if (counter > 10) {
+            if (counter > 8) {
                 break;
             }
             int dir = MathUtils.random(0, 3);
@@ -142,7 +143,7 @@ public class PlayStateHost extends PlayState {
                     }
                     break;
                 case 1:
-                    if (j < 4 && memory.get(j + 1)[i] == MapTile.EMPTY) {
+                    if (j < 3 && memory.get(j + 1)[i] == MapTile.EMPTY) {
                         j++;
                         counter++;
                     }
@@ -161,11 +162,18 @@ public class PlayStateHost extends PlayState {
                     break;
             }
         }
-        mapBuffer.get(mapBuffer.size() - j - 1)[i] = MapTile.SWITCH;
+        if (j == 0){
+            new_row[i] = MapTile.SWITCH;
+            return new_row;
+        } else {
+            mapBuffer.get(mapBuffer.size() - j)[i] = MapTile.SWITCH;
+            return null;
+        }
     }
+
     void wallCoord() {
         powerCounter += 1;
-        doorCounter += 1;
+        doorCounter = (doorCounter + 1)%60;
         spikeCounter += 1;
         MapTile[] new_row = createArray(MapTile.OBSTACLES);
 
@@ -187,9 +195,8 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning door
-        if (doorCounter > 44) {
+        if (doorCounter == 45) {
             new_row = genDoor(new_row);
-            doorCounter = 0;
         }
 
         // updating the memory
@@ -197,8 +204,11 @@ public class PlayStateHost extends PlayState {
         memory.add(0, new_row);
 
         // spawning door switch
-        if (doorCounter == 44) {
-            genSwitch(memory, current);
+        if (doorCounter == 44 || doorCounter == 48) {
+            MapTile[] result;
+            if ((result = genSwitch(memory, current, new_row)) != null){
+                new_row = result;
+            }
         }
 
         try {

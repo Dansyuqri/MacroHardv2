@@ -18,11 +18,21 @@ public class Switch extends Obstacle implements Collidable{
 
     @Override
     public boolean collides(Player player, PlayState playState) {
-        if (player.overlaps(this) && !on) {
+        return (player.overlaps(this));
+    }
+
+    public void setOn(){
+        if (!on) {
             this.setImage(new Texture(Gdx.files.internal("switch_on.png")));
             on = true;
-            return true;
         }
-        return false;
+    }
+
+    public void setOff()
+    {
+        if (on) {
+            this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
+            on = false;
+        }
     }
 }

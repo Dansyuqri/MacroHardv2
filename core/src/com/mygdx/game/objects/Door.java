@@ -17,8 +17,17 @@ public class Door extends Obstacle implements Collidable{
     }
 
     public void setOpen(){
-        open = true;
-        this.setImage(new Texture(Gdx.files.internal("gate_open.png")));
+        if (!open) {
+            open = true;
+            this.setImage(new Texture(Gdx.files.internal("gate_open.png")));
+        }
+    }
+
+    public void setClose(){
+        if (open) {
+            open = false;
+            this.setImage(new Texture(Gdx.files.internal("gate_closed.png")));
+        }
     }
 
     @Override

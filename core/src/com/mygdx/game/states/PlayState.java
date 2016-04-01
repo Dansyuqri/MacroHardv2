@@ -492,20 +492,33 @@ public abstract class PlayState extends State{
 
     private void checkSwitchCollision(){
         //		collides with switch
+
+        boolean open = false;
+        for (GameObject eachSwitch:switches){
+            if (((Switch) eachSwitch).collides(player, this)){
+                open = true;
+                ((Switch) eachSwitch).setOn();
+                MacroHardv2.actionResolver.sendReliable(new byte[]{2});
+            } else {
+                ((Switch) eachSwitch).setOff();
+                MacroHardv2.actionResolver.sendReliable(new byte[]{-2});
+            }
+        }
+
         synchronized (Switch.class) {
             if (gotSwitch) {
                 gotSwitch = false;
-                for (GameObject door : doors) {
-                    ((Door) door).setOpen();
-                }
+                open = true;
             }
         }
-        for (GameObject eachSwitch:switches){
-            if (((Switch) eachSwitch).collides(player, this)){
-                for (GameObject door: doors){
-                    ((Door)door).setOpen();
-                }
-                MacroHardv2.actionResolver.sendReliable(new byte[]{2});
+
+        if (open) {
+            for (GameObject door : doors) {
+                ((Door) door).setOpen();
+            }
+        } else {
+            for (GameObject door: doors){
+                ((Door)door).setClose();
             }
         }
 
@@ -706,6 +719,13 @@ public abstract class PlayState extends State{
                 case 2:
                     synchronized (Switch.class) {
                         gotSwitch = true;
+                    }
+                    break;
+
+                //close doors
+                case -2:
+                    synchronized (Switch.class) {
+                        gotSwitch = false;
                     }
                     break;
 
