@@ -35,7 +35,7 @@ import java.util.List;
  * Created by Nayr on 10/3/2016.
  */
 public class GSGameHelper extends GameHelper implements RoomUpdateListener, RealTimeMessageReceivedListener,RoomStatusUpdateListener,OnInvitationReceivedListener {
-    final static String TAG = "ButtonClicker2000";
+    final static String TAG = "MacroHard";
     static final int RC_SELECT_PLAYERS = 10000;
     static final int RC_WAITING_ROOM = 10002;
     final static int RC_INVITATION_INBOX = 10001;
@@ -46,13 +46,13 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     private String mRoomId = null;
     public String mMyId = null;
     public String host;
-    String mIncomingInvitationId = null;
     public int myidno;
+    String mIncomingInvitationId = null;
+
 
     public GSGameHelper(Activity activity, int clientsToUse) {
         super(activity, clientsToUse);
         this.activity = activity;
-        // TODO Auto-generated constructor stub
     }
 
     public void quickGame(){
@@ -61,10 +61,6 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         roomConfigBuilder.setAutoMatchCriteria(am);
         RoomConfig roomConfig = roomConfigBuilder.build();
         Games.RealTimeMultiplayer.create(getApiClient(), roomConfig);
-
-        // prevent screen from sleeping during handshake
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
     }
 
     public void initMatch(){
@@ -87,7 +83,6 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                 activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 BaseGameUtils.showAlert(activity, "Left Room");
             }else if (response == Activity.RESULT_OK){
-                //BaseGameUtils.showAlert(activity, "Game Starting!");
                 Participant host = invitees.get(0);
                 this.host = host.getParticipantId();
                 for(int i = 0; i < invitees.size();i++){
@@ -163,8 +158,8 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     @Override
     public void onLeftRoom(int arg0, String arg1) {
-        BaseGameUtils.makeSimpleDialog(activity, "Abandonado partida");
-        Gdx.app.log("LEAVE", "Me fui de la Room");
+        BaseGameUtils.makeSimpleDialog(activity, "Abandoned Game");
+        Gdx.app.log("LEAVE", "Left Room");
 
     }
 
@@ -193,7 +188,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     public void onRoomCreated(int arg0, Room arg1) {
         if (arg0 != GamesStatusCodes.STATUS_OK) {
             //BaseGameUtils.showAlert(activity, "Room creation error");
-            BaseGameUtils.makeSimpleDialog(activity, "Error al crear la partida", "Room creation error " + arg0).show();
+            BaseGameUtils.makeSimpleDialog(activity, "Error Creating Room", "Room creation error " + arg0).show();
             Gdx.app.log("R", "Room Created FAILED");
         }else{
             Gdx.app.log("R", "Room Created");
@@ -397,6 +392,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         mIncomingInvitationId = invitation.getInvitationId();
         BaseGameUtils.showAlert(activity, "Received Invitation");
         seeinvites();
+        //try to do popup TO DO
         /*((TextView) findViewById(R.id.incoming_invitation_text)).setText(
                 invitation.getInviter().getDisplayName() + " " +
                         getString(R.string.is_inviting_you));
@@ -408,7 +404,6 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
         if (mIncomingInvitationId.equals(invitationId)&&mIncomingInvitationId!=null) {
             mIncomingInvitationId = null;
-            /*switchToScreen(mCurScreen); // This will hide the invitation popup*/
         }
 
     }
