@@ -25,7 +25,6 @@ public class RestartState extends State{
 
     public RestartState(GameStateManager gsm){
         super(gsm);
-        System.out.println("in rs state");
         cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         cam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         graphicsX = Gdx.graphics.getWidth();
@@ -61,7 +60,6 @@ public class RestartState extends State{
                 touched = true;
             }
             else if(mainMenuBtn.contains(touchPos.x,touchPos.y)){
-                System.out.println(true);
                 mainMenuBtnImage.dispose();
                 mainMenuBtnImage = new Texture("mainMenuBtn_pressed.png");
                 touched = true;
@@ -88,9 +86,7 @@ public class RestartState extends State{
     }
 
     @Override
-    public void update(byte[] message) {
-        handleInput();
-    }
+    public void update(byte[] message) {}
 
     @Override
     public void render(SpriteBatch sb) {

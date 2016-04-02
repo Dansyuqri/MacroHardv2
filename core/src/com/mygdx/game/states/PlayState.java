@@ -98,7 +98,6 @@ public abstract class PlayState extends State{
         player = (Player) players.get(playerID);
 
         mapPro = new Semaphore(15);
-        mapCon = new Semaphore(0);
         mapMod = new Semaphore(1);
         mapCounter = 0;
 
@@ -745,9 +744,5 @@ public abstract class PlayState extends State{
         }
     }
 
-    public void goToRestartState(){
-        coordSender.interrupt();
-        dispose();
-        gsm.set(new RestartState(gsm));
-    }
+    public abstract void goToRestartState();
 }

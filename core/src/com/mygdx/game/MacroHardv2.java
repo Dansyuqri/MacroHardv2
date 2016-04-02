@@ -36,6 +36,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		gsm.render(batch);
 	}
+
 	public MacroHardv2(ActionResolver actionResolver) {
 		this.actionResolver = actionResolver;
 		actionResolver.setGame(this);

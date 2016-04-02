@@ -190,7 +190,7 @@ public class PlayStateHost extends PlayState {
         }
 
         // spawning power ups after a certain time. 20 is default. 20 is for testing
-        if (powerCounter > 20) {
+        if (powerCounter > 23) {
             new_row = genPower(new_row);
         }
 
