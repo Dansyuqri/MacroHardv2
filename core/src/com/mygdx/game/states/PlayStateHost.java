@@ -98,6 +98,17 @@ public class PlayStateHost extends PlayState {
         return new_row;
     }
 
+    public MapTile[] genHole(MapTile[] new_row){
+        int holeNo = MathUtils.random(0,2);
+        for (int j = 0; j < holeNo; j++) {
+            int pos = MathUtils.random(0,8);
+            if (new_row[pos] == MapTile.EMPTY){
+                new_row[pos] = MapTile.HOLE;
+            }
+        }
+        return new_row;
+    }
+
     public MapTile[] genPower(MapTile[] new_row){
         while (true){
             int temp = MathUtils.random(0,8);
@@ -186,6 +197,7 @@ public class PlayStateHost extends PlayState {
         // creating random spikes
         if (spikeCounter > 3) {
             new_row = genSpikes(new_row);
+            new_row = genHole(new_row);
             spikeCounter = 0;
         }
 
