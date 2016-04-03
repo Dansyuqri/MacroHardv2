@@ -195,7 +195,7 @@ public class MenuState extends State{
     }
 
     public void generateTextures(){
-        background = new Texture("menu_bg.png");
+        background = new Texture("Main_menu.png");
         playBtnImage = new Texture("playBtn.png");
         instructionBtnImage = new Texture("instructionBtn.png");
         quickGameBtnImage = new Texture("quickGameBtn.png");

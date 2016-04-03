@@ -4,13 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.PowerType;
+import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.DangerZone;
 import com.mygdx.game.objects.GameObject;
 import com.mygdx.game.objects.Ghost;
+import com.mygdx.game.objects.Hole;
 import com.mygdx.game.objects.Icon;
 import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Overlay;
@@ -52,6 +55,7 @@ public abstract class PlayState extends State{
     private int score;
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
+    public static Stage stage;
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -72,6 +76,7 @@ public abstract class PlayState extends State{
     private ArrayList<GameObject> doors = new ArrayList<GameObject>();
     private ArrayList<GameObject> powers = new ArrayList<GameObject>();
     private ArrayList<GameObject> spikes = new ArrayList<GameObject>();
+    private ArrayList<GameObject> holes = new ArrayList<GameObject>();
     private ArrayList<GameObject> bg = new ArrayList<GameObject>();
     private ArrayList<GameObject> effects = new ArrayList<GameObject>();
     private ArrayList<GameObject> ui = new ArrayList<GameObject>();
@@ -104,6 +109,7 @@ public abstract class PlayState extends State{
         powerCounter = 0;
         doorCounter = 0;
         dangerZoneSpeedLimit = 250;
+        stage = Stage.DUNGEON;
         tracker = 800;
         trackerBG = 800;
         score = 0;
@@ -111,10 +117,11 @@ public abstract class PlayState extends State{
         yourBitmapFontName = new BitmapFont();
 
         gameObjects.add(bg);
+        gameObjects.add(spikes);
+        gameObjects.add(holes);
         gameObjects.add(powers);
         gameObjects.add(doors);
         gameObjects.add(obstacles);
-        gameObjects.add(spikes);
         gameObjects.add(sideWalls);
         gameObjects.add(switches);
         gameObjects.add(players);
@@ -177,7 +184,7 @@ public abstract class PlayState extends State{
         handleInput();
         checkSwitchCollision();
         // tell the camera to update its matrices.
-        while (tracker < 1050) {
+        while (tracker < 1000) {
             synchronized (this) {
                 while (mapBuffer.size() <= 5){
                     try {
@@ -191,7 +198,7 @@ public abstract class PlayState extends State{
             spawnSides(tracker + tileLength);
             tracker += tileLength;
         }
-        if (trackerBG <= 800) {
+        if (trackerBG <= 1000) {
             spawnBg();
             trackerBG += 200;
         }
@@ -313,15 +320,22 @@ public abstract class PlayState extends State{
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
                     break;
                 case SPIKES:
-                    if (score > 100) {
+                    if (score > 100 && stage == Stage.DUNGEON) {
                         spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 20, tracker + 5, 40, 40));
+                    }
+                case HOLE:
+                    if (stage == Stage.ICE){
+                        holes.add(new Hole((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
                     }
             }
         }
-        if (score > 200) {
+        if (score > 200 && stage == Stage.DUNGEON) {
             if (score % 15 == 0) {
                 ghosts.add(new Ghost((tileLength * 9) + 15, tracker, tileLength, tileLength));
             }
+        }
+        if (score % 300 == 0){
+            stage = Stage.values()[MathUtils.random(0, 1)];
         }
     }
 
