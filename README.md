@@ -6,15 +6,64 @@ At the end of the course, the game will potentially be pushed onto the Google Pl
 ## Project contents
 
 This project is mainly based on BadLogicGames' libGDX open source library.
+#### Using the libGDX library
+After generating the library in the folder of your choice, AndroidLauncher will automatically initialize MacroHardv2 class, which essentially uses libGDX's library.
+		
+		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
+		config.useImmersiveMode = true;
+
+		initialize(new MacroHardv2(this), config);
+		Gdx.graphics.requestRendering();
 
 ####Contents
-
-
+1. android
+    - AndroidLauncher
+    - GSGameHelper
+2. core
+    - ActionResolver
+    - MacroHardv2
+    - **customEnum**
+        - MapTile
+        - MessageCode
+        - PowerType
+        - Stage
+    - **Interface**
+        - Collidable
+    - **objects**
+        - Background
+        - CustomButton
+        - DangerZone
+        - Door
+        - GameObject
+        - Ghost
+        - Hole
+        - Icon
+        - JoyStick
+        - Movable
+        - Obstacle
+        - Overlay
+        - Player
+        - Power
+        - SideWall
+        - Spikes
+        - Switch
+        - UI
+    - **states**
+        - GameStateManager
+        - InstructionState
+        - MapMaker
+        - MenuState
+        - PlayerCoordinateSender
+        - PlayState
+        - PlayStateHost
+        - PlayStateNonHost
+        - RestartState
+        - State
+    
 
 
 ## Motivation
 
-A short description of the motivation behind the creation and maintenance of the project. This should explain **why** the project exists.
 
 ## Installation
 
@@ -24,9 +73,6 @@ Provide code examples and explanations of how to get the project.
 
 Depending on the size of the project, if it is small and simple enough the reference docs can be added to the README. For medium size to larger projects it is important to at least provide a link to where the API reference docs live.
 
-## Tests
-
-Describe and show how to run the tests with code examples.
 
 ## Contributors
 
@@ -40,7 +86,6 @@ Sng Han Jie [hansthefearless](https://github.com/hansthefearless)
 
 A short snippet describing the license (MIT, Apache, etc)
 
-name of the projects and all sub-modules and libraries (sometimes they are named different and very confusing to new users)
 descriptions of all the project, and all sub-modules and libraries
 5-line code snippet on how its used (if it's a library)
 copyright and licensing information (or "Read LICENSE")

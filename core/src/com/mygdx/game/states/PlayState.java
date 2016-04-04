@@ -351,10 +351,12 @@ public abstract class PlayState extends State{
                     if (score > 100 && stage == Stage.DUNGEON) {
                         spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 20, tracker + 5, 40, 40));
                     }
+                    break;
                 case HOLE:
                     if (stage == Stage.ICE){
                         holes.add(new Hole((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
                     }
+                    break;
             }
         }
         if (score > 200 && stage == Stage.DUNGEON) {
