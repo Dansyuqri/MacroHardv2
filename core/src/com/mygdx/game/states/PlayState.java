@@ -511,11 +511,15 @@ public abstract class PlayState extends State{
             if (((Switch) eachSwitch).collides(player, this)){
                 open = true;
                 ((Switch) eachSwitch).setOn();
-                MacroHardv2.actionResolver.sendReliable(new byte[]{2});
             } else {
                 ((Switch) eachSwitch).setOff();
-                MacroHardv2.actionResolver.sendReliable(new byte[]{-2});
             }
+        }
+
+        if (open) {
+            MacroHardv2.actionResolver.sendReliable(new byte[]{2});
+        } else {
+            MacroHardv2.actionResolver.sendReliable(new byte[]{-2});
         }
 
         synchronized (Switch.class) {

@@ -9,6 +9,7 @@ import com.mygdx.game.states.PlayState;
 /**
  * Created by Syuqri on 3/16/2016.
  */
+
 public class Background extends Movable{
     public Background(float y){
         super(0, y, 480, 200);
