@@ -67,7 +67,12 @@ After generating the library in the folder of your choice, AndroidLauncher will 
 
 ## Installation
 
-Provide code examples and explanations of how to get the project.
+Simply pull the git repo and run the application either on an Android Emulator or your Android device.
+
+##### Note 
+Do change the directory of the storeFile found in the **build.gradle(Module: android)**
+
+        storeFile file('C:/Users/User/Desktop/GDX/macrokey.jks')
 
 ## API Reference
 
