@@ -3,9 +3,13 @@
 This is a project done during the **Elements of Software Construction** course. The project deliverables consist of a concurrent multiplayer game (set in Android) in which players are able to interact with each other in real time.
 At the end of the course, the game will potentially be pushed onto the Google Play Store.
 
-## Project details
+## Project contents
 
 This project is mainly based on BadLogicGames' libGDX open source library.
+
+####Contents
+
+
 
 
 ## Motivation
@@ -26,10 +30,10 @@ Describe and show how to run the tests with code examples.
 
 ## Contributors
 
-Lim Zhi Han Ryan [nayr43](https://github.com/nayr43)
-Muhammad Syuqri bin Johanna [dansyuqri](https://github.com/dansyuqri)
-Nguyen Dang Minh [ndmnh](https://github.com/ndmnh)
-Samuel Lim Jik Hao [sabbath65](https://github.com/sabbath65)
+Lim Zhi Han Ryan [nayr43](https://github.com/nayr43)  
+Muhammad Syuqri bin Johanna [dansyuqri](https://github.com/dansyuqri)  
+Nguyen Dang Minh [ndmnh](https://github.com/ndmnh)  
+Samuel Lim Jik Hao [sabbath65](https://github.com/sabbath65)  
 Sng Han Jie [hansthefearless](https://github.com/hansthefearless)
 
 ## License
