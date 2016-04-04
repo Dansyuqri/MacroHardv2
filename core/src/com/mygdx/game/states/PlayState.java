@@ -55,7 +55,7 @@ public abstract class PlayState extends State{
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     public boolean running;
-    private boolean touchHeld, gotSwitch = false, end = false;
+    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter;
     public float tracker;
@@ -517,9 +517,11 @@ public abstract class PlayState extends State{
             }
         }
 
-        if (!open) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_SWITCHES});
+        if (!open && onSwitch) {
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS});
         }
+
+        onSwitch = open;
 
         synchronized (Switch.class) {
             if (gotSwitch) {
@@ -731,14 +733,14 @@ public abstract class PlayState extends State{
                     break;
 
                 //open doors
-                case MessageCode.OPEN_SWITCHES:
+                case MessageCode.OPEN_DOORS:
                     synchronized (Switch.class) {
                         gotSwitch = true;
                     }
                     break;
 
                 //close doors
-                case MessageCode.CLOSE_SWITCHES:
+                case MessageCode.CLOSE_DOORS:
                     synchronized (Switch.class) {
                         gotSwitch = false;
                     }

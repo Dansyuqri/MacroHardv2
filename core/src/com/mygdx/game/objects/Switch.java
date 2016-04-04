@@ -25,7 +25,7 @@ public class Switch extends Obstacle implements Collidable{
 
     public void setOn(){
         if (!on) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_SWITCHES});
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS});
             this.setImage(new Texture(Gdx.files.internal("switch_on.png")));
             on = true;
         }
