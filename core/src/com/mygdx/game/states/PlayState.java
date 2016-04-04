@@ -524,7 +524,6 @@ public abstract class PlayState extends State{
 
         synchronized (Switch.class) {
             if (gotSwitch) {
-                gotSwitch = false;
                 open = true;
             }
         }
