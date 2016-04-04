@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
+import com.mygdx.game.customEnum.MessageCode;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.objects.Background;
@@ -440,7 +441,7 @@ public abstract class PlayState extends State{
         }
 
         if (player.y < 150){
-            MacroHardv2.actionResolver.sendReliable(new byte[]{4});
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
             goToRestartState();
         }
     }
@@ -481,7 +482,7 @@ public abstract class PlayState extends State{
         Iterator<GameObject> spikeIterator = spikes.iterator();
         while (spikeIterator.hasNext()){
             if (((Spikes)spikeIterator.next()).collides(player, this)){
-                MacroHardv2.actionResolver.sendReliable(new byte[]{4});
+                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
                 goToRestartState();
             }
         }
@@ -490,7 +491,7 @@ public abstract class PlayState extends State{
         Iterator<GameObject> ghostIterator = ghosts.iterator();
         while (ghostIterator.hasNext()){
             if (((Ghost)ghostIterator.next()).collides(player, this)){
-                MacroHardv2.actionResolver.sendReliable(new byte[]{4});
+                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
                 goToRestartState();
             }
         }
@@ -517,9 +518,9 @@ public abstract class PlayState extends State{
         }
 
         if (open) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{2});
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_SWITCHES});
         } else {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{-2});
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_SWITCHES});
         }
 
         synchronized (Switch.class) {
@@ -656,7 +657,7 @@ public abstract class PlayState extends State{
 
     private void sendGameSpeed(){
         byte[] message = new byte[3];
-        message[0] = 3;
+        message[0] = MessageCode.CHANGE_GAME_SPEED;
         message[1] = (byte) (gameSpeed / 10);
         message[2] = (byte) ((gameSpeed * 10) % 100);
         MacroHardv2.actionResolver.sendReliable(message);
@@ -680,7 +681,7 @@ public abstract class PlayState extends State{
             switch(message[0]) {
 
                 //other player's coordinates
-                case 0:
+                case MessageCode.PLAYER_POSITION:
                     int other = (int) message[1];
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
                     float y = (float) message[4] * 10 + (float) message[5] / 10;
@@ -701,7 +702,7 @@ public abstract class PlayState extends State{
                     break;
 
                 //map
-                case 1:
+                case MessageCode.MAP_TILES:
                     MapTile[] new_row = new MapTile[GAME_WIDTH];
                     for (int i = 2; i < message.length; i++) {
                         new_row[i - 2] = MapTile.fromByte(message[i]);
@@ -732,27 +733,27 @@ public abstract class PlayState extends State{
                     break;
 
                 //open doors
-                case 2:
+                case MessageCode.OPEN_SWITCHES:
                     synchronized (Switch.class) {
                         gotSwitch = true;
                     }
                     break;
 
                 //close doors
-                case -2:
+                case MessageCode.CLOSE_SWITCHES:
                     synchronized (Switch.class) {
                         gotSwitch = false;
                     }
                     break;
 
                 //game speed update
-                case 3:
+                case MessageCode.CHANGE_GAME_SPEED:
                     synchronized (Player.class) {
                         gameSpeed = ((float) message[1] * 10 + (float) message[2] / 10);
                     }
                     break;
                 //end game
-                case 4:
+                case MessageCode.END_GAME:
                     synchronized (this){
                         end = true;
                     }

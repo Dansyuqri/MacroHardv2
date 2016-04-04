@@ -3,6 +3,7 @@ package com.mygdx.game.states;
 import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MapTile;
+import com.mygdx.game.customEnum.MessageCode;
 
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
@@ -242,7 +243,7 @@ public class PlayStateHost extends PlayState {
 
     private byte[] tobyte(MapTile[] row, int count){
         byte[] temp = new byte[row.length+2];
-        temp[0] = 1;
+        temp[0] = MessageCode.MAP_TILES;
         temp[1] = (byte) count;
         for (int i = 2; i < temp.length; i++) {
             temp[i]=row[i-2].toByte();
