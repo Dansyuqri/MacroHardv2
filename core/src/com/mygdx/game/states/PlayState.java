@@ -517,9 +517,7 @@ public abstract class PlayState extends State{
             }
         }
 
-        if (open) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_SWITCHES});
-        } else {
+        if (!open) {
             MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_SWITCHES});
         }
 

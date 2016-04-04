@@ -3,6 +3,8 @@ package com.mygdx.game.objects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.Interface.Collidable;
+import com.mygdx.game.MacroHardv2;
+import com.mygdx.game.customEnum.MessageCode;
 import com.mygdx.game.states.PlayState;
 
 /**
@@ -23,6 +25,7 @@ public class Switch extends Obstacle implements Collidable{
 
     public void setOn(){
         if (!on) {
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_SWITCHES});
             this.setImage(new Texture(Gdx.files.internal("switch_on.png")));
             on = true;
         }
