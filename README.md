@@ -26,7 +26,11 @@ Describe and show how to run the tests with code examples.
 
 ## Contributors
 
-Let people know how they can dive into the project, include important links to things like issue trackers, irc, twitter accounts if applicable.
+Lim Zhi Han Ryan [nayr43](https://github.com/nayr43)
+Muhammad Syuqri bin Johanna [dansyuqri](https://github.com/dansyuqri)
+Nguyen Dang Minh [ndmnh](https://github.com/ndmnh)
+Samuel Lim Jik Hao [sabbath65](https://github.com/sabbath65)
+Sng Han Jie [hansthefearless](https://github.com/hansthefearless)
 
 ## License
 
