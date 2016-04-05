@@ -154,7 +154,7 @@ public abstract class PlayState extends State{
 
         coordSender = new PlayerCoordinateSender(this);
         coordSender.start();
-        running = false;
+        running = true;
     }
 
     @Override
@@ -205,6 +205,7 @@ public abstract class PlayState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
+
         handleInput();
         while (tracker < 1000) {
             try {
