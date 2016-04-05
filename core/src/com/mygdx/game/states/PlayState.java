@@ -284,6 +284,8 @@ public abstract class PlayState extends State{
             }
         }
 
+        mapSynchronizer.scroll(gameSpeed);
+
         synchronized (this) {
             if (end) {
                 goToRestartState();
