@@ -51,12 +51,14 @@ public abstract class PlayState extends State{
     private Vector3 touchPos = new Vector3();
 
     protected PlayerCoordinateSender coordSender;
+    private MapSynchronizer mapSynchronizer;
 
     //values
     private int mapCounter;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     public boolean running;
+
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone, powerCounter, doorCounter;
@@ -151,6 +153,8 @@ public abstract class PlayState extends State{
         createBg();
         createObstacle();
         createSides();
+
+        mapSynchronizer = new MapSynchronizer();
 
         coordSender = new PlayerCoordinateSender(this);
         coordSender.start();
@@ -698,8 +702,11 @@ public abstract class PlayState extends State{
                 //other player's coordinates
                 case MessageCode.PLAYER_POSITION:
                     int other = (int) message[1];
+                    if (!mapSynchronizer.isSet(other)){
+                        mapSynchronizer.set(other);
+                    }
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
-                    float y = (float) message[4] * 10 + (float) message[5] / 10;
+                    float y = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, other);
                     players.get(other).x = x;
                     players.get(other).y = y;
                     try {
