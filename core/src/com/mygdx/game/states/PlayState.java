@@ -11,6 +11,7 @@ import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.DangerZone;
+import com.mygdx.game.objects.Fog;
 import com.mygdx.game.objects.GameObject;
 import com.mygdx.game.objects.Ghost;
 import com.mygdx.game.objects.Hole;
@@ -82,6 +83,7 @@ public abstract class PlayState extends State{
     private ArrayList<GameObject> ui = new ArrayList<GameObject>();
     private ArrayList<GameObject> icons = new ArrayList<GameObject>();
     private ArrayList<GameObject> ghosts = new ArrayList<GameObject>();
+    private ArrayList<GameObject> fogs = new ArrayList<GameObject>();
 
     //final values
     final int tileLength = 50;
@@ -126,6 +128,7 @@ public abstract class PlayState extends State{
         gameObjects.add(switches);
         gameObjects.add(players);
         gameObjects.add(ghosts);
+        gameObjects.add(fogs);
         gameObjects.add(effects);
         gameObjects.add(ui);
         gameObjects.add(icons);
@@ -355,6 +358,11 @@ public abstract class PlayState extends State{
         Overlay effect = new Overlay(trackerBG);
         bg.add(backg);
         effects.add(effect);
+        if (stage == Stage.ICE){
+            float fogX = MathUtils.random(0,480);
+            Fog fog = new Fog(fogX,trackerBG);
+            fogs.add(fog);
+        }
     }
 
     /**
