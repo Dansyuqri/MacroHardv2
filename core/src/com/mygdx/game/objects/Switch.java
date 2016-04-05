@@ -15,7 +15,7 @@ public class Switch extends Obstacle implements Collidable{
 
     public Switch(float x, float y, float width, float height){
         super(x, y, width, height);
-        this.setImage(new Texture(Gdx.files.internal("switch_off.png")));;
+        this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
     }
 
     @Override
