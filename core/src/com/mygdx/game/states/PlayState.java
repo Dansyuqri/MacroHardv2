@@ -154,7 +154,7 @@ public abstract class PlayState extends State{
 
         coordSender = new PlayerCoordinateSender(this);
         coordSender.start();
-        running = true;
+        running = false;
     }
 
     @Override
@@ -206,6 +206,17 @@ public abstract class PlayState extends State{
     @Override
     public void render(SpriteBatch sb) {
 
+        // allows for the game to wait before starting
+        // non actually necessary
+        if (!running){
+            running = true;
+            try {
+                sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         handleInput();
         while (tracker < 1000) {
             try {
@@ -250,8 +261,8 @@ public abstract class PlayState extends State{
         effectActivePower();
         effectDangerZone(player);
 
-        tracker -= gameSpeed * Gdx.graphics.getDeltaTime();
-        trackerBG -= gameSpeed * Gdx.graphics.getDeltaTime();
+        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+        trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
 
 //        for (int i = 0; i < players.size(); i++) {
 //            if (i != playerID){
@@ -395,24 +406,24 @@ public abstract class PlayState extends State{
     private void omniMove(float x, float y, float ratio){
         float prevx = player.x;
         float prevy = player.y;
-        player.x += ratio * x * playerSpeed * Gdx.graphics.getDeltaTime();
-        player.y += ratio * y * playerSpeed * Gdx.graphics.getDeltaTime();
+        player.x += ratio * x * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+        player.y += ratio * y * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
         if (collidesObstacle()){
             player.x = prevx;
             player.y = prevy;
 
             if (x > 0) {
-                player.x += ratio * playerSpeed * Gdx.graphics.getDeltaTime();
+                player.x += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
             } else {
-                player.x -= ratio * playerSpeed * Gdx.graphics.getDeltaTime();
+                player.x -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
             }
             if (collidesObstacle()){
                 player.x = prevx;
             }
             if (y > 0) {
-                player.y += ratio * playerSpeed * Gdx.graphics.getDeltaTime();
+                player.y += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
             } else {
-                player.y -= ratio * playerSpeed * Gdx.graphics.getDeltaTime();
+                player.y -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
             }
             if (collidesObstacle()){
                 player.y = prevy;
@@ -673,8 +684,8 @@ public abstract class PlayState extends State{
             if (angle != 2) {
                 float cos = (float) Math.cos(angle);
                 float sin = (float) Math.sin(angle);
-                players.get(player).x += cos * gameSpeed * Gdx.graphics.getDeltaTime();
-                players.get(player).y += sin * gameSpeed * Gdx.graphics.getDeltaTime();
+                players.get(player).x += cos * gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+                players.get(player).y += sin * gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
             }
         } catch (NullPointerException ignored){}
     }
@@ -693,7 +704,7 @@ public abstract class PlayState extends State{
                     players.get(other).y = y;
                     try {
                         float relX = players.get(other).x - previousCoordinates[other][0];
-                        float relY = players.get(other).y - previousCoordinates[other][1] + gameSpeed * Gdx.graphics.getDeltaTime();
+                        float relY = players.get(other).y - previousCoordinates[other][1] + gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
                         float angle = (float) Math.atan2(relY, relX);
                         if (Math.pow(relX,2)+Math.pow(relY,2) < 1){
                             prevAngle[other] = 2;

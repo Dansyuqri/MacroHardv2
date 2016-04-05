@@ -161,7 +161,7 @@ public class PlayStateHost extends PlayState {
                     }
                     break;
                 case 2:
-                    if (i < GAME_WIDTH - 1 && memory.get(j)[i + 1] == MapTile.EMPTY) {
+                    if (i < 8 && memory.get(j)[i + 1] == MapTile.EMPTY) {
                         i++;
                         counter++;
                     }

@@ -14,6 +14,6 @@ public abstract class Movable extends GameObject {
         super(x, y, width, height);
     }
     public void scroll (float gameSpeed){
-        y -= gameSpeed * Gdx.graphics.getDeltaTime();
+        y -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
     }
 }
