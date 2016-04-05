@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.Semaphore;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Created by Syuqri on 3/7/2016.
  */
@@ -79,7 +81,7 @@ public abstract class PlayState extends State{
     protected ArrayList<GameObject> players = new ArrayList<GameObject>(
             Arrays.asList(
                     new Player[]{
-                            new Player(), new Player()
+                            new Player(0), new Player(1), new Player(2)
                     }));
     private ArrayList<GameObject> obstacles = new ArrayList<GameObject>();
     private ArrayList<GameObject> sideWalls = new ArrayList<GameObject>();
@@ -117,11 +119,11 @@ public abstract class PlayState extends State{
         joystick = new JoyStick();
 
         //misc values initialization
-        gameSpeed = 80;
+        gameSpeed = 60;
         speedIncrease = (float) 0.07;
         speedChange = (float) 0.4;
         playerSpeed = 200;
-        dangerZone = 200;
+        dangerZone = 300;
         powerCounter = 0;
         doorCounter = 0;
         dangerZoneSpeedLimit = 250;
@@ -152,7 +154,7 @@ public abstract class PlayState extends State{
 
         coordSender = new PlayerCoordinateSender(this);
         coordSender.start();
-        running = true;
+        running = false;
     }
 
     @Override
@@ -271,7 +273,6 @@ public abstract class PlayState extends State{
                 goToRestartState();
             }
         }
-
     }
 
     @Override

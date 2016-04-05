@@ -14,9 +14,7 @@ class MapMaker extends Thread{
             if (isInterrupted()){
                 break;
             }
-            if (playStateHost.running) {
-                playStateHost.wallCoord();
-            }
+            playStateHost.wallCoord();
         }
     }
 

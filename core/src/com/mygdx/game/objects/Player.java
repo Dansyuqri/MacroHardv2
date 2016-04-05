@@ -15,9 +15,19 @@ public class Player extends Movable {
     private long endActivePowerTime;
     private boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken, canDestroy;
 
-    public Player(){
-        super(480 / 2 - 50 / 2, 400, 40, 40);
-        this.setImage(new Texture(Gdx.files.internal("player_temp.png")));
+    public Player(int id){
+        super(480 / 2 - 50 / 2, 450, 40, 40);
+        switch (id) {
+            case 0:
+                this.setImage(new Texture(Gdx.files.internal("Player1.png")));
+                break;
+            case 1:
+                this.setImage(new Texture(Gdx.files.internal("Player2.png")));
+                break;
+            case 2:
+                this.setImage(new Texture(Gdx.files.internal("Player3.png")));
+                break;
+        }
         this.activePower = this.passivePower = PowerType.NOTHING;
         endActivePowerTime = endPassivePowerTime = System.currentTimeMillis();
         passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = canDestroy = false;

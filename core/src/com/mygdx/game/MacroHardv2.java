@@ -21,6 +21,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 	public static final String TITLE = "Demo";
 	private GameStateManager gsm;
 	private SpriteBatch batch;
+	private boolean running = false;
 	public static ActionResolver actionResolver;
 	
 	@Override
