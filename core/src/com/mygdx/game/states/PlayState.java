@@ -150,6 +150,16 @@ public abstract class PlayState extends State{
         gameObjects.add(ui);
         gameObjects.add(icons);
 
+        Thread timeCheck = new Thread(){
+            @Override
+            public void run(){
+                while(Thread.currentThread().isAlive()){
+                    effectPassivePower();
+                    effectActivePower();
+                }
+            }
+        };
+        timeCheck.start();
         createBg();
         createObstacle();
         createSides();
@@ -261,8 +271,8 @@ public abstract class PlayState extends State{
         collidesFatal();
 
 //		constantly check if any power/DangerZone's effect still lingers
-        effectPassivePower();
-        effectActivePower();
+        //effectPassivePower();
+        //effectActivePower();
         effectDangerZone(player);
 
         tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
@@ -575,8 +585,9 @@ public abstract class PlayState extends State{
 
     private void effectDangerZone(Player p) {
         if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
-            gameSpeed += speedIncrease;
-            sendGameSpeed();
+            if (!(player.getPassivePower().equals(PowerType.FREEZE_MAZE)&&player.getPassivePowerState())) {
+                gameSpeed += speedIncrease;
+            }
         }
     }
 
