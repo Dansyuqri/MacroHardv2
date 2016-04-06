@@ -17,8 +17,10 @@ public class MapSynchronizer extends Movable{
     }
 
     public void set(int id){
-        set[id] = true;
-        yOffset[id] = 450 - y;
+        if (!set[id]) {
+            set[id] = true;
+            yOffset[id] = 450 - y;
+        }
     }
 
     public float offset(float y, int id){

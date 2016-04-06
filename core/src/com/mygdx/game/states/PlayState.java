@@ -66,7 +66,7 @@ public abstract class PlayState extends State{
     private int mapCounter;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
-    public boolean running;
+    private boolean running;
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
@@ -178,7 +178,6 @@ public abstract class PlayState extends State{
         mapSynchronizer = new MapSynchronizer();
 
         coordSender = new PlayerCoordinateSender(this);
-        coordSender.start();
         running = false;
     }
 
@@ -257,14 +256,11 @@ public abstract class PlayState extends State{
                 //Sleep duration
                 temp[3] = (byte)latency;
                 MacroHardv2.actionResolver.sendReliable(temp);
-                System.out.println("HEHE: HOST SEND PING");
                 try {
                     sleep(latency);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.out.println("HEHE: " + latency);
-                MenuState.goToPlay=true;
             }
             //Player
             else if (MacroHardv2.actionResolver.getmyidint() == 1){
@@ -273,21 +269,12 @@ public abstract class PlayState extends State{
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                MenuState.gotoPlayP = true;
             }
         }
 
-
-
-        // allows for the game to wait before starting
-        // non actually necessary
         if (!running){
             running = true;
-            try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            coordSender.start();
         }
 
         handleInput();
@@ -786,18 +773,6 @@ public abstract class PlayState extends State{
                     float y = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, other);
                     players.get(other).x = x;
                     players.get(other).y = y;
-                    try {
-                        float relX = players.get(other).x - previousCoordinates[other][0];
-                        float relY = players.get(other).y - previousCoordinates[other][1] + gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
-                        float angle = (float) Math.atan2(relY, relX);
-                        if (Math.pow(relX,2)+Math.pow(relY,2) < 1){
-                            prevAngle[other] = 2;
-                        } else {
-                            prevAngle[other] = angle;
-                        }
-                    } catch (NullPointerException ignored){}
-                    previousCoordinates[(int) message[1]][0] = x;
-                    previousCoordinates[(int) message[1]][1] = y;
                     break;
 
                 //map
@@ -889,7 +864,7 @@ public abstract class PlayState extends State{
 
     public abstract void goToRestartState();
 
-    public boolean isSync() {
-        return sync;
+    public int getScore() {
+        return score;
     }
 }
