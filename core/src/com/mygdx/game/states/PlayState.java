@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 
 import static java.lang.Thread.sleep;
@@ -41,6 +42,13 @@ import static java.lang.Thread.sleep;
  * Created by Syuqri on 3/7/2016.
  */
 public abstract class PlayState extends State{
+
+    //Synchronising
+    private CountDownLatch HostL = new CountDownLatch(1);
+    private CountDownLatch PlayerL1 = new CountDownLatch(1);
+    private long latency;
+    private boolean sync = false;
+
 
     //objects
     protected Semaphore mapPro;
@@ -222,6 +230,54 @@ public abstract class PlayState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
+
+        //Host
+        if(!sync){
+            sync = true;
+            if(MacroHardv2.actionResolver.getmyidint()==0){
+                byte[] temp = new byte[4];
+                //Message ID
+                temp[0] = 5;
+                //Origin of message
+                temp[1] = (byte) MacroHardv2.actionResolver.getmyidint();
+                //0 for ping, 1 for sleep
+                temp[2] = 0;
+                //Sleep duration
+                temp[3] = 0;
+                long start = System.currentTimeMillis();
+                MacroHardv2.actionResolver.sendReliable(temp);
+                try {
+                    HostL.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                latency = (System.currentTimeMillis() - start)/2;
+                //0 for ping, 1 for sleep
+                temp[2] = 1;
+                //Sleep duration
+                temp[3] = (byte)latency;
+                MacroHardv2.actionResolver.sendReliable(temp);
+                System.out.println("HEHE: HOST SEND PING");
+                try {
+                    sleep(latency);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("HEHE: " + latency);
+                MenuState.goToPlay=true;
+            }
+            //Player
+            else if (MacroHardv2.actionResolver.getmyidint() == 1){
+                try {
+                    PlayerL1.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                MenuState.gotoPlayP = true;
+            }
+        }
+
+
 
         // allows for the game to wait before starting
         // non actually necessary
@@ -801,9 +857,39 @@ public abstract class PlayState extends State{
                         end = true;
                     }
                     break;
+                case MessageCode.SYNCING:
+                    if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() != 0)){
+                        System.out.println("HEHE: PLAYER 1 RECEIVED PING, SENDING MESSAGE BACK");
+                        byte[] temp = new byte[4];
+                        //Message ID
+                        temp[0] = 5;
+                        //Origin of message
+                        temp[1] = (byte) MacroHardv2.actionResolver.getmyidint();
+                        //0 for ping, 1 for sleep
+                        temp[2] = 0;
+                        //Sleep duration
+                        temp[3] = 0;
+                        MacroHardv2.actionResolver.sendReliable(temp);
+                        break;
+                    }
+                    else if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() == 0)){
+                        System.out.println("HEHE: HOST CALCULATING LATENCY TIME");
+                        HostL.countDown();
+                        break;
+                    }
+                    else if(message[2] == 1){
+                        System.out.println("HEHE: PLAYER STARTING");
+                        PlayerL1.countDown();
+                    }
+
+                    break;
             }
         }
     }
 
     public abstract void goToRestartState();
+
+    public boolean isSync() {
+        return sync;
+    }
 }
