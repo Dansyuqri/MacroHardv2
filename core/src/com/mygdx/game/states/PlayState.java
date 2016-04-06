@@ -795,7 +795,6 @@ public abstract class PlayState extends State{
                     break;
                 case MessageCode.SYNCING:
                     if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() != 0)){
-                        System.out.println("HEHE: PLAYER 1 RECEIVED PING, SENDING MESSAGE BACK");
                         byte[] temp = new byte[4];
                         //Message ID
                         temp[0] = 5;
@@ -809,12 +808,10 @@ public abstract class PlayState extends State{
                         break;
                     }
                     else if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() == 0)){
-                        System.out.println("HEHE: HOST CALCULATING LATENCY TIME");
                         mapSynchronizer.gethost().countDown();
                         break;
                     }
                     else if(message[2] == 1){
-                        System.out.println("HEHE: PLAYER STARTING");
                         mapSynchronizer.getplayer1().countDown();
                     }
 
