@@ -44,9 +44,6 @@ import static java.lang.Thread.sleep;
 public abstract class PlayState extends State{
 
     //Synchronising
-    private CountDownLatch HostL = new CountDownLatch(1);
-    private CountDownLatch PlayerL1 = new CountDownLatch(1);
-    private long latency;
     private boolean sync = false;
 
 
@@ -233,43 +230,7 @@ public abstract class PlayState extends State{
         //Host
         if(!sync){
             sync = true;
-            if(MacroHardv2.actionResolver.getmyidint()==0){
-                byte[] temp = new byte[4];
-                //Message ID
-                temp[0] = 5;
-                //Origin of message
-                temp[1] = (byte) MacroHardv2.actionResolver.getmyidint();
-                //0 for ping, 1 for sleep
-                temp[2] = 0;
-                //Sleep duration
-                temp[3] = 0;
-                long start = System.currentTimeMillis();
-                MacroHardv2.actionResolver.sendReliable(temp);
-                try {
-                    HostL.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                latency = (System.currentTimeMillis() - start)/2;
-                //0 for ping, 1 for sleep
-                temp[2] = 1;
-                //Sleep duration
-                temp[3] = (byte)latency;
-                MacroHardv2.actionResolver.sendReliable(temp);
-                try {
-                    sleep(latency);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            //Player
-            else if (MacroHardv2.actionResolver.getmyidint() == 1){
-                try {
-                    PlayerL1.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            mapSynchronizer.Synchroniser();
         }
 
         if (!running){
@@ -849,12 +810,12 @@ public abstract class PlayState extends State{
                     }
                     else if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() == 0)){
                         System.out.println("HEHE: HOST CALCULATING LATENCY TIME");
-                        HostL.countDown();
+                        mapSynchronizer.gethost().countDown();
                         break;
                     }
                     else if(message[2] == 1){
                         System.out.println("HEHE: PLAYER STARTING");
-                        PlayerL1.countDown();
+                        mapSynchronizer.getplayer1().countDown();
                     }
 
                     break;
