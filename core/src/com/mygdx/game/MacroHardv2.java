@@ -49,7 +49,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 			MenuState.gotoPlayP = true;
 		} else{
 			try {
-				sleep(500);
+				sleep(50);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

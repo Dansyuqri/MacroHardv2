@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 
 import static java.lang.Thread.sleep;
@@ -44,6 +45,10 @@ import static java.lang.Thread.sleep;
  * Created by Syuqri on 3/7/2016.
  */
 public abstract class PlayState extends State{
+
+    //Synchronising
+    private boolean sync = false;
+
 
     //objects
     protected Semaphore mapPro;
@@ -61,7 +66,7 @@ public abstract class PlayState extends State{
     private int mapCounter;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
-    public boolean running;
+    private boolean running;
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
@@ -180,7 +185,6 @@ public abstract class PlayState extends State{
         mapSynchronizer = new MapSynchronizer();
 
         coordSender = new PlayerCoordinateSender(this);
-        coordSender.start();
         running = false;
     }
 
@@ -247,15 +251,15 @@ public abstract class PlayState extends State{
     @Override
     public void render(SpriteBatch sb) {
 
-        // allows for the game to wait before starting
-        // non actually necessary
+        //Host
+        if(!sync){
+            sync = true;
+            mapSynchronizer.Synchroniser();
+        }
+
         if (!running){
             running = true;
-            try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            coordSender.start();
         }
 
         handleInput();
@@ -763,18 +767,6 @@ public abstract class PlayState extends State{
                     float y = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, other);
                     players.get(other).x = x;
                     players.get(other).y = y;
-                    try {
-                        float relX = players.get(other).x - previousCoordinates[other][0];
-                        float relY = players.get(other).y - previousCoordinates[other][1] + gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
-                        float angle = (float) Math.atan2(relY, relX);
-                        if (Math.pow(relX,2)+Math.pow(relY,2) < 1){
-                            prevAngle[other] = 2;
-                        } else {
-                            prevAngle[other] = angle;
-                        }
-                    } catch (NullPointerException ignored){}
-                    previousCoordinates[(int) message[1]][0] = x;
-                    previousCoordinates[(int) message[1]][1] = y;
                     break;
 
                 //map
@@ -834,13 +826,39 @@ public abstract class PlayState extends State{
                         end = true;
                     }
                     break;
+                case MessageCode.SYNCING:
+                    if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() != 0)){
+                        System.out.println("HEHE: PLAYER 1 RECEIVED PING, SENDING MESSAGE BACK");
+                        byte[] temp = new byte[4];
+                        //Message ID
+                        temp[0] = 5;
+                        //Origin of message
+                        temp[1] = (byte) MacroHardv2.actionResolver.getmyidint();
+                        //0 for ping, 1 for sleep
+                        temp[2] = 0;
+                        //Sleep duration
+                        temp[3] = 0;
+                        MacroHardv2.actionResolver.sendReliable(temp);
+                        break;
+                    }
+                    else if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() == 0)){
+                        System.out.println("HEHE: HOST CALCULATING LATENCY TIME");
+                        mapSynchronizer.gethost().countDown();
+                        break;
+                    }
+                    else if(message[2] == 1){
+                        System.out.println("HEHE: PLAYER STARTING");
+                        mapSynchronizer.getplayer1().countDown();
+                    }
+
+                    break;
             }
         }
     }
 
     public abstract void goToRestartState();
 
-    public int getScore(){
+    public int getScore() {
         return score;
     }
 }
