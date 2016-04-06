@@ -806,4 +806,8 @@ public abstract class PlayState extends State{
     }
 
     public abstract void goToRestartState();
+
+    public int getScore(){
+        return score;
+    }
 }

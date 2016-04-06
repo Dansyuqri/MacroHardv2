@@ -255,6 +255,6 @@ public class PlayStateHost extends PlayState {
         coordSender.interrupt();
         mapMaker.interrupt();
         dispose();
-        gsm.set(new RestartState(gsm));
+        gsm.set(new RestartState(gsm, getScore()));
     }
 }

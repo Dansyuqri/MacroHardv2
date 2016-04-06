@@ -14,6 +14,6 @@ public class PlayStateNonHost extends PlayState {
     public void goToRestartState(){
         coordSender.interrupt();
         dispose();
-        gsm.set(new RestartState(gsm));
+        gsm.set(new RestartState(gsm, getScore()));
     }
 }
