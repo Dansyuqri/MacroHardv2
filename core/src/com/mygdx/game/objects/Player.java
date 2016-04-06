@@ -3,6 +3,10 @@ package com.mygdx.game.objects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.mygdx.game.customEnum.Direction;
 import com.mygdx.game.customEnum.PowerType;
 
 /**
@@ -15,22 +19,87 @@ public class Player extends Movable {
     private long endActivePowerTime;
     private boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken, canDestroy;
 
+    private static final int        FRAME_COLS = 5;
+    private static final int        FRAME_ROWS = 4;
+
+    Texture                         walkSheet;
+    TextureRegion[]                 walkFramesNorth, walkFramesEast, walkFramesSouth, walkFramesWest;
+    TextureRegion                   faceNorth, faceSouth, faceEast, faceWest;
+    Animation                       walkAnimationNorth, walkAnimationSouth, walkAnimationEast, walkAnimationWest;
+
     public Player(int id){
         super(480 / 2 - 50 / 2, 450, 40, 40);
+        walkSheet = new Texture(Gdx.files.internal("Player_sprite.png"));
+        TextureRegion[][] tmp = TextureRegion.split(walkSheet, walkSheet.getWidth()/FRAME_COLS, walkSheet.getHeight()/FRAME_ROWS);              // #10
+        walkFramesNorth = new TextureRegion[4];
+        walkFramesSouth = new TextureRegion[4];
+        walkFramesEast = new TextureRegion[4];
+        walkFramesWest = new TextureRegion[4];
+
+        for(int i = 0; i < FRAME_COLS-1; i++){
+            walkFramesNorth[i] = tmp[0][i];
+            walkFramesWest[i] = tmp[1][i];
+            walkFramesSouth[i] = tmp[2][i];
+            walkFramesEast[i] = tmp[3][i];
+        }
+        faceNorth = tmp[0][FRAME_COLS-1];
+        faceWest = tmp[1][FRAME_COLS-1];
+        faceSouth = tmp[2][FRAME_COLS-1];
+        faceEast = tmp[3][FRAME_COLS-1];
+
+        walkAnimationNorth = new Animation(0.2f, walkFramesNorth);
+        walkAnimationSouth = new Animation(0.2f, walkFramesSouth);
+        walkAnimationEast = new Animation(0.25f, walkFramesEast);
+        walkAnimationWest = new Animation(0.25f, walkFramesWest);
         switch (id) {
             case 0:
-                this.setImage(new Texture(Gdx.files.internal("Player1.png")));
+                this.setImage(faceNorth);
                 break;
             case 1:
-                this.setImage(new Texture(Gdx.files.internal("Player2.png")));
+                this.setImage(faceNorth);
                 break;
             case 2:
-                this.setImage(new Texture(Gdx.files.internal("Player3.png")));
+                this.setImage(faceNorth);
                 break;
         }
         this.activePower = this.passivePower = PowerType.NOTHING;
         endActivePowerTime = endPassivePowerTime = System.currentTimeMillis();
         passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = canDestroy = false;
+    }
+
+    @Override
+    public void draw(SpriteBatch sb){
+        sb.draw(playImage, x, y);
+    }
+
+    public void setOrientation(Direction orientation){
+        if (orientation == Direction.NORTH){
+            this.setImage(faceNorth);
+        }
+        else if (orientation == Direction.SOUTH){
+            this.setImage(faceSouth);
+        }
+        else if (orientation == Direction.EAST){
+            this.setImage(faceEast);
+        }
+        else if (orientation == Direction.WEST){
+            this.setImage(faceWest);
+        }
+    }
+
+    public void setCurrentFrame(Direction orientation, float stateTime, boolean check){
+        if (orientation == Direction.NORTH){
+            this.setImage(walkAnimationNorth.getKeyFrame(stateTime, check));
+        }
+        else if (orientation == Direction.SOUTH){
+            this.setImage(walkAnimationSouth.getKeyFrame(stateTime, check));
+        }
+        else if (orientation == Direction.EAST){
+            this.setImage(walkAnimationEast.getKeyFrame(stateTime, check));
+        }
+        else {
+            this.setImage(walkAnimationWest.getKeyFrame(stateTime, check));
+        }
     }
 
     public long getEndPassivePowerTime() {

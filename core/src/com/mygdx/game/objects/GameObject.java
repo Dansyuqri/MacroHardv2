@@ -2,6 +2,7 @@ package com.mygdx.game.objects;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 /**
@@ -9,11 +10,15 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public abstract class GameObject extends Rectangle {
     private Texture image;
+    TextureRegion                   playImage;
     public Texture getImage() {
         return image;
     }
     public void setImage(Texture image) {
         this.image = image;
+    }
+    public void setImage(TextureRegion image){
+        this.playImage = image;
     }
     GameObject(float x, float y, float width, float height){
         this.x = x;

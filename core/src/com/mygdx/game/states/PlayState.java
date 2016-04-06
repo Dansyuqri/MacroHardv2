@@ -1,12 +1,15 @@
 package com.mygdx.game.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MacroHardv2;
+import com.mygdx.game.customEnum.Direction;
 import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.MessageCode;
 import com.mygdx.game.customEnum.PowerType;
@@ -71,6 +74,9 @@ public abstract class PlayState extends State{
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
     public static Stage stage;
+    public Direction orientation;
+    public boolean touched;
+    float animateTime;
 
     private HashMap<Integer, MapTile[]> messageBuffer = new HashMap<Integer, MapTile[]>();
 
@@ -103,6 +109,7 @@ public abstract class PlayState extends State{
     //final values
     final int tileLength = 50;
 
+    TextureRegion currentFrame;
     protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
 
@@ -137,6 +144,9 @@ public abstract class PlayState extends State{
         score = 0;
         yourScoreName = "score: 0";
         yourBitmapFontName = new BitmapFont();
+        orientation = Direction.NORTH;
+        touched = false;
+        animateTime = 0f;
 
         gameObjects.add(bg);
         gameObjects.add(spikes);
@@ -176,7 +186,8 @@ public abstract class PlayState extends State{
 
     @Override
     protected void handleInput() {
-        if(Gdx.input.isTouched()) {
+        touched = Gdx.input.isTouched();
+        if(touched) {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
             cam.unproject(touchPos);
             float relativex = touchPos.x - (joystick.getX());
@@ -189,6 +200,19 @@ public abstract class PlayState extends State{
 
                 //calculates the relevant numbers needed for omnidirectional movement
                 float angle = (float) Math.atan2(relativey, relativex);
+                if (angle > (Math.PI)/4 && angle <= 3*(Math.PI)/4 ){
+                    orientation = Direction.NORTH;
+                }
+                else if (angle > 3*(Math.PI)/4 || angle <= -3*(Math.PI)/4 ){
+                    orientation = Direction.WEST;
+                }
+                else if (angle < -(Math.PI)/4 && angle >= -3*(Math.PI)/4 ){
+                    orientation = Direction.SOUTH;
+                }
+                else if (angle > -(Math.PI)/4 && angle <= (Math.PI)/4 ){
+                    orientation = Direction.EAST;
+                }
+                player.setOrientation(orientation);
                 float cos = (float) Math.cos(angle);
                 float sin = (float) Math.sin(angle);
                 float ratio;
@@ -396,12 +420,12 @@ public abstract class PlayState extends State{
                 ghosts.add(new Ghost((tileLength * 9) + 15, tracker, tileLength, tileLength));
             }
         }
-        if (score % 300 == 0){
-            stage = Stage.values()[MathUtils.random(0, 1)];
-        }
     }
 
     private void spawnBg(){
+        if (score % 300 == 0){
+            stage = Stage.values()[MathUtils.random(0, 1)];
+        }
         Background backg = new Background(trackerBG);
         Overlay effect = new Overlay(trackerBG);
         bg.add(backg);
@@ -684,6 +708,15 @@ public abstract class PlayState extends State{
                     if (!(gameObject instanceof Player)) {
                         gameObjectIterator.remove();
                         continue;
+                    }
+                }
+                if (gameObject instanceof Player){
+                    animateTime += Gdx.graphics.getDeltaTime();
+                    if (touched) {
+                        ((Player) gameObject).setCurrentFrame(orientation, animateTime, true);
+                    }
+                    else {
+                        ((Player) gameObject).setOrientation(orientation);
                     }
                 }
                 gameObject.draw(sb);
