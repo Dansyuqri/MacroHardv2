@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.customEnum.Direction;
 import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.customEnum.Stage;
@@ -33,6 +34,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Syuqri on 3/7/2016.
@@ -56,7 +60,8 @@ public abstract class PlayState extends State{
     private int score;
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
-    public static Stage stage;
+    public Stage stage;
+    public Direction orientation;
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -87,6 +92,8 @@ public abstract class PlayState extends State{
 
     //final values
     final int tileLength = 50;
+
+    public ScheduledThreadPoolExecutor timeTracker = new ScheduledThreadPoolExecutor(1);
 
     protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
@@ -198,6 +205,10 @@ public abstract class PlayState extends State{
         handleInput();
         checkSwitchCollision();
         // tell the camera to update its matrices.
+        if (trackerBG <= 1000) {
+            spawnBg();
+            trackerBG += 200;
+        }
         while (tracker < 1000) {
             synchronized (this) {
                 while (mapBuffer.size() <= 5){
@@ -211,10 +222,6 @@ public abstract class PlayState extends State{
             spawnObjects();
             spawnSides(tracker + tileLength);
             tracker += tileLength;
-        }
-        if (trackerBG <= 1000) {
-            spawnBg();
-            trackerBG += 200;
         }
         // tell the camera to update its matrices.
         cam.update();
@@ -348,19 +355,19 @@ public abstract class PlayState extends State{
                 ghosts.add(new Ghost((tileLength * 9) + 15, tracker, tileLength, tileLength));
             }
         }
-        if (score % 300 == 0){
-            stage = Stage.values()[MathUtils.random(0, 1)];
-        }
     }
 
     private void spawnBg(){
+        if (score % 20 == 0){
+            stage = Stage.values()[MathUtils.random(0, 1)];
+//            stage = Stage.ICE;
+        }
         Background backg = new Background(trackerBG);
         Overlay effect = new Overlay(trackerBG);
         bg.add(backg);
         effects.add(effect);
         if (stage == Stage.ICE){
-            float fogX = MathUtils.random(0,480);
-            Fog fog = new Fog(fogX,trackerBG);
+            Fog fog = new Fog(0,trackerBG);
             fogs.add(fog);
         }
     }
@@ -477,6 +484,29 @@ public abstract class PlayState extends State{
                 goToRestartState();
             }
         }
+        // collides with holes
+        Iterator<GameObject> holeIterator = holes.iterator();
+        while (holeIterator.hasNext()){
+            final Hole hole = ((Hole)holeIterator.next());
+            if (hole.collides(player, this)){
+                if (hole.isBroken()) {
+                    goToRestartState();
+                }
+                else {
+                    timeTracker.schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            hole.setBreakHole(true);
+                        }
+                    }, 3, TimeUnit.SECONDS);
+                }
+            }
+
+            if (hole.isBreakHole()){
+                hole.setBroken();
+            }
+        }
+
     }
 
     /**
@@ -585,11 +615,11 @@ public abstract class PlayState extends State{
     }
 
     public void draw(SpriteBatch sb){
-        for (ArrayList<GameObject> gameObjList: gameObjects) {
+        for (ArrayList<GameObject> gameObjList : gameObjects) {
             Iterator<GameObject> gameObjectIterator = gameObjList.iterator();
-            while (gameObjectIterator.hasNext()){
+            while (gameObjectIterator.hasNext()) {
                 GameObject gameObject = gameObjectIterator.next();
-                if (gameObject.y < -gameObject.height){
+                if (gameObject.y < -gameObject.height) {
                     gameObjectIterator.remove();
                     continue;
                 }
