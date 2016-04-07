@@ -1,6 +1,7 @@
 package com.mygdx.game.states;
 
 import com.mygdx.game.MacroHardv2;
+import com.mygdx.game.customEnum.MessageCode;
 import com.mygdx.game.objects.Movable;
 
 import java.util.concurrent.CountDownLatch;
@@ -85,5 +86,17 @@ public class MapSynchronizer extends Movable{
         return this.PlayerL1;
     }
 
+    public void sendTracker(float tracker, float gameSpeed){
+        float shiftedTracker = tracker - gameSpeed*latency/1000;
+        byte[] message = wrapTracker(shiftedTracker);
+        MacroHardv2.actionResolver.sendReliable(message);
+    }
 
+    private static byte[] wrapTracker(float tracker){
+        byte[] result = new byte[3];
+        result[0] = MessageCode.SYNC_TRACKER;
+        result[1] = (byte) (tracker/10);
+        result[2] = (byte)((tracker*10)%100);
+        return result;
+    }
 }

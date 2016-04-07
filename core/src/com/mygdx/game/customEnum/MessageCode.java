@@ -11,4 +11,5 @@ public class MessageCode {
     public static final int END_GAME = 4;
     public static final int CLOSE_DOORS = -2;
     public static final int SYNCING = 5;
+    public static final int SYNC_TRACKER = 6;
 }

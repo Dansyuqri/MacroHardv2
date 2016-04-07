@@ -38,8 +38,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Semaphore;
 
-import static java.lang.Thread.sleep;
-
 /**
  * Created by Syuqri on 3/7/2016.
  */
@@ -267,20 +265,25 @@ public abstract class PlayState extends State{
         }
 
         handleInput();
-        while (tracker < 1000) {
-            try {
-                mapCon.acquire();
-                mapMod.acquire();
-                path = mapBuffer.remove(0);
-                mapMod.release();
-                mapPro.release();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        if (playerID == 0) {
+            mapSynchronizer.sendTracker(tracker, gameSpeed);
+        }
+        synchronized (MapSynchronizer.class) {
+            while (tracker < 1000) {
+                try {
+                    mapCon.acquire();
+                    mapMod.acquire();
+                    path = mapBuffer.remove(0);
+                    mapMod.release();
+                    mapPro.release();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-            spawnObjects();
-            spawnSides(tracker + tileLength);
-            tracker += tileLength;
+                spawnObjects();
+                spawnSides(tracker + tileLength);
+                tracker += tileLength;
+            }
         }
 
         if (trackerBG <= 1000) {
@@ -307,13 +310,13 @@ public abstract class PlayState extends State{
 
         checkDangerZone(player);
 
-        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+        if (playerID == 0) {
+            tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+        }
         trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
 
         for (ArrayList<GameObject> gameObj: gameObjects){
-            Iterator<GameObject> gameObjectIterator = gameObj.iterator();
-            while (gameObjectIterator.hasNext()){
-                GameObject gameObject = gameObjectIterator.next();
+            for (GameObject gameObject : gameObj) {
                 if (gameObject instanceof Movable) {
                     ((Movable) gameObject).scroll(gameSpeed);
                 }
@@ -540,32 +543,28 @@ public abstract class PlayState extends State{
 
     private void checkFatalCollision(){
         //      collide with spikes
-        Iterator<GameObject> spikeIterator = spikes.iterator();
-        while (spikeIterator.hasNext()){
-            if (((Spikes)spikeIterator.next()).collides(player, this)){
+        for (GameObject spike : spikes) {
+            if (((Spikes) spike).collides(player, this)) {
                 MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
                 goToRestartState();
             }
         }
 
         //      collide with ghosts
-        Iterator<GameObject> ghostIterator = ghosts.iterator();
-        while (ghostIterator.hasNext()){
-            if (((Ghost)ghostIterator.next()).collides(player, this)){
+        for (GameObject ghost : ghosts) {
+            if (((Ghost) ghost).collides(player, this)) {
                 MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
                 goToRestartState();
             }
         }
 
         // collides with holes
-        Iterator<GameObject> holeIterator = holes.iterator();
-        while (holeIterator.hasNext()){
-            final Hole hole = ((Hole)holeIterator.next());
-            if (hole.collides(player, this)){
+        for (GameObject hole1 : holes) {
+            final Hole hole = ((Hole) hole1);
+            if (hole.collides(player, this)) {
                 if (hole.isBroken()) {
                     goToRestartState();
-                }
-                else {
+                } else {
                     backgroundTaskExecutor.schedule(new Runnable() {
                         @Override
                         public void run() {
@@ -575,7 +574,7 @@ public abstract class PlayState extends State{
                 }
             }
 
-            if (hole.isBreakHole()){
+            if (hole.isBreakHole()) {
                 hole.setBroken();
             }
         }
@@ -826,12 +825,14 @@ public abstract class PlayState extends State{
                         gameSpeed = ((float) message[1] * 10 + (float) message[2] / 10);
                     }
                     break;
+
                 //end game
                 case MessageCode.END_GAME:
                     synchronized (this){
                         end = true;
                     }
                     break;
+
                 case MessageCode.SYNCING:
                     if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() != 0)){
                         byte[] temp = new byte[4];
@@ -854,6 +855,12 @@ public abstract class PlayState extends State{
                         mapSynchronizer.getplayer1().countDown();
                     }
 
+                    break;
+
+                case MessageCode.SYNC_TRACKER:
+                    synchronized (MapSynchronizer.class) {
+                        tracker = (float) message[1] * 10 + (float) message[2] / 10;
+                    }
                     break;
             }
         }
