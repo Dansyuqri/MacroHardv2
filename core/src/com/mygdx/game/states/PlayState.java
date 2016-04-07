@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MacroHardv2;
@@ -112,7 +111,7 @@ public abstract class PlayState extends State{
     //final values
     final int tileLength = 50;
 
-    protected ScheduledThreadPoolExecutor timeTracker = new ScheduledThreadPoolExecutor(3);
+    protected ScheduledThreadPoolExecutor backgroundTaskExecutor = new ScheduledThreadPoolExecutor(3);
 
     protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
@@ -259,7 +258,12 @@ public abstract class PlayState extends State{
 
         if (!running){
             running = true;
-            coordSender.start();
+            backgroundTaskExecutor.scheduleWithFixedDelay(new Runnable() {
+                @Override
+                public void run() {
+                    coordSender.send();
+                }
+            }, 0, 1, TimeUnit.MILLISECONDS);
         }
 
         handleInput();
@@ -562,7 +566,7 @@ public abstract class PlayState extends State{
                     goToRestartState();
                 }
                 else {
-                    timeTracker.schedule(new Runnable() {
+                    backgroundTaskExecutor.schedule(new Runnable() {
                         @Override
                         public void run() {
                             hole.setBreakHole(true);
@@ -856,8 +860,7 @@ public abstract class PlayState extends State{
     }
 
     public void goToRestartState(){
-        timeTracker.shutdownNow();
-        coordSender.interrupt();
+        backgroundTaskExecutor.shutdownNow();
         dispose();
         gsm.set(new RestartState(gsm, getScore()));
     }

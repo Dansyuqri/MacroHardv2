@@ -6,26 +6,15 @@ import com.mygdx.game.customEnum.MessageCode;
 /**
  * Created by Nayr on 30/3/2016.
  */
-public class PlayerCoordinateSender extends Thread {
+public class PlayerCoordinateSender {
     private PlayState game;
     PlayerCoordinateSender(PlayState game){
         this.game = game;
     }
 
-    @Override
-    public void run() {
-        while (true) {
-            if (isInterrupted()){
-                break;
-            }
-            try{
-                sleep(1);
-            } catch (InterruptedException e){
-                e.printStackTrace();
-            }
-            byte[] message = wrapCoords(MacroHardv2.actionResolver.getmyidint(),game.player.x,game.player.y);
-            MacroHardv2.actionResolver.sendPing(message);
-        }
+    public void send() {
+        byte[] message = wrapCoords(MacroHardv2.actionResolver.getmyidint(),game.player.x,game.player.y);
+        MacroHardv2.actionResolver.sendPing(message);
     }
 
     private static byte[] wrapCoords(int id, float x, float y){
