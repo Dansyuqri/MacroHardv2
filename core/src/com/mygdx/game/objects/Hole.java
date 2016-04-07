@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class Hole extends Obstacle implements Collidable {
     private boolean broken = false;
     private boolean breakHole = false;
+    public static final int HOLE_BREAK_TIME = 3;
 
     public Hole(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height, stage);

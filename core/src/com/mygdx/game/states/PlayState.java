@@ -1,7 +1,6 @@
 package com.mygdx.game.states;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -36,10 +35,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 
 import static java.lang.Thread.sleep;
@@ -77,8 +74,6 @@ public abstract class PlayState extends State{
     public float tracker;
     public float trackerBG;
     private int score;
-    private float[] prevAngle = new float[2];
-    private float[][] previousCoordinates = new float[2][2];
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
     public Stage stage;
@@ -182,6 +177,7 @@ public abstract class PlayState extends State{
                 }
             }
         };
+
         timeCheck.start();
         createBg();
         createObstacle();
@@ -259,7 +255,7 @@ public abstract class PlayState extends State{
         //Host
         if(!sync){
             sync = true;
-            mapSynchronizer.Synchroniser();
+            mapSynchronizer.sync();
         }
 
         if (!running){
@@ -303,22 +299,13 @@ public abstract class PlayState extends State{
         sb.end();
 
         checkSwitchCollision();
-        collidesBoundaries();
-        collidesFatal();
+        checkBoundaryCollision();
+        checkFatalCollision();
 
-//		constantly check if any power/DangerZone's effect still lingers
-        //effectPassivePower();
-        //effectActivePower();
-        effectDangerZone(player);
+        checkDangerZone(player);
 
         tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
         trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
-
-//        for (int i = 0; i < players.size(); i++) {
-//            if (i != playerID){
-//                doSmoothInterpolation(i);
-//            }
-//        }
 
         for (ArrayList<GameObject> gameObj: gameObjects){
             Iterator<GameObject> gameObjectIterator = gameObj.iterator();
@@ -464,7 +451,7 @@ public abstract class PlayState extends State{
         float prevy = player.y;
         player.x += ratio * x * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
         player.y += ratio * y * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
-        if (collidesObstacle()){
+        if (checkObstacleCollision()){
             player.x = prevx;
             player.y = prevy;
 
@@ -473,7 +460,7 @@ public abstract class PlayState extends State{
             } else {
                 player.x -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
             }
-            if (collidesObstacle()){
+            if (checkObstacleCollision()){
                 player.x = prevx;
             }
             if (y > 0) {
@@ -481,7 +468,7 @@ public abstract class PlayState extends State{
             } else {
                 player.y -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
             }
-            if (collidesObstacle()){
+            if (checkObstacleCollision()){
                 player.y = prevy;
             }
         }
@@ -497,7 +484,7 @@ public abstract class PlayState extends State{
      the player will be moved back to his previous position (remembered by a temporary variable)
      */
 
-    private void collidesBoundaries(){
+    private void checkBoundaryCollision(){
         // collision with screen boundaries
         if (player.x > 465 - player.width ){
             player.x = 465 - player.height;
@@ -516,7 +503,7 @@ public abstract class PlayState extends State{
             goToRestartState();
         }
     }
-    private boolean collidesObstacle(){
+    private boolean checkObstacleCollision(){
 
 //    		collides with normal wall obstacle
         Iterator<GameObject> obstacleIterator = obstacles.iterator();
@@ -548,7 +535,7 @@ public abstract class PlayState extends State{
         return false;
     }
 
-    private void collidesFatal(){
+    private void checkFatalCollision(){
         //      collide with spikes
         Iterator<GameObject> spikeIterator = spikes.iterator();
         while (spikeIterator.hasNext()){
@@ -581,7 +568,7 @@ public abstract class PlayState extends State{
                         public void run() {
                             hole.setBreakHole(true);
                         }
-                    }, 3, TimeUnit.SECONDS);
+                    }, Hole.HOLE_BREAK_TIME, TimeUnit.SECONDS);
                 }
             }
 
@@ -647,7 +634,7 @@ public abstract class PlayState extends State{
      Methods handling power-ups/affecting game attributes
      */
 
-    private void effectDangerZone(Player p) {
+    private void checkDangerZone(Player p) {
         if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
             if (!(player.getPassivePower().equals(PowerType.FREEZE_MAZE)&&player.getPassivePowerState())) {
                 gameSpeed += speedIncrease;
@@ -766,18 +753,6 @@ public abstract class PlayState extends State{
         message[1] = (byte) (gameSpeed / 10);
         message[2] = (byte) ((gameSpeed * 10) % 100);
         MacroHardv2.actionResolver.sendReliable(message);
-    }
-
-    private void doSmoothInterpolation(int player){
-        try {
-            float angle = prevAngle[player];
-            if (angle != 2) {
-                float cos = (float) Math.cos(angle);
-                float sin = (float) Math.sin(angle);
-                players.get(player).x += cos * gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
-                players.get(player).y += sin * gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
-            }
-        } catch (NullPointerException ignored){}
     }
 
     public void update(byte[] message) {
