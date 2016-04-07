@@ -46,11 +46,11 @@ public abstract class PlayState extends State{
     //Synchronising
     protected boolean sync = false;
 
-
     //objects
     protected Semaphore mapPro;
     protected Semaphore mapCon;
     protected Semaphore mapMod;
+    protected Semaphore spawn;
 
     private JoyStick joystick;
     protected Player player;
@@ -119,6 +119,7 @@ public abstract class PlayState extends State{
 
         mapPro = new Semaphore(15);
         mapMod = new Semaphore(1);
+        spawn = new Semaphore(0);
         mapCounter = 0;
 
         touchHeld = false;
@@ -265,25 +266,32 @@ public abstract class PlayState extends State{
         }
 
         handleInput();
-        if (playerID == 0 && tracker < 1000) {
-            mapSynchronizer.sendTracker(tracker, gameSpeed);
-        }
 
-        synchronized (MapSynchronizer.class) {
-            while (tracker < 1000) {
-                try {
-                    mapCon.acquire();
-                    mapMod.acquire();
-                    path = mapBuffer.remove(0);
-                    mapMod.release();
-                    mapPro.release();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        while (tracker < 1000 || spawn.availablePermits() > 0) {
+            try {
+                mapCon.acquire();
+                mapMod.acquire();
+                path = mapBuffer.remove(0);
+                mapMod.release();
+                mapPro.release();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
+            if (playerID == 0) {
+                mapSynchronizer.sendSpawnMessage();
                 spawnObjects();
                 spawnSides(tracker + tileLength);
                 tracker += tileLength;
+            } else {
+                try {
+                    spawn.acquire();
+                    spawnObjects();
+                    spawnSides(tracker + tileLength);
+                    tracker += tileLength;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -311,9 +319,8 @@ public abstract class PlayState extends State{
 
         checkDangerZone(player);
 
-        if (playerID == 0) {
-            tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
-        }
+        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+
         trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
 
         for (ArrayList<GameObject> gameObj: gameObjects){
@@ -859,9 +866,7 @@ public abstract class PlayState extends State{
                     break;
 
                 case MessageCode.SYNC_TRACKER:
-                    synchronized (MapSynchronizer.class) {
-                        tracker = (float) message[1] * 10 + (float) message[2] / 10;
-                    }
+                    spawn.release();
                     break;
             }
         }

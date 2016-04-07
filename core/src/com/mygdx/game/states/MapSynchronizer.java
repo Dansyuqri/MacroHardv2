@@ -86,17 +86,7 @@ public class MapSynchronizer extends Movable{
         return this.PlayerL1;
     }
 
-    public void sendTracker(float tracker, float gameSpeed){
-        float shiftedTracker = tracker - gameSpeed*latency/1000;
-        byte[] message = wrapTracker(tracker);
-        MacroHardv2.actionResolver.sendReliable(message);
-    }
-
-    private static byte[] wrapTracker(float tracker){
-        byte[] result = new byte[3];
-        result[0] = MessageCode.SYNC_TRACKER;
-        result[1] = (byte) (tracker/10);
-        result[2] = (byte)((tracker*10)%100);
-        return result;
+    public void sendSpawnMessage(){
+        MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.SYNC_TRACKER});
     }
 }
