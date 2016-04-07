@@ -50,7 +50,6 @@ public abstract class PlayState extends State{
     protected Semaphore mapPro;
     protected Semaphore mapCon;
     protected Semaphore mapMod;
-    protected Semaphore spawn;
 
     private JoyStick joystick;
     protected Player player;
@@ -119,7 +118,6 @@ public abstract class PlayState extends State{
 
         mapPro = new Semaphore(15);
         mapMod = new Semaphore(1);
-        spawn = new Semaphore(0);
         mapCounter = 0;
 
         touchHeld = false;
@@ -267,7 +265,7 @@ public abstract class PlayState extends State{
 
         handleInput();
 
-        while (tracker < 1000 || spawn.availablePermits() > 0) {
+        while (tracker < 1000) {
             try {
                 mapCon.acquire();
                 mapMod.acquire();
@@ -278,21 +276,9 @@ public abstract class PlayState extends State{
                 e.printStackTrace();
             }
 
-            if (playerID == 0) {
-                mapSynchronizer.sendSpawnMessage();
-                spawnObjects();
-                spawnSides(tracker + tileLength);
-                tracker += tileLength;
-            } else {
-                try {
-                    spawn.acquire();
-                    spawnObjects();
-                    spawnSides(tracker + tileLength);
-                    tracker += tileLength;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            spawnObjects();
+            spawnSides(tracker + tileLength);
+            tracker += tileLength;
         }
 
         if (trackerBG <= 1000) {
@@ -866,7 +852,7 @@ public abstract class PlayState extends State{
                     break;
 
                 case MessageCode.SYNC_TRACKER:
-                    spawn.release();
+
                     break;
             }
         }
