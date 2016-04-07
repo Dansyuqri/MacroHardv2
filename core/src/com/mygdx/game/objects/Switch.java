@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.Interface.Collidable;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MessageCode;
+import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.states.PlayState;
 
 /**
@@ -13,8 +14,8 @@ import com.mygdx.game.states.PlayState;
 public class Switch extends Obstacle implements Collidable{
     private boolean on = false;
 
-    public Switch(float x, float y, float width, float height){
-        super(x, y, width, height);
+    public Switch(float x, float y, float width, float height, Stage stage){
+        super(x, y, width, height, stage);
         this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
     }
 

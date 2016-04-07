@@ -36,6 +36,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 
@@ -78,7 +81,7 @@ public abstract class PlayState extends State{
     private float[][] previousCoordinates = new float[2][2];
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
-    public static Stage stage;
+    public Stage stage;
     public Direction orientation;
     public boolean touched;
     float animateTime;
@@ -113,6 +116,8 @@ public abstract class PlayState extends State{
 
     //final values
     final int tileLength = 50;
+
+    public ScheduledThreadPoolExecutor timeTracker = new ScheduledThreadPoolExecutor(1);
 
     TextureRegion currentFrame;
     protected PlayState(GameStateManager gsm, int playerID) {
@@ -354,7 +359,7 @@ public abstract class PlayState extends State{
     private void createObstacle() {
         for (int i = 0; i < path.length; i++) {
             if (path[i] == MapTile.OBSTACLES) {
-                Obstacle obstacle = new Obstacle((tileLength * i) + 15, 800, tileLength, tileLength);
+                Obstacle obstacle = new Obstacle((tileLength * i) + 15, 800, tileLength, tileLength, stage);
                 obstacles.add(obstacle);
             }
         }
@@ -363,8 +368,8 @@ public abstract class PlayState extends State{
     private void createBg(){
         int counter = 0;
         while (counter*200 < 800) {
-            Background backg = new Background(counter*200);
-            Overlay effect = new Overlay(counter*200);
+            Background backg = new Background(counter*200, stage);
+            Overlay effect = new Overlay(counter*200, stage);
             bg.add(backg);
             effects.add(effect);
             counter++;
@@ -396,16 +401,16 @@ public abstract class PlayState extends State{
         for (int i = 0; i < path.length; i++) {
             switch (path[i]){
                 case SWITCH:
-                    switches.add(new Switch((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength));
+                    switches.add(new Switch((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength, stage));
                     break;
                 case OBSTACLES:
-                    obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength));
+                    obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength, stage));
                     break;
                 case POWER:
                     powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
-                    doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
+                    doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength, stage));
                     break;
                 case SPIKES:
                     if (score > 100 && stage == Stage.DUNGEON) {
@@ -414,7 +419,7 @@ public abstract class PlayState extends State{
                     break;
                 case HOLE:
                     if (stage == Stage.ICE){
-                        holes.add(new Hole((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
+                        holes.add(new Hole((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength,stage));
                     }
                     break;
             }
@@ -427,16 +432,15 @@ public abstract class PlayState extends State{
     }
 
     private void spawnBg(){
-        if (score % 300 == 0){
+        if (score % 20 == 0){
             stage = Stage.values()[MathUtils.random(0, 1)];
         }
-        Background backg = new Background(trackerBG);
-        Overlay effect = new Overlay(trackerBG);
+        Background backg = new Background(trackerBG, stage);
+        Overlay effect = new Overlay(trackerBG, stage);
         bg.add(backg);
         effects.add(effect);
         if (stage == Stage.ICE){
-            float fogX = MathUtils.random(0,480);
-            Fog fog = new Fog(fogX,trackerBG);
+            Fog fog = new Fog(0,trackerBG);
             fogs.add(fog);
         }
     }
@@ -562,6 +566,30 @@ public abstract class PlayState extends State{
                 goToRestartState();
             }
         }
+
+        // collides with holes
+        Iterator<GameObject> holeIterator = holes.iterator();
+        while (holeIterator.hasNext()){
+            final Hole hole = ((Hole)holeIterator.next());
+            if (hole.collides(player, this)){
+                if (hole.isBroken()) {
+                    goToRestartState();
+                }
+                else {
+                    timeTracker.schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            hole.setBreakHole(true);
+                        }
+                    }, 3, TimeUnit.SECONDS);
+                }
+            }
+
+            if (hole.isBreakHole()){
+                hole.setBroken();
+            }
+        }
+
     }
 
     /**

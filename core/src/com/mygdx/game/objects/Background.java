@@ -11,12 +11,12 @@ import com.mygdx.game.states.PlayState;
  */
 
 public class Background extends Movable{
-    public Background(float y){
+    public Background(float y, Stage stage){
         super(0, y, 480, 200);
-        if (PlayState.stage == Stage.DUNGEON) {
+        if (stage == Stage.DUNGEON) {
             this.setImage(new Texture(Gdx.files.internal("bg.png")));
         }
-        else if (PlayState.stage == Stage.ICE){
+        else if (stage == Stage.ICE){
             this.setImage(new Texture(Gdx.files.internal("bg_ice.png")));
         }
     }
