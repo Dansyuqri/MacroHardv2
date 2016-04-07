@@ -296,8 +296,8 @@ public abstract class PlayState extends State{
     private void createBg(){
         int counter = 0;
         while (counter*200 < 800) {
-            Background backg = new Background(counter*200);
-            Overlay effect = new Overlay(counter*200);
+            Background backg = new Background(counter*200, stage);
+            Overlay effect = new Overlay(counter*200, stage);
             bg.add(backg);
             effects.add(effect);
             counter++;
@@ -362,8 +362,8 @@ public abstract class PlayState extends State{
             stage = Stage.values()[MathUtils.random(0, 1)];
 //            stage = Stage.ICE;
         }
-        Background backg = new Background(trackerBG);
-        Overlay effect = new Overlay(trackerBG);
+        Background backg = new Background(trackerBG, stage);
+        Overlay effect = new Overlay(trackerBG, stage);
         bg.add(backg);
         effects.add(effect);
         if (stage == Stage.ICE){
