@@ -26,6 +26,7 @@ public class Player extends Movable {
     TextureRegion[]                 walkFramesNorth, walkFramesEast, walkFramesSouth, walkFramesWest;
     TextureRegion                   faceNorth, faceSouth, faceEast, faceWest;
     Animation                       walkAnimationNorth, walkAnimationSouth, walkAnimationEast, walkAnimationWest;
+    TextureRegion                   playImage;
 
     public Player(int id){
         super(480 / 2 - 50 / 2, 450, 40, 40);
@@ -70,6 +71,15 @@ public class Player extends Movable {
     @Override
     public void draw(SpriteBatch sb){
         sb.draw(playImage, x, y);
+    }
+
+    @Override
+    public Texture getImage() {
+        return walkSheet;
+    }
+
+    public void setImage(TextureRegion image){
+        this.playImage = image;
     }
 
     public void setOrientation(Direction orientation){
