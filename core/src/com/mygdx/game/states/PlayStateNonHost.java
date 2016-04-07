@@ -8,6 +8,5 @@ import java.util.concurrent.Semaphore;
 public class PlayStateNonHost extends PlayState {
     public PlayStateNonHost(GameStateManager gsm, int playerID) {
         super(gsm, playerID);
-        mapCon = new Semaphore(0);
     }
 }

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Semaphore;
@@ -50,6 +51,7 @@ public abstract class PlayState extends State{
     protected Semaphore mapPro;
     protected Semaphore mapCon;
     protected Semaphore mapMod;
+    protected Semaphore seedSem;
 
     private JoyStick joystick;
     protected Player player;
@@ -57,16 +59,18 @@ public abstract class PlayState extends State{
 
     protected PlayerCoordinateSender coordSender;
     private MapSynchronizer mapSynchronizer;
+    protected Random mapRandomizer;
 
     //values
     private int mapCounter;
+    protected long seed;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     private boolean running;
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
-    protected int playerSpeed, dangerZone, powerCounter, doorCounter;
+    protected int playerSpeed, dangerZone;
     public float tracker;
     public float trackerBG;
     private int score;
@@ -108,6 +112,12 @@ public abstract class PlayState extends State{
     //final values
     final int tileLength = 50;
 
+    //map making objects
+    private int doorCounter, powerCounter, spikeCounter, HostMapCounter;
+    private ArrayList<MapTile[]> memory;
+    private boolean[] current = createArray(true);
+    protected MapMaker mapMaker;
+
     protected ScheduledThreadPoolExecutor backgroundTaskExecutor = new ScheduledThreadPoolExecutor(3);
 
     protected PlayState(GameStateManager gsm, int playerID) {
@@ -117,7 +127,9 @@ public abstract class PlayState extends State{
         player = (Player) players.get(playerID);
 
         mapPro = new Semaphore(15);
+        mapCon = new Semaphore(-4);
         mapMod = new Semaphore(1);
+        seedSem = new Semaphore(0);
         mapCounter = 0;
 
         touchHeld = false;
@@ -135,8 +147,10 @@ public abstract class PlayState extends State{
         speedChange = (float) 0.4;
         playerSpeed = 200;
         dangerZone = 300;
-        powerCounter = 0;
+        HostMapCounter = 0;
         doorCounter = 0;
+        powerCounter = 0;
+        spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
         stage = Stage.DUNGEON;
         tracker = 800;
@@ -172,6 +186,15 @@ public abstract class PlayState extends State{
                 }
             }
         };
+
+        memory = new ArrayList<MapTile[]>();
+        MapTile[] init = createArray(MapTile.EMPTY);
+        for (int i = 0; i < 5; i++){
+            memory.add(init);
+        }
+
+        mapMaker = new MapMaker(this);
+        mapMaker.start();
 
         timeCheck.start();
         createBg();
@@ -306,7 +329,6 @@ public abstract class PlayState extends State{
         checkDangerZone(player);
 
         tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
-
         trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
 
         for (ArrayList<GameObject> gameObj: gameObjects){
@@ -420,7 +442,7 @@ public abstract class PlayState extends State{
 
     private void spawnBg(){
         if (score % 20 == 0){
-            stage = Stage.values()[MathUtils.random(0, 1)];
+            stage = Stage.values()[mapRandomizer.nextInt(2)];
         }
         Background backg = new Background(trackerBG, stage);
         Overlay effect = new Overlay(trackerBG, stage);
@@ -770,33 +792,14 @@ public abstract class PlayState extends State{
 
                 //map
                 case MessageCode.MAP_TILES:
-                    MapTile[] new_row = new MapTile[GAME_WIDTH];
-                    for (int i = 2; i < message.length; i++) {
-                        new_row[i - 2] = MapTile.fromByte(message[i]);
+                    byte[] seedStringBytes = new byte[message.length - 1];
+                    for (int i = 0; i < message.length; i++) {
+                        seedStringBytes[i] = message[i-1];
                     }
-
-                    try {
-                        mapPro.acquire();
-                        if (message[1] == mapCounter){
-                            mapMod.acquire();
-                            mapBuffer.add(new_row);
-                            mapMod.release();
-                            mapCounter = (mapCounter + 1) % 15;
-                            mapCon.release();
-                        } else {
-                            messageBuffer.put((int) message[1], new_row);
-                            if (messageBuffer.containsKey(mapCounter)) {
-                                mapMod.acquire();
-                                mapBuffer.add(messageBuffer.get(mapCounter));
-                                mapMod.release();
-                                messageBuffer.remove(mapCounter);
-                                mapCounter = (mapCounter + 1) % 15;
-                                mapCon.release();
-                            }
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    String seedString = new String(seedStringBytes);
+                    seed = Long.decode(seedString);
+                    mapRandomizer = new Random(seed);
+                    seedSem.release();
                     break;
 
                 //open doors
@@ -859,6 +862,7 @@ public abstract class PlayState extends State{
     }
 
     public void goToRestartState(){
+        mapMaker.interrupt();
         backgroundTaskExecutor.shutdownNow();
         dispose();
         gsm.set(new RestartState(gsm, getScore()));
@@ -866,5 +870,204 @@ public abstract class PlayState extends State{
 
     public int getScore() {
         return score;
+    }
+
+    private MapTile[] generator(MapTile[] new_row){
+        boolean test = false;
+        while (!test) {
+            int temp = mapRandomizer.nextInt(9)+1;
+            for (int i = 0; i < temp; i++) {
+                int coord = mapRandomizer.nextInt(9);
+                new_row[coord] = MapTile.EMPTY;
+            }
+            for (int i = 0; i < new_row.length; i++) {
+                if ((new_row[i] == MapTile.EMPTY) && current[i]) {
+                    test = true;
+                    break;
+                }
+            }
+        }
+        return new_row;
+    }
+
+    private boolean[] updatePath(MapTile[] new_row, boolean[] current){
+        int out_index = 0;
+        for (int k = 0; k < new_row.length; k++) {
+            if ((new_row[k] == MapTile.EMPTY) && current[k]) {
+                current[k] = true;
+                out_index = k;
+            } else {
+                current[k] = false;
+            }
+        }
+
+        for (int j = 1; j < new_row.length; j++) {
+            if (out_index + j < new_row.length) {
+                if ((new_row[out_index + j] == MapTile.EMPTY) && current[out_index + j - 1]) {
+                    current[out_index + j] = true;
+                }
+                else {
+                    break;
+                }
+            }
+            if (out_index - j >= 0) {
+                if ((new_row[out_index - j] == MapTile.EMPTY) && current[out_index - j + 1]) {
+                    current[out_index - j] = true;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+        return current;
+    }
+
+    private MapTile[] genSpikes(MapTile[] new_row){
+        int spikeNo = mapRandomizer.nextInt(3);
+        for (int j = 0; j < spikeNo; j++) {
+            int pos = mapRandomizer.nextInt(9);
+            if (new_row[pos] == MapTile.OBSTACLES){
+                new_row[pos] = MapTile.SPIKES;
+            }
+        }
+        return new_row;
+    }
+
+    private MapTile[] genHole(MapTile[] new_row){
+        int holeNo = mapRandomizer.nextInt(3);
+        for (int j = 0; j < holeNo; j++) {
+            int pos = mapRandomizer.nextInt(9);
+            if (new_row[pos] == MapTile.EMPTY){
+                new_row[pos] = MapTile.HOLE;
+            }
+        }
+        return new_row;
+    }
+
+    private MapTile[] genPower(MapTile[] new_row){
+        while (true){
+            int temp = mapRandomizer.nextInt(9);
+            if (new_row[temp] == MapTile.EMPTY){
+                new_row[temp] = MapTile.POWER;
+                powerCounter = 0;
+                break;
+            }
+        }
+        return new_row;
+    }
+
+    private MapTile[] genDoor(MapTile[] new_row){
+        for (int i = 0; i < current.length; i++) {
+            if (new_row[i] == MapTile.EMPTY) {
+                new_row[i] = MapTile.DOOR;
+            }
+        }
+        return new_row;
+    }
+
+    private MapTile[] genSwitch(ArrayList<MapTile[]> memory, boolean[] current, MapTile[] new_row){
+        int i;
+        for (i = 0; i < current.length; i++) {
+            if (current[i]){
+                break;
+            }
+        }
+
+        int j = 0;
+
+        int counter = 0;
+        while (true) {
+            if (counter > 8) {
+                break;
+            }
+            int dir = mapRandomizer.nextInt(4);
+            switch (dir){
+                case 0:
+                    if (i > 0 && memory.get(j)[i - 1] == MapTile.EMPTY) {
+                        i--;
+                        counter++;
+                    }
+                    break;
+                case 1:
+                    if (j < 2 && memory.get(j + 1)[i] == MapTile.EMPTY) {
+                        j++;
+                        counter++;
+                    }
+                    break;
+                case 2:
+                    if (i < 8 && memory.get(j)[i + 1] == MapTile.EMPTY) {
+                        i++;
+                        counter++;
+                    }
+                    break;
+                case 3:
+                    if (j > 0 && memory.get(j - 1)[i] == MapTile.EMPTY) {
+                        j--;
+                        counter++;
+                    }
+                    break;
+            }
+        }
+        if (j == 0){
+            new_row[i] = MapTile.SWITCH;
+            return new_row;
+        } else {
+            mapBuffer.get(mapBuffer.size() - j)[i] = MapTile.SWITCH;
+            return null;
+        }
+    }
+
+    void wallCoord() {
+        powerCounter += 1;
+        doorCounter = (doorCounter + 1)%60;
+        spikeCounter += 1;
+        MapTile[] new_row = createArray(MapTile.OBSTACLES);
+
+        // random generator
+        new_row = generator(new_row);
+
+        // updating the path array
+        current = updatePath(new_row, current);
+
+        // creating random spikes
+        if (spikeCounter > 3) {
+            new_row = genSpikes(new_row);
+            new_row = genHole(new_row);
+            spikeCounter = 0;
+        }
+
+        // spawning power ups after a certain time. 20 is default. 20 is for testing
+        if (powerCounter > 23) {
+            new_row = genPower(new_row);
+        }
+
+        // spawning door
+        if (doorCounter == 45) {
+            new_row = genDoor(new_row);
+        }
+
+        // updating the memory
+        memory.remove(memory.size() - 1);
+        memory.add(0, new_row);
+
+        // spawning door switch
+        if (doorCounter == 44 || doorCounter == 48) {
+            MapTile[] result;
+            if ((result = genSwitch(memory, current, new_row)) != null){
+                new_row = result;
+            }
+        }
+
+        try {
+            mapPro.acquire();
+            mapMod.acquire();
+
+            mapBuffer.add(new_row);
+
+            mapMod.release();
+            mapCon.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
