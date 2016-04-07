@@ -39,7 +39,7 @@ public class MapSynchronizer extends Movable{
         return set[id];
     }
 
-    public void Synchroniser(){
+    public void sync(){
         if(MacroHardv2.actionResolver.getmyidint()==0){
             byte[] temp = new byte[4];
             //Message ID
