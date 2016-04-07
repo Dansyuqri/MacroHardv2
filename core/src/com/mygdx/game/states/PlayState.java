@@ -305,9 +305,9 @@ public abstract class PlayState extends State{
 
         checkDangerZone(player);
 
-        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
 
-        trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+        trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
 
         for (ArrayList<GameObject> gameObj: gameObjects){
             for (GameObject gameObject : gameObj) {
@@ -449,24 +449,24 @@ public abstract class PlayState extends State{
     private void omniMove(float x, float y, float ratio){
         float prevx = player.x;
         float prevy = player.y;
-        player.x += ratio * x * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
-        player.y += ratio * y * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+        player.x += ratio * x * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
+        player.y += ratio * y * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
         if (checkObstacleCollision()){
             player.x = prevx;
             player.y = prevy;
 
             if (x > 0) {
-                player.x += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+                player.x += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
             } else {
-                player.x -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+                player.x -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
             }
             if (checkObstacleCollision()){
                 player.x = prevx;
             }
             if (y > 0) {
-                player.y += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+                player.y += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
             } else {
-                player.y -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.03);
+                player.y -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
             }
             if (checkObstacleCollision()){
                 player.y = prevy;
