@@ -1,5 +1,7 @@
 package com.mygdx.game.states;
 
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.Stack;
@@ -9,10 +11,18 @@ import java.util.Stack;
  */
 
 public class GameStateManager {
+    private AssetManager assetManager;
     private Stack<State> states;
 
     public GameStateManager(){
         states = new Stack<State>();
+        assetManager = new AssetManager();
+        assetManager.load("MainMenuSound.mp3", Music.class);
+        assetManager.load("WallDestroySound.wav", Music.class);
+        assetManager.load("TimeSlowSound.mp3", Music.class);
+        assetManager.load("MenuSelectionClick.wav", Music.class);
+        assetManager.load("GateSound.wav", Music.class);
+        assetManager.finishLoading();
     }
 
     public void push(State state){
@@ -37,4 +47,27 @@ public class GameStateManager {
     public State peek(){
         return states.peek();
     }
+
+    public void startMusicLoop(String path) {
+        if(assetManager.isLoaded(path)) {
+            Music music = assetManager.get(path, Music.class);
+            music.setVolume((float)0.5);
+            music.play();
+            music.setLooping(true);
+        }
+    }
+
+    public void startMusic(String path) {
+        if(assetManager.isLoaded(path)) {
+            Music music = assetManager.get(path, Music.class);
+            music.setVolume(1);
+            music.play();
+        }
+    }
+
+
+    public void disposeMusic(String path){
+        this.assetManager.unload(path);
+    }
+
 }

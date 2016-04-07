@@ -43,7 +43,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 			MenuState.startNonHost = true;
 		} else{
 			try {
-				sleep(50);
+				sleep(200);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

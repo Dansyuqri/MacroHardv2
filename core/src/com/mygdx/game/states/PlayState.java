@@ -533,6 +533,7 @@ public abstract class PlayState extends State{
             if (((Obstacle)obstacleIterator.next()).collides(player, this)){
 //              DESTROY_WALL implementation
                 if (player.getCanDestroy()) {
+                    gsm.startMusic("WallDestroySound.wav");
                     obstacleIterator.remove();
                     score++;
                     yourScoreName = "score: " + score;
@@ -626,6 +627,7 @@ public abstract class PlayState extends State{
         synchronized (Switch.class) {
             if (gotSwitch) {
                 open = true;
+                gsm.startMusic("GateSound.wav");
             }
         }
 
@@ -670,6 +672,7 @@ public abstract class PlayState extends State{
                     gameSpeed = 0;
                     sendGameSpeed();
                 } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
+                    gsm.startMusic("TimeSlowSound.mp3");
                     gameSpeed *= speedChange;
                     sendGameSpeed();
                 } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {

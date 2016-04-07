@@ -1,5 +1,6 @@
 package com.mygdx.game.states;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.mygdx.game.MacroHardv2;
 import com.badlogic.gdx.Gdx;
@@ -39,6 +40,8 @@ public class MenuState extends State{
         graphicsX = Gdx.graphics.getWidth();
         graphicsY = Gdx.graphics.getHeight();
         generateTextures();
+
+        gsm.startMusicLoop("MainMenuSound.mp3");
 
         playBtnX = playBtnImage.getWidth()*3;
         playBtnY = playBtnImage.getHeight()*3;
@@ -124,16 +127,19 @@ public class MenuState extends State{
 
         else if(!Gdx.input.isTouched() && touched){
             if(playBtn.contains(touchPos.x,touchPos.y)){
+                gsm.startMusic("MenuSelectionClick.wav");
                 gsm.set(new PlayStateHost(gsm, 0, true));
                 //dispose();
                 touched = false;
             }
             else if(instructionBtn.contains(touchPos.x,touchPos.y)){
+                gsm.startMusic("MenuSelectionClick.wav");
                 gsm.set(new InstructionState(gsm));
                 dispose();
                 touched = false;
             }
             else if(quickGameBtn.contains(touchPos.x,touchPos.y)){
+                gsm.startMusic("MenuSelectionClick.wav");
                 if(MacroHardv2.actionResolver.isSignedIn()){
                     MacroHardv2.actionResolver.QuickGame();
 
@@ -143,18 +149,21 @@ public class MenuState extends State{
                 touched = false;
             }
             else if(sendInviteBtn.contains(touchPos.x,touchPos.y)){
+                gsm.startMusic("MenuSelectionClick.wav");
                 MacroHardv2.actionResolver.Inviteplayers();
                 sendInviteBtnImage.dispose();
                 sendInviteBtnImage = new Texture("sendInviteBtn.png");
                 touched = false;
             }
             else if(invitationBtn.contains(touchPos.x,touchPos.y)){
+                gsm.startMusic("MenuSelectionClick.wav");
                 MacroHardv2.actionResolver.Seeinvites();
                 invitationBtnImage.dispose();
                 invitationBtnImage = new Texture("invitationBtn.png");
                 touched = false;
             }
             else if(signInBtn.contains(touchPos.x,touchPos.y)){
+                gsm.startMusic("MenuSelectionClick.wav");
                 MacroHardv2.actionResolver.SignIn();
                 signInBtnImage.dispose();
                 signInBtnImage = new Texture("signInBtn.png");
