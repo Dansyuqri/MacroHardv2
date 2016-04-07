@@ -265,9 +265,10 @@ public abstract class PlayState extends State{
         }
 
         handleInput();
-        if (playerID == 0) {
+        if (playerID == 0 && tracker < 1000) {
             mapSynchronizer.sendTracker(tracker, gameSpeed);
         }
+
         synchronized (MapSynchronizer.class) {
             while (tracker < 1000) {
                 try {

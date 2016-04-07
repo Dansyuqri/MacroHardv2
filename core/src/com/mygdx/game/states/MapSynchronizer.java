@@ -88,7 +88,7 @@ public class MapSynchronizer extends Movable{
 
     public void sendTracker(float tracker, float gameSpeed){
         float shiftedTracker = tracker - gameSpeed*latency/1000;
-        byte[] message = wrapTracker(shiftedTracker);
+        byte[] message = wrapTracker(tracker);
         MacroHardv2.actionResolver.sendReliable(message);
     }
 
