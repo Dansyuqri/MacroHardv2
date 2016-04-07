@@ -12,9 +12,9 @@ import com.mygdx.game.objects.CustomButton;
  * Created by Syuqri on 3/7/2016.
  */
 public class MenuState extends State{
-    private Texture background,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, signInBtnImage;
+    private Texture background,playBtnImage,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, signInBtnImage;
 
-    private CustomButton instructionBtn, invitationBtn, sendInviteBtn, quickGameBtn, signInBtn;
+    private CustomButton playBtn, instructionBtn, invitationBtn, sendInviteBtn, quickGameBtn, signInBtn;
     private Vector3 touchPos = new Vector3(0,0,0);
     private float bufferFromTop = 20;
     private boolean touched = false;
@@ -23,7 +23,8 @@ public class MenuState extends State{
 
 
     //Resize variables
-    private float instructionBtnX, instructionBtnY,
+    private float playBtnX, playBtnY,
+            instructionBtnX, instructionBtnY,
             quickGameBtnX, quickGameBtnY,
             graphicsX, graphicsY,
             sendInviteBtnX, sendInviteBtnY,
@@ -39,6 +40,8 @@ public class MenuState extends State{
         graphicsY = Gdx.graphics.getHeight();
         generateTextures();
 
+        playBtnX = playBtnImage.getWidth()*3;
+        playBtnY = playBtnImage.getHeight()*3;
         quickGameBtnX = quickGameBtnImage.getWidth()*3;
         quickGameBtnY = quickGameBtnImage.getHeight()*3;
         instructionBtnX = instructionBtnImage.getWidth()*3;
@@ -50,6 +53,8 @@ public class MenuState extends State{
         signInBtnX = signInBtnImage.getWidth()*3;
         signInBtnY = signInBtnImage.getHeight()*3;
 
+        playBtn = new CustomButton((graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
+        playBtn.setImage(playBtnImage);
         quickGameBtn = new CustomButton( (graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
         quickGameBtn.setImage(quickGameBtnImage);
         instructionBtn = new CustomButton((graphicsX / 2) - (instructionBtnX/2), graphicsY / 2 - instructionBtnY/2, instructionBtnX, instructionBtnY);
@@ -85,7 +90,12 @@ public class MenuState extends State{
          * **************************************************************************************
          */
         if(Gdx.input.isTouched() && !touched){
-            if(instructionBtn.contains(touchPos.x,touchPos.y)){
+            if(playBtn.contains(touchPos.x,touchPos.y)){
+                playBtnImage.dispose();
+                playBtnImage = new Texture("playBtn_pressed.png");
+                touched = true;
+            }
+            else if(instructionBtn.contains(touchPos.x,touchPos.y)){
                 instructionBtnImage.dispose();
                 instructionBtnImage = new Texture("instructionBtn_pressed.png");
                 touched = true;
@@ -113,9 +123,14 @@ public class MenuState extends State{
         }
 
         else if(!Gdx.input.isTouched() && touched){
-            if(instructionBtn.contains(touchPos.x,touchPos.y)){
-                gsm.set(new InstructionState(gsm));
+            if(playBtn.contains(touchPos.x,touchPos.y)){
+                gsm.set(new PlayStateHost(gsm, 0));
                 //dispose();
+                touched = false;
+            }
+            else if(instructionBtn.contains(touchPos.x,touchPos.y)){
+                gsm.set(new InstructionState(gsm));
+                dispose();
                 touched = false;
             }
             else if(quickGameBtn.contains(touchPos.x,touchPos.y)){
@@ -160,6 +175,7 @@ public class MenuState extends State{
         cam.update();
         sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
+        sb.draw(playBtnImage, (graphicsX / 2) - (playBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + quickGameBtnY + 2 * bufferFromTop), playBtnX, playBtnY);
         sb.draw(quickGameBtnImage, (graphicsX / 2) - (quickGameBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + bufferFromTop), quickGameBtnX, quickGameBtnY);
         sb.draw(instructionBtnImage, (graphicsX / 2) - (instructionBtnX / 2), graphicsY / 2 - instructionBtnY / 2, instructionBtnX, instructionBtnY);
         sb.draw(sendInviteBtnImage, (graphicsX / 2) - (sendInviteBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - bufferFromTop), sendInviteBtnX, sendInviteBtnY);
@@ -171,6 +187,7 @@ public class MenuState extends State{
     @Override
     public void dispose() {
         background.dispose();
+        playBtnImage.dispose();
         instructionBtnImage.dispose();
         quickGameBtnImage.dispose();
         sendInviteBtnImage.dispose();
@@ -185,6 +202,7 @@ public class MenuState extends State{
 
     public void generateTextures(){
         background = new Texture("Main_menu.png");
+        playBtnImage = new Texture("playBtn.png");
         instructionBtnImage = new Texture("instructionBtn.png");
         quickGameBtnImage = new Texture("quickGameBtn.png");
         sendInviteBtnImage = new Texture("sendInviteBtn.png");
