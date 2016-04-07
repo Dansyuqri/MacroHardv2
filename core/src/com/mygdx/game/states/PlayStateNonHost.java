@@ -10,10 +10,4 @@ public class PlayStateNonHost extends PlayState {
         super(gsm, playerID);
         mapCon = new Semaphore(0);
     }
-
-    public void goToRestartState(){
-        coordSender.interrupt();
-        dispose();
-        gsm.set(new RestartState(gsm, getScore()));
-    }
 }

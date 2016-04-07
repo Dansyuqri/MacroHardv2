@@ -112,9 +112,8 @@ public abstract class PlayState extends State{
     //final values
     final int tileLength = 50;
 
-    public ScheduledThreadPoolExecutor timeTracker = new ScheduledThreadPoolExecutor(1);
+    protected ScheduledThreadPoolExecutor timeTracker = new ScheduledThreadPoolExecutor(3);
 
-    TextureRegion currentFrame;
     protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
 
@@ -856,7 +855,12 @@ public abstract class PlayState extends State{
         }
     }
 
-    public abstract void goToRestartState();
+    public void goToRestartState(){
+        timeTracker.shutdownNow();
+        coordSender.interrupt();
+        dispose();
+        gsm.set(new RestartState(gsm, getScore()));
+    }
 
     public int getScore() {
         return score;
