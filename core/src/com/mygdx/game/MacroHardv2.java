@@ -3,15 +3,9 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.states.GameStateManager;
 import com.mygdx.game.states.MenuState;
-import com.mygdx.game.states.PlayState;
-import com.mygdx.game.states.PlayStateHost;
-import com.mygdx.game.states.PlayStateNonHost;
-
-import java.awt.Menu;
 
 import static java.lang.Thread.sleep;
 
@@ -46,17 +40,18 @@ public class MacroHardv2 extends ApplicationAdapter{
 	public void multiplayerGameReady(){
 
 		if(!this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){
-			MenuState.gotoPlayP = true;
+			MenuState.startNonHost = true;
 		} else{
 			try {
 				sleep(50);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			MenuState.goToPlay=true;
+			MenuState.startHost =true;
 		}
 
 	}
+
 	public GameStateManager getGsm() {
 		return gsm;
 	}

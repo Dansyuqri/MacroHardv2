@@ -47,7 +47,7 @@ import static java.lang.Thread.sleep;
 public abstract class PlayState extends State{
 
     //Synchronising
-    private boolean sync = false;
+    protected boolean sync = false;
 
 
     //objects

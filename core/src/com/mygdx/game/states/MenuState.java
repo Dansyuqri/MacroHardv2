@@ -18,8 +18,8 @@ public class MenuState extends State{
     private Vector3 touchPos = new Vector3(0,0,0);
     private float bufferFromTop = 20;
     private boolean touched = false;
-    public static volatile boolean goToPlay = false;
-    public static volatile boolean gotoPlayP = false;
+    public static volatile boolean startHost = false;
+    public static volatile boolean startNonHost = false;
 
 
     //Resize variables
@@ -73,14 +73,14 @@ public class MenuState extends State{
         touchPos.y = Gdx.input.getY();
         cam.unproject(touchPos);
 
-        if (goToPlay) {
-            goToPlay = false;
+        if (startHost) {
+            startHost = false;
             dispose();
             gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()));
         }
 
-        if(gotoPlayP){
-            gotoPlayP = false;
+        if(startNonHost){
+            startNonHost = false;
             dispose();
             gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()));
         }
@@ -124,7 +124,7 @@ public class MenuState extends State{
 
         else if(!Gdx.input.isTouched() && touched){
             if(playBtn.contains(touchPos.x,touchPos.y)){
-                gsm.set(new PlayStateHost(gsm, 0));
+                gsm.set(new PlayStateHost(gsm, 0, true));
                 //dispose();
                 touched = false;
             }

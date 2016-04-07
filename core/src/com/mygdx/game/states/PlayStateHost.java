@@ -38,6 +38,27 @@ public class PlayStateHost extends PlayState {
         mapMaker.start();
     }
 
+    public PlayStateHost(GameStateManager gsm, int playerID, boolean soloPLay){
+        super(gsm, playerID);
+        //spawning initialization
+
+        mapCon = new Semaphore(-4);
+
+        HostMapCounter = 0;
+        doorCounter = 0;
+        powerCounter = 0;
+        spikeCounter = 0;
+        memory = new ArrayList<MapTile[]>();
+        MapTile[] init = createArray(MapTile.EMPTY);
+        for (int i = 0; i < 5; i++){
+            memory.add(init);
+        }
+
+        mapMaker = new MapMaker(this);
+        mapMaker.start();
+        sync = true;
+    }
+
     public MapTile[] generator(MapTile[] new_row){
         boolean test = false;
         while (!test) {
