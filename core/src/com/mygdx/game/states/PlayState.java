@@ -62,26 +62,23 @@ public abstract class PlayState extends State{
     protected Random mapRandomizer;
 
     //values
-    private int mapCounter;
     protected long seed;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     private boolean running;
 
-    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
+    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false, spawn = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone;
     public float tracker;
     public float trackerBG;
-    private int score;
+    protected int score;
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
     public Stage stage;
     public Direction orientation;
     public boolean touched;
     float animateTime;
-
-    private HashMap<Integer, MapTile[]> messageBuffer = new HashMap<Integer, MapTile[]>();
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -95,25 +92,25 @@ public abstract class PlayState extends State{
                     new Player[]{
                             new Player(0), new Player(1), new Player(2)
                     }));
-    private ArrayList<GameObject> obstacles = new ArrayList<GameObject>();
+    protected ArrayList<GameObject> obstacles = new ArrayList<GameObject>();
     private ArrayList<GameObject> sideWalls = new ArrayList<GameObject>();
-    private ArrayList<GameObject> switches = new ArrayList<GameObject>();
-    private ArrayList<GameObject> doors = new ArrayList<GameObject>();
-    private ArrayList<GameObject> powers = new ArrayList<GameObject>();
-    private ArrayList<GameObject> spikes = new ArrayList<GameObject>();
-    private ArrayList<GameObject> holes = new ArrayList<GameObject>();
+    protected ArrayList<GameObject> switches = new ArrayList<GameObject>();
+    protected ArrayList<GameObject> doors = new ArrayList<GameObject>();
+    protected ArrayList<GameObject> powers = new ArrayList<GameObject>();
+    protected ArrayList<GameObject> spikes = new ArrayList<GameObject>();
+    protected ArrayList<GameObject> holes = new ArrayList<GameObject>();
     private ArrayList<GameObject> bg = new ArrayList<GameObject>();
     private ArrayList<GameObject> effects = new ArrayList<GameObject>();
     private ArrayList<GameObject> ui = new ArrayList<GameObject>();
     private ArrayList<GameObject> icons = new ArrayList<GameObject>();
-    private ArrayList<GameObject> ghosts = new ArrayList<GameObject>();
+    protected ArrayList<GameObject> ghosts = new ArrayList<GameObject>();
     private ArrayList<GameObject> fogs = new ArrayList<GameObject>();
 
     //final values
     final int tileLength = 50;
 
     //map making objects
-    private int doorCounter, powerCounter, spikeCounter, HostMapCounter;
+    private int doorCounter, powerCounter, spikeCounter;
     private ArrayList<MapTile[]> memory;
     private boolean[] current = createArray(true);
     protected MapMaker mapMaker;
@@ -130,7 +127,6 @@ public abstract class PlayState extends State{
         mapCon = new Semaphore(-4);
         mapMod = new Semaphore(1);
         seedSem = new Semaphore(0);
-        mapCounter = 0;
 
         touchHeld = false;
 
@@ -147,13 +143,12 @@ public abstract class PlayState extends State{
         speedChange = (float) 0.4;
         playerSpeed = 200;
         dangerZone = 300;
-        HostMapCounter = 0;
         doorCounter = 0;
         powerCounter = 0;
         spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
         stage = Stage.DUNGEON;
-        tracker = 800;
+        tracker = 1000;
         trackerBG = 800;
         score = 0;
         yourScoreName = "score: 0";
@@ -288,20 +283,44 @@ public abstract class PlayState extends State{
 
         handleInput();
 
-        while (tracker < 1000) {
-            try {
-                mapCon.acquire();
-                mapMod.acquire();
-                path = mapBuffer.remove(0);
-                mapMod.release();
-                mapPro.release();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        if (playerID == 0) {
+            if (tracker < 1000 + gameSpeed*mapSynchronizer.getLatency() && !spawn) {
+                mapSynchronizer.syncSpawn();
+                spawn = true;
             }
+            if (tracker < 1000) {
+                spawn = false;
+                try {
+                    mapCon.acquire();
+                    mapMod.acquire();
+                    path = mapBuffer.remove(0);
+                    mapMod.release();
+                    mapPro.release();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-            spawnObjects();
-            spawnSides(tracker + tileLength);
-            tracker += tileLength;
+                spawnObjects();
+                spawnSides(tracker + tileLength);
+                tracker += tileLength;
+            }
+            tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
+        } else {
+            if (spawn) {
+                spawn = false;
+                try {
+                    mapCon.acquire();
+                    mapMod.acquire();
+                    path = mapBuffer.remove(0);
+                    mapMod.release();
+                    mapPro.release();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                spawnObjects();
+                spawnSides(tracker + tileLength);
+            }
         }
 
         if (trackerBG <= 1000) {
@@ -328,7 +347,6 @@ public abstract class PlayState extends State{
 
         checkDangerZone(player);
 
-        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
         trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
 
         for (ArrayList<GameObject> gameObj: gameObjects){
@@ -368,7 +386,7 @@ public abstract class PlayState extends State{
     private void createObstacle() {
         for (int i = 0; i < path.length; i++) {
             if (path[i] == MapTile.OBSTACLES) {
-                Obstacle obstacle = new Obstacle((tileLength * i) + 15, 800, tileLength, tileLength, stage);
+                Obstacle obstacle = new Obstacle((tileLength * i) + 15, 1000, tileLength, tileLength, stage);
                 obstacles.add(obstacle);
             }
         }
@@ -405,6 +423,8 @@ public abstract class PlayState extends State{
     /**
      Method to spawn the walls using the coordinates from the wallCoord() method
      */
+
+
 
     private void spawnObjects(){
         for (int i = 0; i < path.length; i++) {
@@ -858,7 +878,7 @@ public abstract class PlayState extends State{
                     break;
 
                 case MessageCode.SYNC_TRACKER:
-
+                    spawn = true;
                     break;
             }
         }

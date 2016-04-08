@@ -1,7 +1,5 @@
 package com.mygdx.game.states;
 
-import java.util.concurrent.Semaphore;
-
 /**
  * Created by hj on 19/3/16.
  */

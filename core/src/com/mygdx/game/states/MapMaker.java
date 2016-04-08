@@ -7,7 +7,7 @@ import java.util.Random;
 /**
  * Created by Syuqri on 3/18/2016.
  */
-class MapMaker extends Thread{
+public class MapMaker extends Thread{
     PlayState playState;
     public MapMaker(PlayState playState){this.playState = playState;}
     @Override

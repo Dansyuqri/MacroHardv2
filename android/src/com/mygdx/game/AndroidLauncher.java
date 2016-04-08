@@ -11,6 +11,9 @@ import com.google.example.games.basegameutils.GameHelper;
 
 import com.google.example.games.basegameutils.GameHelper.GameHelperListener;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 public class AndroidLauncher extends AndroidApplication implements ActionResolver{
 	private GSGameHelper _gameHelper;
 

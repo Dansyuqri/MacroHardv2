@@ -1,13 +1,9 @@
 package com.mygdx.game.states;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.MacroHardv2;
-import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.MessageCode;
 
-import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.Semaphore;
 
 
 /**

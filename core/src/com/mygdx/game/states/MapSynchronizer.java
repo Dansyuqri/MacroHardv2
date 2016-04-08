@@ -86,7 +86,12 @@ public class MapSynchronizer extends Movable{
         return this.PlayerL1;
     }
 
-    public void sendSpawnMessage(){
+    public float getLatency(){
+        return latency/1000;
+    }
+
+    public void syncSpawn(){
+
         MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.SYNC_TRACKER});
     }
 }
