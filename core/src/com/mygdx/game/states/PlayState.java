@@ -148,7 +148,7 @@ public abstract class PlayState extends State{
         spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
         stage = Stage.DUNGEON;
-        tracker = 1000;
+        tracker = 800;
         trackerBG = 800;
         score = 0;
         yourScoreName = "score: 0";
@@ -283,44 +283,21 @@ public abstract class PlayState extends State{
 
         handleInput();
 
-        if (playerID == 0) {
-            if (tracker < 1000 + gameSpeed*mapSynchronizer.getLatency() && !spawn) {
-                mapSynchronizer.syncSpawn();
-                spawn = true;
+        while (tracker < 1000) {
+            spawn = false;
+            try {
+                mapCon.acquire();
+                mapMod.acquire();
+                path = mapBuffer.remove(0);
+                mapMod.release();
+                mapPro.release();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            if (tracker < 1000) {
-                spawn = false;
-                try {
-                    mapCon.acquire();
-                    mapMod.acquire();
-                    path = mapBuffer.remove(0);
-                    mapMod.release();
-                    mapPro.release();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
-                spawnObjects();
-                spawnSides(tracker + tileLength);
-                tracker += tileLength;
-            }
-            tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
-        } else {
-            if (spawn) {
-                spawn = false;
-                try {
-                    mapCon.acquire();
-                    mapMod.acquire();
-                    path = mapBuffer.remove(0);
-                    mapMod.release();
-                    mapPro.release();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                spawnObjects();
-                spawnSides(tracker + tileLength);
-            }
+            spawnObjects();
+            spawnSides(tracker + tileLength);
+            tracker += tileLength;
         }
 
         if (trackerBG <= 1000) {
@@ -347,6 +324,7 @@ public abstract class PlayState extends State{
 
         checkDangerZone(player);
 
+        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
         trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
 
         for (ArrayList<GameObject> gameObj: gameObjects){
@@ -816,8 +794,8 @@ public abstract class PlayState extends State{
                 //map
                 case MessageCode.MAP_TILES:
                     byte[] seedStringBytes = new byte[message.length - 1];
-                    for (int i = 0; i < message.length; i++) {
-                        seedStringBytes[i] = message[i-1];
+                    for (int i = 0; i < message.length - 1; i++) {
+                        seedStringBytes[i] = message[i + 1];
                     }
                     String seedString = new String(seedStringBytes);
                     seed = Long.decode(seedString);
