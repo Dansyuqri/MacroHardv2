@@ -24,6 +24,8 @@ public class PlayStateHost extends PlayState {
         super(gsm, playerID);
         Random random = new Random();
         seed = random.nextInt();
+        mapRandomizer = new Random(seed);
+        seedSem.release();
         MacroHardv2.actionResolver.sendReliable(wrapSeed(seed));
         sync = true;
     }
