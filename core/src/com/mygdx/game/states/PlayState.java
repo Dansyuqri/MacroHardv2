@@ -77,7 +77,6 @@ public abstract class PlayState extends State{
     BitmapFont yourBitmapFontName;
     public Stage stage;
     public Direction orientation;
-    public boolean touched;
     float animateTime;
 
     //boolean arrays
@@ -154,7 +153,6 @@ public abstract class PlayState extends State{
         yourScoreName = "score: 0";
         yourBitmapFontName = new BitmapFont();
         orientation = Direction.NORTH;
-        touched = false;
         animateTime = 0f;
 
         gameObjects.add(bg);
@@ -204,8 +202,7 @@ public abstract class PlayState extends State{
 
     @Override
     protected void handleInput() {
-        touched = Gdx.input.isTouched();
-        if(touched) {
+        if(Gdx.input.isTouched()) {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
             cam.unproject(touchPos);
             float relativex = touchPos.x - (joystick.getX());
@@ -264,7 +261,6 @@ public abstract class PlayState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
-
         //Host
         if(!sync){
             sync = true;
@@ -281,6 +277,7 @@ public abstract class PlayState extends State{
             }, 0, 1, TimeUnit.MILLISECONDS);
         }
 
+        long start = System.currentTimeMillis();
         handleInput();
 
         while (tracker < 1000) {
@@ -340,6 +337,15 @@ public abstract class PlayState extends State{
         synchronized (this) {
             if (end) {
                 goToRestartState();
+            }
+        }
+
+        long time = System.currentTimeMillis() - start;
+        if (time < 25){
+            try {
+                Thread.currentThread().sleep(25 - time);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -750,7 +756,7 @@ public abstract class PlayState extends State{
                 }
                 if (gameObject instanceof Player){
                     animateTime += Gdx.graphics.getDeltaTime();
-                    if (touched) {
+                    if (touchHeld) {
                         ((Player) gameObject).setCurrentFrame(orientation, animateTime, true);
                     }
                     else {
