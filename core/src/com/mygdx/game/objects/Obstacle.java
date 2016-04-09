@@ -10,6 +10,8 @@ import com.mygdx.game.states.PlayState;
  * Created by Syuqri on 3/9/2016.
  */
 public class Obstacle extends Movable implements Collidable {
+    private boolean destroyed = false;
+
     public Obstacle(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
         if (stage == Stage.DUNGEON) {
@@ -28,5 +30,13 @@ public class Obstacle extends Movable implements Collidable {
         else {
             return false;
         }
+    }
+
+    public void setDestroyed(boolean destroyed) {
+        this.destroyed = destroyed;
+    }
+
+    public boolean isDestroyed() {
+        return destroyed;
     }
 }

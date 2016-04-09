@@ -11,6 +11,7 @@ import com.mygdx.game.states.PlayState;
  */
 public class Door extends Obstacle implements Collidable{
     private boolean open = false;
+    private boolean destroyed = false;
 
     public Door(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height, stage);

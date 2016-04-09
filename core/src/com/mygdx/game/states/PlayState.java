@@ -1,10 +1,10 @@
 package com.mygdx.game.states;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.Direction;
@@ -32,7 +32,6 @@ import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -247,7 +246,7 @@ public abstract class PlayState extends State{
                     joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight()/2 + joystick.getJoystickWidth()/2*sin);
                 }
 
-                omniMove(cos, sin, (float) Math.pow(ratio, 0.5));
+                movePlayer(cos, sin, (float) Math.pow(ratio, 0.5));
             } else {
                 if (!icons.isEmpty()){
                     if (icons.get(0).contains(touchPos.x, touchPos.y)){
@@ -476,7 +475,7 @@ public abstract class PlayState extends State{
     /**
      Method to move the player
      */
-    private void omniMove(float x, float y, float ratio){
+    private void movePlayer(float x, float y, float ratio){
         float prevx = player.x;
         float prevy = player.y;
         player.x += ratio * x * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
@@ -538,13 +537,15 @@ public abstract class PlayState extends State{
 //    		collides with normal wall obstacle
         Iterator<GameObject> obstacleIterator = obstacles.iterator();
         while (obstacleIterator.hasNext()){
-            if (((Obstacle)obstacleIterator.next()).collides(player, this)){
+            Obstacle obstacle = (Obstacle)obstacleIterator.next();
+            if (obstacle.collides(player, this) || obstacle.isDestroyed()){
 //              DESTROY_WALL implementation
-                if (player.getCanDestroy()) {
+                if (player.getCanDestroy() || obstacle.isDestroyed()) {
+                    if (!obstacle.isDestroyed()){
+                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, obstacle.x + tileLength/2, obstacle.y);
+                    }
                     gsm.startMusic("WallDestroySound.wav");
                     obstacleIterator.remove();
-                    score++;
-                    yourScoreName = "score: " + score;
                     break;
                 }
                 return true;
@@ -553,9 +554,13 @@ public abstract class PlayState extends State{
         //		collides with doors
         Iterator<GameObject> doorIterator = doors.iterator();
         while (doorIterator.hasNext()){
-            if (((Door)doorIterator.next()).collides(player, this)){
+            Door door = (Door)doorIterator.next();
+            if (door.collides(player, this) || door.isDestroyed()){
 //              DESTROY_WALL implementation
-                if (player.getCanDestroy()) {
+                if (player.getCanDestroy() || door.isDestroyed()) {
+                    if (!door.isDestroyed()){
+                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, door.x + tileLength/2, door.y);
+                    }
                     doorIterator.remove();
                     break;
                 }
@@ -845,7 +850,7 @@ public abstract class PlayState extends State{
                     if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() != 0)){
                         byte[] temp = new byte[4];
                         //Message ID
-                        temp[0] = 5;
+                        temp[0] = MessageCode.SYNCING;
                         //Origin of message
                         temp[1] = (byte) MacroHardv2.actionResolver.getmyidint();
                         //0 for ping, 1 for sleep
@@ -862,11 +867,34 @@ public abstract class PlayState extends State{
                     else if(message[2] == 1){
                         mapSynchronizer.getplayer1().countDown();
                     }
-
                     break;
 
-                case MessageCode.SYNC_TRACKER:
-                    spawn = true;
+                case MessageCode.BREAK_HOLE:
+                    x = (float) message[1] * 10 + (float) message[2] / 10;
+                    y = (float) message[3] * 10 + (float) message[4] / 10;
+                    for (GameObject hole: holes) {
+                        if (hole.contains(x, y)){
+                            ((Hole)hole).setBreakHole(true);
+                            break;
+                        }
+                    }
+                    break;
+
+                case MessageCode.DESTROY_WALL:
+                    x = (float) message[1] * 10 + (float) message[2] / 10;
+                    y = (float) message[3] * 10 + (float) message[4] / 10;
+                    for (GameObject obstacle: obstacles) {
+                        if (obstacle.contains(x, y)){
+                            ((Obstacle)obstacle).setDestroyed(true);
+                            break;
+                        }
+                    }
+                    for (GameObject door: doors) {
+                        if (door.contains(x, y)){
+                            ((Door)door).setDestroyed(true);
+                            break;
+                        }
+                    }
                     break;
             }
         }
@@ -1082,4 +1110,6 @@ public abstract class PlayState extends State{
             e.printStackTrace();
         }
     }
+
+
 }

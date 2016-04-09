@@ -44,7 +44,7 @@ public class MapSynchronizer extends Movable{
         if(MacroHardv2.actionResolver.getmyidint()==0){
             byte[] temp = new byte[4];
             //Message ID
-            temp[0] = 5;
+            temp[0] = MessageCode.SYNCING;
             //Origin of message
             temp[1] = (byte) MacroHardv2.actionResolver.getmyidint();
             //0 for ping, 1 for sleep
@@ -85,13 +85,16 @@ public class MapSynchronizer extends Movable{
     public CountDownLatch getplayer1(){
         return this.PlayerL1;
     }
-
     public float getLatency(){
         return latency/1000;
     }
-
-    public void syncSpawn(){
-
-        MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.SYNC_TRACKER});
+    public void sendMessage(int messageCode, float x, float y){
+        byte[] message = new byte[5];
+        message[0] = (byte) messageCode;
+        message[1] = (byte) (x/10);
+        message[2] = (byte)((x*10)%100);
+        message[3] = (byte) (y/10);
+        message[4] = (byte)((y*10)%100);
+        MacroHardv2.actionResolver.sendReliable(message);
     }
 }
