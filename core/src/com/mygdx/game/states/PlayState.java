@@ -113,6 +113,7 @@ public abstract class PlayState extends State{
     private ArrayList<MapTile[]> memory;
     private boolean[] current = createArray(true);
     protected MapMaker mapMaker;
+    private Thread timeCheck;
 
     protected ScheduledThreadPoolExecutor backgroundTaskExecutor = new ScheduledThreadPoolExecutor(3);
 
@@ -170,10 +171,13 @@ public abstract class PlayState extends State{
         gameObjects.add(ui);
         gameObjects.add(icons);
 
-        Thread timeCheck = new Thread(){
+        timeCheck = new Thread(){
             @Override
             public void run(){
-                while(Thread.currentThread().isAlive()){
+                while(true){
+                    if (interrupted()){
+                        break;
+                    }
                     effectPassivePower();
                     effectActivePower();
                 }
@@ -261,6 +265,7 @@ public abstract class PlayState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
+        long start = System.currentTimeMillis();
         //Host
         if(!sync){
             sync = true;
@@ -277,7 +282,6 @@ public abstract class PlayState extends State{
             }, 0, 1, TimeUnit.MILLISECONDS);
         }
 
-        long start = System.currentTimeMillis();
         handleInput();
 
         while (tracker < 1000) {
@@ -870,6 +874,7 @@ public abstract class PlayState extends State{
 
     public void goToRestartState(){
         mapMaker.interrupt();
+        timeCheck.interrupt();
         backgroundTaskExecutor.shutdownNow();
         dispose();
         gsm.set(new RestartState(gsm, getScore()));
@@ -1026,7 +1031,7 @@ public abstract class PlayState extends State{
 
     void wallCoord() {
         powerCounter += 1;
-        doorCounter = (doorCounter + 1)%60;
+        doorCounter = (doorCounter + 1)%30;
         spikeCounter += 1;
         MapTile[] new_row = createArray(MapTile.OBSTACLES);
 
@@ -1043,13 +1048,8 @@ public abstract class PlayState extends State{
             spikeCounter = 0;
         }
 
-        // spawning power ups after a certain time. 20 is default. 20 is for testing
-        if (powerCounter > 23) {
-            new_row = genPower(new_row);
-        }
-
         // spawning door
-        if (doorCounter == 45) {
+        if (doorCounter == 15) {
             new_row = genDoor(new_row);
         }
 
@@ -1058,11 +1058,16 @@ public abstract class PlayState extends State{
         memory.add(0, new_row);
 
         // spawning door switch
-        if (doorCounter == 44 || doorCounter == 48) {
+        if (doorCounter == 14 || doorCounter == 18) {
             MapTile[] result;
             if ((result = genSwitch(memory, current, new_row)) != null){
                 new_row = result;
             }
+        }
+
+        // spawning power ups after a certain time
+        if (powerCounter > 8) {
+            new_row = genPower(new_row);
         }
 
         try {
