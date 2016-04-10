@@ -76,7 +76,7 @@ public abstract class PlayState extends State{
     BitmapFont yourBitmapFontName;
     public Stage stage;
     public Direction orientation;
-    float animateTime;
+    float animateTime, angle;
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -154,6 +154,7 @@ public abstract class PlayState extends State{
         yourBitmapFontName = new BitmapFont();
         orientation = Direction.NORTH;
         animateTime = 0f;
+        angle = 0;
 
         gameObjects.add(bg);
         gameObjects.add(spikes);
@@ -217,20 +218,30 @@ public abstract class PlayState extends State{
                 touchHeld = true;
 
                 //calculates the relevant numbers needed for omnidirectional movement
-                float angle = (float) Math.atan2(relativey, relativex);
-                if (angle > (Math.PI)/4 && angle <= 3*(Math.PI)/4 ){
-                    orientation = Direction.NORTH;
-                }
-                else if (angle > 3*(Math.PI)/4 || angle <= -3*(Math.PI)/4 ){
-                    orientation = Direction.WEST;
-                }
-                else if (angle < -(Math.PI)/4 && angle >= -3*(Math.PI)/4 ){
-                    orientation = Direction.SOUTH;
-                }
-                else if (angle > -(Math.PI)/4 && angle <= (Math.PI)/4 ){
-                    orientation = Direction.EAST;
-                }
-                player.setOrientation(orientation);
+                angle = (float) Math.atan2(relativey, relativex);
+                backgroundTaskExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (angle > 3 * (Math.PI) / 8 && angle <= 5 * (Math.PI) / 8) {
+                            orientation = Direction.NORTH;
+                        } else if (angle > 7 * (Math.PI) / 8 || angle <= -7 * (Math.PI) / 8) {
+                            orientation = Direction.WEST;
+                        } else if (angle < -3 * (Math.PI) /8 && angle >= -5 * (Math.PI) / 8) {
+                            orientation = Direction.SOUTH;
+                        } else if (angle > -(Math.PI) / 8 && angle <= (Math.PI) / 8) {
+                            orientation = Direction.EAST;
+                        } else if (angle > (Math.PI) / 8 && angle <= 3 * (Math.PI) / 8){
+                            orientation = Direction.NORTHEAST;
+                        } else if (angle > 5 * (Math.PI) / 8 && angle <= 7 * (Math.PI) / 8){
+                            orientation = Direction.NORTHWEST;
+                        } else if (angle > -3 * (Math.PI) / 8 && angle <= -(Math.PI) / 8){
+                            orientation = Direction.SOUTHEAST;
+                        } else if (angle > -7 * (Math.PI) / 8 && angle <= -5 * (Math.PI) / 8) {
+                            orientation = Direction.SOUTHWEST;
+                        }
+                        player.setOrientation(orientation);
+                    }
+                });
                 float cos = (float) Math.cos(angle);
                 float sin = (float) Math.sin(angle);
                 float ratio;

@@ -20,12 +20,12 @@ public class Player extends Movable {
     private boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken, canDestroy;
 
     private static final int        FRAME_COLS = 5;
-    private static final int        FRAME_ROWS = 4;
+    private static final int        FRAME_ROWS = 8;
 
     Texture                         walkSheet;
-    TextureRegion[]                 walkFramesNorth, walkFramesEast, walkFramesSouth, walkFramesWest;
-    TextureRegion                   faceNorth, faceSouth, faceEast, faceWest;
-    Animation                       walkAnimationNorth, walkAnimationSouth, walkAnimationEast, walkAnimationWest;
+    TextureRegion[]                 walkFramesNorth, walkFramesEast, walkFramesSouth, walkFramesWest, walkFramesNorthEast, walkFramesNorthWest, walkFramesSouthEast, walkFramesSouthWest;
+    TextureRegion                   faceNorth, faceSouth, faceEast, faceWest, faceNorthEast, faceNorthWest, faceSouthEast, faceSouthWest;
+    Animation                       walkAnimationNorth, walkAnimationSouth, walkAnimationEast, walkAnimationWest, walkAnimationNorthEast, walkAnimationNorthWest, walkAnimationSouthEast, walkAnimationSouthWest;
     TextureRegion                   playImage;
 
     public Player(int id){
@@ -36,22 +36,38 @@ public class Player extends Movable {
         walkFramesSouth = new TextureRegion[4];
         walkFramesEast = new TextureRegion[4];
         walkFramesWest = new TextureRegion[4];
+        walkFramesNorthEast = new TextureRegion[4];
+        walkFramesNorthWest = new TextureRegion[4];
+        walkFramesSouthEast = new TextureRegion[4];
+        walkFramesSouthWest = new TextureRegion[4];
 
         for(int i = 0; i < FRAME_COLS-1; i++){
             walkFramesNorth[i] = tmp[0][i];
             walkFramesWest[i] = tmp[1][i];
             walkFramesSouth[i] = tmp[2][i];
             walkFramesEast[i] = tmp[3][i];
+            walkFramesNorthEast[i] = tmp[7][i];
+            walkFramesNorthWest[i] = tmp[4][i];
+            walkFramesSouthEast[i] = tmp[6][i];
+            walkFramesSouthWest[i] = tmp[5][i];
         }
         faceNorth = tmp[0][FRAME_COLS-1];
         faceWest = tmp[1][FRAME_COLS-1];
         faceSouth = tmp[2][FRAME_COLS-1];
         faceEast = tmp[3][FRAME_COLS-1];
+        faceNorthEast = tmp[7][FRAME_COLS-1];
+        faceNorthWest = tmp[4][FRAME_COLS-1];
+        faceSouthEast = tmp[6][FRAME_COLS-1];
+        faceSouthWest = tmp[5][FRAME_COLS-1];;
 
         walkAnimationNorth = new Animation(0.2f, walkFramesNorth);
         walkAnimationSouth = new Animation(0.2f, walkFramesSouth);
         walkAnimationEast = new Animation(0.25f, walkFramesEast);
         walkAnimationWest = new Animation(0.25f, walkFramesWest);
+        walkAnimationNorthEast = new Animation(0.25f, walkFramesNorthEast);
+        walkAnimationNorthWest = new Animation(0.25f, walkFramesNorthWest);
+        walkAnimationSouthEast = new Animation(0.25f, walkFramesSouthEast);
+        walkAnimationSouthWest = new Animation(0.25f, walkFramesSouthWest);
         switch (id) {
             case 0:
                 this.setImage(faceNorth);
@@ -95,6 +111,18 @@ public class Player extends Movable {
         else if (orientation == Direction.WEST){
             this.setImage(faceWest);
         }
+        else if (orientation == Direction.NORTHEAST){
+            this.setImage(faceNorthEast);
+        }
+        else if (orientation == Direction.NORTHWEST){
+            this.setImage(faceNorthWest);
+        }
+        else if (orientation == Direction.SOUTHWEST){
+            this.setImage(faceSouthWest);
+        }
+        else if (orientation == Direction.SOUTHEAST){
+            this.setImage(faceSouthEast);
+        }
     }
 
     public void setCurrentFrame(Direction orientation, float stateTime, boolean check){
@@ -107,8 +135,20 @@ public class Player extends Movable {
         else if (orientation == Direction.EAST){
             this.setImage(walkAnimationEast.getKeyFrame(stateTime, check));
         }
-        else {
+        else if (orientation == Direction.WEST){
             this.setImage(walkAnimationWest.getKeyFrame(stateTime, check));
+        }
+        else if (orientation == Direction.NORTHEAST){
+            this.setImage(walkAnimationNorthEast.getKeyFrame(stateTime, check));
+        }
+        else if (orientation == Direction.NORTHWEST){
+            this.setImage(walkAnimationNorthWest.getKeyFrame(stateTime, check));
+        }
+        else if (orientation == Direction.SOUTHWEST){
+            this.setImage(walkAnimationSouthWest.getKeyFrame(stateTime, check));
+        }
+        else if (orientation == Direction.SOUTHEAST){
+            this.setImage(walkAnimationSouthEast.getKeyFrame(stateTime, check));
         }
     }
 
