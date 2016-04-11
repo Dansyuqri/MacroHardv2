@@ -205,9 +205,6 @@ public abstract class PlayState extends State{
     }
     @Override
     protected void handleInput() {
-        if(Gdx.input.isCatchBackKey()) {//Ignores back button
-        }
-
         if(Gdx.input.isTouched()) {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
             cam.unproject(touchPos);

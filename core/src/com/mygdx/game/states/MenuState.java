@@ -34,7 +34,6 @@ public class MenuState extends State{
             ;
     public MenuState(GameStateManager gsm) {
         super(gsm);
-        System.out.println("this is gsm 1:" + gsm);
         cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         cam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         graphicsX = Gdx.graphics.getWidth();
