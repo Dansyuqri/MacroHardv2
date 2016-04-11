@@ -15,11 +15,9 @@ import com.mygdx.game.customEnum.PowerType;
 public class Player extends Movable {
     private PowerType passivePower;
     private PowerType activePower;
-    private long endPassivePowerTime;
-    private long endActivePowerTime;
-    private boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken, canDestroy;
+    private boolean canDestroy;
     float prev_x, prev_y;
-
+    
     private static final int        FRAME_COLS = 5;
     private static final int        FRAME_ROWS = 8;
 
@@ -60,7 +58,7 @@ public class Player extends Movable {
         faceNorthEast = tmp[7][FRAME_COLS-1];
         faceNorthWest = tmp[4][FRAME_COLS-1];
         faceSouthEast = tmp[6][FRAME_COLS-1];
-        faceSouthWest = tmp[5][FRAME_COLS-1];;
+        faceSouthWest = tmp[5][FRAME_COLS-1];
 
         walkAnimationNorth = new Animation(0.2f, walkFramesNorth);
         walkAnimationSouth = new Animation(0.2f, walkFramesSouth);
@@ -82,8 +80,7 @@ public class Player extends Movable {
                 break;
         }
         this.activePower = this.passivePower = PowerType.NOTHING;
-        endActivePowerTime = endPassivePowerTime = System.currentTimeMillis();
-        passivePowerState = passivePowerEffectTaken = activePowerState = activePowerEffectTaken = canDestroy = false;
+        canDestroy = false;
     }
 
     @Override
@@ -175,21 +172,6 @@ public class Player extends Movable {
         }
     }
 
-    public long getEndPassivePowerTime() {
-        return endPassivePowerTime;
-    }
-
-    public void setEndPassivePowerTime(long endPassivePowerTime) {
-        this.endPassivePowerTime = endPassivePowerTime;
-    }
-
-    public long getEndActivePowerTime() {
-        return endActivePowerTime;
-    }
-
-    public void setEndActivePowerTime(long endActivePowerTime) {
-        this.endActivePowerTime = endActivePowerTime;
-    }
 
     public PowerType getActivePower() {
         return activePower;
@@ -199,9 +181,6 @@ public class Player extends Movable {
         this.activePower = activePower;
     }
 
-    public void setPassivePower(PowerType power) {
-        this.passivePower = power;
-    }
 
     public PowerType getPassivePower() {
         return passivePower;
@@ -215,32 +194,4 @@ public class Player extends Movable {
         this.canDestroy = canDestroy;
     }
 
-    public void setActivePowerEffectTaken(boolean activePowerEffectTaken) {
-        this.activePowerEffectTaken = activePowerEffectTaken;
-    }
-
-    public void setPassivePowerEffectTaken(boolean passivePowerEffectTaken) {
-        this.passivePowerEffectTaken = passivePowerEffectTaken;
-    }
-
-    public void setPassivePowerState(boolean passivePowerState) {
-        this.passivePowerState = passivePowerState;
-    }
-
-    public void setActivePowerState(boolean activePowerState) {
-        this.activePowerState = activePowerState;
-    }
-
-    public boolean getActivePowerEffectTaken() {
-        return activePowerEffectTaken;
-    }
-    public boolean getPassivePowerEffectTaken() {
-        return passivePowerEffectTaken;
-    }
-    public boolean getPassivePowerState() {
-        return passivePowerState;
-    }
-    public boolean getActivePowerState() {
-        return activePowerState;
-    }
 }
