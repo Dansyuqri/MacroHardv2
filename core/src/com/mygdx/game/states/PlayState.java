@@ -533,7 +533,7 @@ public abstract class PlayState extends State{
 
         if (player.y < 150){
             MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
-//            goToRestartState();
+            goToRestartState();
         }
     }
     private boolean checkObstacleCollision(){
