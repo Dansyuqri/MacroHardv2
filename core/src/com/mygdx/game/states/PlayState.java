@@ -44,6 +44,7 @@ import java.util.concurrent.Semaphore;
 public abstract class PlayState extends State{
 
     //Synchronising
+    public static final float deltaCap = 0.05f;
     protected boolean sync = false;
 
     //objects
@@ -258,7 +259,7 @@ public abstract class PlayState extends State{
                 public void run() {
                     for (int i = 0; i < 3; i++) {
                         if (((Player)players.get(i)).x != ((Player)players.get(i)).getPrev_x() ||
-                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05))) > 5 ) {
+                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap))) > 5 ) {
                             if (angle[i] > 3 * (Math.PI) / 8 && angle[i] <= 5 * (Math.PI) / 8) {
                                 ((Player) players.get(i)).setOrientation(Direction.NORTH);
                             } else if (angle[i] > 7 * (Math.PI) / 8 || angle[i] <= -7 * (Math.PI) / 8) {
@@ -324,8 +325,8 @@ public abstract class PlayState extends State{
 
         checkDangerZone(player);
 
-        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
-        trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
+        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
+        trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
 
         for (ArrayList<GameObject> gameObj: gameObjects){
             for (GameObject gameObject : gameObj) {
@@ -482,24 +483,24 @@ public abstract class PlayState extends State{
     private void movePlayer(float x, float y, float ratio){
         float prevx = player.x;
         float prevy = player.y;
-        player.x += ratio * x * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
-        player.y += ratio * y * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
+        player.x += ratio * x * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
+        player.y += ratio * y * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
         if (checkObstacleCollision()){
             player.x = prevx;
             player.y = prevy;
 
             if (x > 0) {
-                player.x += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
+                player.x += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
             } else {
-                player.x -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
+                player.x -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
             }
             if (checkObstacleCollision()){
                 player.x = prevx;
             }
             if (y > 0) {
-                player.y += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
+                player.y += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
             } else {
-                player.y -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
+                player.y -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
             }
             if (checkObstacleCollision()){
                 player.y = prevy;
@@ -783,7 +784,7 @@ public abstract class PlayState extends State{
                 if (gameObject instanceof Player){
                     animateTime += Gdx.graphics.getDeltaTime();
                     if (((Player)gameObject).x != ((Player)gameObject).getPrev_x() ||
-                            Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05))) > 5 ){
+                            Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap))) > 5 ){
                         ((Player) gameObject).setCurrentFrame(animateTime, true);
                     }
                     else {

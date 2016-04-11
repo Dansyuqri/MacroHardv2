@@ -26,7 +26,7 @@ public class Obstacle extends Movable implements Collidable {
 
     public Obstacle(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
-        wallSheet = new Texture(Gdx.files.internal("wall.png"));
+        wallSheet = new Texture(Gdx.files.internal("wall4.1.png"));
         TextureRegion[][] tmp = TextureRegion.split(wallSheet, wallSheet.getWidth()/FRAME_COLS, wallSheet.getHeight()/FRAME_ROWS);
         destroyFramesDun = new TextureRegion[3];
         destroyFramesIce = new TextureRegion[3];

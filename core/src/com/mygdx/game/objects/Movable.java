@@ -1,6 +1,7 @@
 package com.mygdx.game.objects;
 
 import com.badlogic.gdx.Gdx;
+import com.mygdx.game.states.PlayState;
 
 /**
  * Created by Samuel on 23/3/2016.
@@ -14,6 +15,6 @@ public abstract class Movable extends GameObject {
         super(x, y, width, height);
     }
     public void scroll (float gameSpeed){
-        y -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05);
+        y -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) PlayState.deltaCap);
     }
 }
