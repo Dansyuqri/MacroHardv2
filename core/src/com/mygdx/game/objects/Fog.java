@@ -18,6 +18,6 @@ public class Fog extends Movable {
     @Override
     public void scroll (float gameSpeed){
         y -= gameSpeed * Gdx.graphics.getDeltaTime();
-        x -= 50 * Gdx.graphics.getDeltaTime();
+        x -= 10 * Gdx.graphics.getDeltaTime();
     }
 }
