@@ -7,6 +7,8 @@ import com.mygdx.game.Interface.Collidable;
 import com.mygdx.game.states.PlayState;
 import com.mygdx.game.customEnum.PowerType;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by Syuqri on 3/9/2016.
  */
@@ -36,18 +38,7 @@ public class Power extends Movable implements Collidable {
 
     @Override
     public boolean collides(Player player, PlayState game) {
-        if (player.overlaps(this)){
-            if (isPassive()) {
-                player.setPassivePowerState(true);
-                player.setPassivePower(type);
-                player.setEndPassivePowerTime(System.currentTimeMillis()+5000);
-            } else {
-                player.setActivePower(type);
-                game.addIcon(new Icon(this));
-            }
-            return true;
-        }
-        return false;
+        return player.overlaps(this);
     }
 
     public boolean isPassive() {
@@ -58,6 +49,10 @@ public class Power extends Movable implements Collidable {
                 break;
             }
         }
-        return (index<5);
+        return (index<4);
+    }
+
+    public PowerType getType() {
+        return type;
     }
 }

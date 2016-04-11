@@ -22,6 +22,7 @@ import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Door;
 import com.mygdx.game.objects.Obstacle;
 import com.mygdx.game.objects.Power;
+import com.mygdx.game.objects.Sand;
 import com.mygdx.game.objects.SideWall;
 import com.mygdx.game.objects.Spikes;
 import com.mygdx.game.objects.Switch;
@@ -50,6 +51,7 @@ public abstract class PlayState extends State{
     protected Semaphore mapCon;
     protected Semaphore mapMod;
     protected Semaphore seedSem;
+    protected boolean gameSpeedIsAvailable;
 
     private JoyStick joystick;
     protected Player player;
@@ -66,7 +68,7 @@ public abstract class PlayState extends State{
     private boolean running;
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
-    protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
+    protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone;
     public float tracker;
     public float trackerBG;
@@ -102,6 +104,7 @@ public abstract class PlayState extends State{
     private ArrayList<GameObject> icons = new ArrayList<GameObject>();
     protected ArrayList<GameObject> ghosts = new ArrayList<GameObject>();
     private ArrayList<GameObject> fogs = new ArrayList<GameObject>();
+    private ArrayList<GameObject> sands = new ArrayList<GameObject>();
 
     //final values
     final int tileLength = 50;
@@ -111,7 +114,6 @@ public abstract class PlayState extends State{
     private ArrayList<MapTile[]> memory;
     private boolean[] current = createArray(true);
     protected MapMaker mapMaker;
-    private Thread timeCheck;
 
     protected ScheduledThreadPoolExecutor backgroundTaskExecutor = new ScheduledThreadPoolExecutor(3);
 
@@ -125,6 +127,7 @@ public abstract class PlayState extends State{
         mapCon = new Semaphore(-4);
         mapMod = new Semaphore(1);
         seedSem = new Semaphore(0);
+        gameSpeedIsAvailable = true;
 
         touchHeld = false;
 
@@ -138,7 +141,6 @@ public abstract class PlayState extends State{
         //misc values initialization
         gameSpeed = 60;
         speedIncrease = (float) 0.07;
-        speedChange = (float) 0.4;
         playerSpeed = 200;
         dangerZone = 300;
         doorCounter = 0;
@@ -157,6 +159,7 @@ public abstract class PlayState extends State{
         gameObjects.add(bg);
         gameObjects.add(spikes);
         gameObjects.add(holes);
+        gameObjects.add(sands);
         gameObjects.add(powers);
         gameObjects.add(doors);
         gameObjects.add(obstacles);
@@ -169,19 +172,6 @@ public abstract class PlayState extends State{
         gameObjects.add(ui);
         gameObjects.add(icons);
 
-        timeCheck = new Thread(){
-            @Override
-            public void run(){
-                while(true){
-                    if (interrupted()){
-                        break;
-                    }
-                    effectPassivePower();
-                    effectActivePower();
-                }
-            }
-        };
-
         memory = new ArrayList<MapTile[]>();
         MapTile[] init = createArray(MapTile.EMPTY);
         for (int i = 0; i < 5; i++){
@@ -191,7 +181,6 @@ public abstract class PlayState extends State{
         mapMaker = new MapMaker(this);
         mapMaker.start();
 
-        timeCheck.start();
         createBg();
         createObstacle();
         createSides();
@@ -426,7 +415,7 @@ public abstract class PlayState extends State{
 
     private void spawnObjects(){
         if (score % 60 == 0){
-            stage = Stage.values()[mapRandomizer.nextInt(2)];
+            stage = Stage.values()[mapRandomizer.nextInt(3)];
         }
         for (int i = 0; i < path.length; i++) {
             switch (path[i]){
@@ -452,6 +441,10 @@ public abstract class PlayState extends State{
                         holes.add(new Hole((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength,stage));
                     }
                     break;
+                case SAND:
+                    if (stage == Stage.DESERT){
+                        sands.add(new Sand((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
+                    }
             }
         }
         if (score > 200 && stage == Stage.DUNGEON) {
@@ -667,8 +660,65 @@ public abstract class PlayState extends State{
 
         //		collides with power up
         Iterator<GameObject> powerIterator = powers.iterator();
-        while (powerIterator.hasNext()){
-            if (((Power)powerIterator.next()).collides(player, this)){
+        while (powerIterator.hasNext()) {
+            Power tempPower = (Power) powerIterator.next();
+            if (tempPower.collides(player, this)) {
+                if (tempPower.isPassive()) {
+                    switch(tempPower.getType()) {
+                        case FREEZE_MAZE:
+                            try {
+                                while (!gameSpeedIsAvailable) {
+                                    wait();
+                                }
+                            } catch (InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
+                            gameSpeedIsAvailable = false;
+                            tempGameSpeed = gameSpeed;
+                            gameSpeed = 0;
+                            backgroundTaskExecutor.schedule(new Runnable() {
+                                @Override
+                                public void run() {
+                                    gameSpeed = tempGameSpeed;
+                                    gameSpeedIsAvailable = true;
+                                    notifyAll();
+                                }
+                            }, 5, TimeUnit.SECONDS);
+                            break;
+                        case SPEED_PLAYER_UP:
+                            playerSpeed *= 0.7;
+                            backgroundTaskExecutor.schedule(new Runnable() {
+                                @Override
+                                public void run() {
+                                    playerSpeed /= 0.7;
+                                }
+                            },5, TimeUnit.SECONDS);
+                            break;
+                        case SLOW_GAME_DOWN:
+                            try {
+                                while (!gameSpeedIsAvailable) {
+                                    wait();
+                                }
+                            } catch (InterruptedException ex) {
+                                ex.printStackTrace();
+                            }
+                            gameSpeedIsAvailable = false;
+                            gsm.startMusic("TimeSlowSound.mp3");
+                            gameSpeed *= 0.4;
+                            backgroundTaskExecutor.schedule(new Runnable() {
+                                @Override
+                                public void run() {
+                                    gameSpeed /= 0.4;
+                                    gameSpeedIsAvailable = true;
+                                    notifyAll();
+                                }
+                            },5, TimeUnit.SECONDS);
+                            break;
+                    }
+                } else {
+                    player.setActivePower(tempPower.getType());
+                    this.addIcon(new Icon(tempPower));
+                }
                 powerIterator.remove();
             }
         }
@@ -680,70 +730,26 @@ public abstract class PlayState extends State{
 
     private void checkDangerZone(Player p) {
         if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
-            if (!(player.getPassivePower().equals(PowerType.FREEZE_MAZE)&&player.getPassivePowerState())) {
+            if (!(player.getPassivePower().equals(PowerType.FREEZE_MAZE) || player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN))) {
                 gameSpeed += speedIncrease;
             }
         }
     }
 
-    private void effectPassivePower(){
-        if (player.getPassivePowerState()) {
-            if (!player.getPassivePowerEffectTaken()) {
-                if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
-                    synchronized (Player.class) {
-                        tempGameSpeed = gameSpeed;
-                    }
-                    gameSpeed = 0;
-                    sendGameSpeed();
-                } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
-                    gsm.startMusic("TimeSlowSound.mp3");
-                    gameSpeed *= speedChange;
-                    sendGameSpeed();
-                } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
-                    playerSpeed /= speedChange;
-                }
-                player.setPassivePowerEffectTaken(true);
-            }
-            if (System.currentTimeMillis() >= player.getEndPassivePowerTime()) {
-                if (player.getPassivePower().equals(PowerType.FREEZE_MAZE)) {
-                    synchronized (Player.class) {
-                        gameSpeed = tempGameSpeed;
-                    }
-                    sendGameSpeed();
-                } else if (player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN)) {
-                    gameSpeed /= speedChange;
-                    sendGameSpeed();
-                } else if (player.getPassivePower().equals(PowerType.SPEED_PLAYER_UP)) {
-                    playerSpeed *= speedChange;
-                }
-                player.setPassivePowerState(false);
-                player.setPassivePowerEffectTaken(false);
-            }
-        }
-    }
-
     private void activateActivePower(){
-        player.setActivePowerState(true);
-        player.setEndActivePowerTime(System.currentTimeMillis()+5000);
-
-    }
-
-    private void effectActivePower(){
-        if (player.getActivePowerState()) {
-            if (!player.getActivePowerEffectTaken()) {
-                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
-                    player.setCanDestroy(true);
-                }
-                player.setActivePowerEffectTaken(true);
-            }
-            if (System.currentTimeMillis() >= player.getEndActivePowerTime()) {
-                if (player.getActivePower().equals(PowerType.DESTROY_WALL)) {
-                    player.setCanDestroy(false);
-                }
-                player.setActivePower(PowerType.NOTHING);
-                player.setActivePowerState(false);
-                player.setActivePowerEffectTaken(false);
-            }
+        switch (player.getActivePower()) {
+            case DESTROY_WALL:
+                player.setCanDestroy(true);
+                backgroundTaskExecutor.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        player.setCanDestroy(false);
+                    }
+                },5,TimeUnit.SECONDS);
+                break;
+            case PLAYERS_COMBINE:
+                byte[] message = wrapCoords(MacroHardv2.actionResolver.getmyidint(),player.x,player.y);
+                MacroHardv2.actionResolver.sendPing(message);
         }
     }
 
@@ -923,7 +929,6 @@ public abstract class PlayState extends State{
 
     public void goToRestartState(){
         mapMaker.interrupt();
-        timeCheck.interrupt();
         backgroundTaskExecutor.shutdownNow();
         dispose();
         gsm.set(new RestartState(gsm, getScore()));
@@ -1000,6 +1005,17 @@ public abstract class PlayState extends State{
             int pos = mapRandomizer.nextInt(9);
             if (new_row[pos] == MapTile.EMPTY){
                 new_row[pos] = MapTile.HOLE;
+            }
+        }
+        return new_row;
+    }
+
+    private MapTile[] genQuickSand(MapTile[] new_row){
+        int holeNo = mapRandomizer.nextInt(3);
+        for (int j = 0; j < holeNo; j++) {
+            int pos = mapRandomizer.nextInt(9);
+            if (new_row[pos] == MapTile.EMPTY){
+                new_row[pos] = MapTile.SAND;
             }
         }
         return new_row;
@@ -1095,8 +1111,13 @@ public abstract class PlayState extends State{
 
         // creating random spikes
         if (spikeCounter > 3) {
-            new_row = genSpikes(new_row);
-            new_row = genHole(new_row);
+            if (stage == Stage.DUNGEON) {
+                new_row = genSpikes(new_row);
+            } else if (stage == Stage.ICE) {
+                new_row = genHole(new_row);
+            } else if (stage == Stage.DESERT){
+                new_row = genQuickSand(new_row);
+            }
             spikeCounter = 0;
         }
 
@@ -1133,5 +1154,15 @@ public abstract class PlayState extends State{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+    private static byte[] wrapCoords(int id, float x, float y){
+        byte[] result = new byte[6];
+        result[0] = MessageCode.TELEPORT;
+        result[1] = (byte) id;
+        result[2] = (byte) (x/10);
+        result[3] = (byte)((x*10)%100);
+        result[4] = (byte)(y/10);
+        result[5] = (byte)((y*10)%100);
+        return result;
     }
 }

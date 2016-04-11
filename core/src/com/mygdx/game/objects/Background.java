@@ -19,5 +19,8 @@ public class Background extends Movable{
         else if (stage == Stage.ICE){
             this.setImage(new Texture(Gdx.files.internal("bg_ice.png")));
         }
+        else if (stage == Stage.DESERT){
+            this.setImage(new Texture(Gdx.files.internal("bg_desert.png")));
+        }
     }
 }
