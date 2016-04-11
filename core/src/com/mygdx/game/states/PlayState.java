@@ -917,8 +917,8 @@ public abstract class PlayState extends State{
                     int otherp = (int) message[1];
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
                     float y1 = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, otherp);
-                    players.get(otherp).x = x1;
-                    players.get(otherp).y = y1;
+                    players.get(MacroHardv2.actionResolver.getmyidint()).x = x1;
+                    players.get(MacroHardv2.actionResolver.getmyidint()).y = y1;
                     break;
             }
         }
