@@ -18,6 +18,7 @@ public class Player extends Movable {
     private long endPassivePowerTime;
     private long endActivePowerTime;
     private boolean passivePowerState, passivePowerEffectTaken, activePowerState, activePowerEffectTaken, canDestroy;
+    float prev_x, prev_y;
 
     private static final int        FRAME_COLS = 5;
     private static final int        FRAME_ROWS = 8;
@@ -27,6 +28,7 @@ public class Player extends Movable {
     TextureRegion                   faceNorth, faceSouth, faceEast, faceWest, faceNorthEast, faceNorthWest, faceSouthEast, faceSouthWest;
     Animation                       walkAnimationNorth, walkAnimationSouth, walkAnimationEast, walkAnimationWest, walkAnimationNorthEast, walkAnimationNorthWest, walkAnimationSouthEast, walkAnimationSouthWest;
     TextureRegion                   playImage;
+    Direction                       orientation;
 
     public Player(int id){
         super(480 / 2 - 50 / 2, 450, 40, 40);
@@ -98,7 +100,15 @@ public class Player extends Movable {
         this.playImage = image;
     }
 
-    public void setOrientation(Direction orientation){
+    public void setOrientation(Direction orientation) {
+        this.orientation = orientation;
+    }
+
+    public Direction getOrientation() {
+        return orientation;
+    }
+
+    public void setDirection(){
         if (orientation == Direction.NORTH){
             this.setImage(faceNorth);
         }
@@ -125,7 +135,7 @@ public class Player extends Movable {
         }
     }
 
-    public void setCurrentFrame(Direction orientation, float stateTime, boolean check){
+    public void setCurrentFrame(float stateTime, boolean check){
         if (orientation == Direction.NORTH){
             this.setImage(walkAnimationNorth.getKeyFrame(stateTime, check));
         }

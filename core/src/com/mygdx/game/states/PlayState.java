@@ -1,6 +1,5 @@
 package com.mygdx.game.states;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -75,8 +74,8 @@ public abstract class PlayState extends State{
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
     public Stage stage;
-    public Direction orientation;
-    float animateTime, angle;
+    float animateTime;
+    float[] angle;
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -152,9 +151,8 @@ public abstract class PlayState extends State{
         score = 0;
         yourScoreName = "score: 0";
         yourBitmapFontName = new BitmapFont();
-        orientation = Direction.NORTH;
         animateTime = 0f;
-        angle = 0;
+        angle = new float[3];
 
         gameObjects.add(bg);
         gameObjects.add(spikes);
@@ -218,32 +216,9 @@ public abstract class PlayState extends State{
                 touchHeld = true;
 
                 //calculates the relevant numbers needed for omnidirectional movement
-                angle = (float) Math.atan2(relativey, relativex);
-                backgroundTaskExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (angle > 3 * (Math.PI) / 8 && angle <= 5 * (Math.PI) / 8) {
-                            orientation = Direction.NORTH;
-                        } else if (angle > 7 * (Math.PI) / 8 || angle <= -7 * (Math.PI) / 8) {
-                            orientation = Direction.WEST;
-                        } else if (angle < -3 * (Math.PI) /8 && angle >= -5 * (Math.PI) / 8) {
-                            orientation = Direction.SOUTH;
-                        } else if (angle > -(Math.PI) / 8 && angle <= (Math.PI) / 8) {
-                            orientation = Direction.EAST;
-                        } else if (angle > (Math.PI) / 8 && angle <= 3 * (Math.PI) / 8){
-                            orientation = Direction.NORTHEAST;
-                        } else if (angle > 5 * (Math.PI) / 8 && angle <= 7 * (Math.PI) / 8){
-                            orientation = Direction.NORTHWEST;
-                        } else if (angle > -3 * (Math.PI) / 8 && angle <= -(Math.PI) / 8){
-                            orientation = Direction.SOUTHEAST;
-                        } else if (angle > -7 * (Math.PI) / 8 && angle <= -5 * (Math.PI) / 8) {
-                            orientation = Direction.SOUTHWEST;
-                        }
-                        player.setOrientation(orientation);
-                    }
-                });
-                float cos = (float) Math.cos(angle);
-                float sin = (float) Math.sin(angle);
+                angle[playerID] = (float) Math.atan2(relativey, relativex);
+                float cos = (float) Math.cos(angle[playerID]);
+                float sin = (float) Math.sin(angle[playerID]);
                 float ratio;
                 //setting joystick centre coordinates
                 if ((Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
@@ -290,6 +265,30 @@ public abstract class PlayState extends State{
                     coordSender.send();
                 }
             }, 0, 1, TimeUnit.MILLISECONDS);
+            backgroundTaskExecutor.scheduleWithFixedDelay(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < 3; i++) {
+                        if (angle[i] > 3 * (Math.PI) / 8 && angle[i] <= 5 * (Math.PI) / 8) {
+                            ((Player)players.get(i)).setOrientation(Direction.NORTH);
+                        } else if (angle[i] > 7 * (Math.PI) / 8 || angle[i] <= -7 * (Math.PI) / 8) {
+                            ((Player)players.get(i)).setOrientation(Direction.WEST);
+                        } else if (angle[i] < -3 * (Math.PI) / 8 && angle[i] >= -5 * (Math.PI) / 8) {
+                            ((Player)players.get(i)).setOrientation(Direction.SOUTH);
+                        } else if (angle[i] > -(Math.PI) / 8 && angle[i] <= (Math.PI) / 8) {
+                            ((Player)players.get(i)).setOrientation(Direction.EAST);
+                        } else if (angle[i] > (Math.PI) / 8 && angle[i] <= 3 * (Math.PI) / 8) {
+                            ((Player)players.get(i)).setOrientation(Direction.NORTHEAST);
+                        } else if (angle[i] > 5 * (Math.PI) / 8 && angle[i] <= 7 * (Math.PI) / 8) {
+                            ((Player)players.get(i)).setOrientation(Direction.NORTHWEST);
+                        } else if (angle[i] > -3 * (Math.PI) / 8 && angle[i] <= -(Math.PI) / 8) {
+                            ((Player)players.get(i)).setOrientation(Direction.SOUTHEAST);
+                        } else if (angle[i] > -7 * (Math.PI) / 8 && angle[i] <= -5 * (Math.PI) / 8) {
+                            ((Player)players.get(i)).setOrientation(Direction.SOUTHWEST);
+                        }
+                    }
+                }
+            }, 0, 30, TimeUnit.MILLISECONDS);
         }
 
         handleInput();
@@ -776,11 +775,11 @@ public abstract class PlayState extends State{
                 }
                 if (gameObject instanceof Player){
                     animateTime += Gdx.graphics.getDeltaTime();
-                    if (touchHeld) {
-                        ((Player) gameObject).setCurrentFrame(orientation, animateTime, true);
+                    if (touchHeld ) {
+                        ((Player) gameObject).setCurrentFrame(animateTime, true);
                     }
                     else {
-                        ((Player) gameObject).setOrientation(orientation);
+                        ((Player) gameObject).setDirection();
                     }
                 }
                 gameObject.draw(sb);
@@ -811,10 +810,13 @@ public abstract class PlayState extends State{
                     if (!mapSynchronizer.isSet(other)){
                         mapSynchronizer.set(other);
                     }
+                    float prev_x = players.get(other).x;
+                    float prev_y = players.get(other).y;
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
                     float y = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, other);
                     players.get(other).x = x;
                     players.get(other).y = y;
+                    angle[other] = ((float)Math.atan2(y-prev_y, x-prev_x));
                     break;
 
                 //map
