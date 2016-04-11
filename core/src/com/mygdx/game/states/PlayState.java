@@ -429,6 +429,9 @@ public abstract class PlayState extends State{
 
 
     private void spawnObjects(){
+        if (score % 20 == 0){
+            stage = Stage.values()[mapRandomizer.nextInt(2)];
+        }
         for (int i = 0; i < path.length; i++) {
             switch (path[i]){
                 case SWITCH:
@@ -463,9 +466,6 @@ public abstract class PlayState extends State{
     }
 
     private void spawnBg(){
-        if (score % 20 == 0){
-            stage = Stage.values()[mapRandomizer.nextInt(2)];
-        }
         Background backg = new Background(trackerBG, stage);
         Overlay effect = new Overlay(trackerBG, stage);
         bg.add(backg);
@@ -1134,6 +1134,4 @@ public abstract class PlayState extends State{
             e.printStackTrace();
         }
     }
-
-
 }
