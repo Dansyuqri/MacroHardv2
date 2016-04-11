@@ -4,8 +4,9 @@ android {
             keyAlias 'macrokey'
             keyPassword 'macrokey'
             //storeFile file('/Users/hj/AndroidStudioProjects/MacroHardv2/macrokey.jks')
-            storeFile file('C:/Users/User/Desktop/GDX/macrokey.jks')
-            //storeFile file('C:/Users/Nayr/Desktop/MacroHardv2/macrokey.jks')
+//            storeFile file('C:/Users/User/Desktop/GDX/macrokey.jks')
+            storeFile file('C:/Users/Nayr/Desktop/MacroHardv2/macrokey.jks')
+//            storeFile file('C:/Users/Samuel/Desktop/School/Sophomore Term 5/ESC/libgdx/MacroHardv2/macrokey.jks')
             storePassword 'macrokey'
         }
     }

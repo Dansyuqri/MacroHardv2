@@ -1,6 +1,5 @@
 package com.mygdx.game.states;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -66,7 +65,7 @@ public abstract class PlayState extends State{
     protected final int playerID;
     private boolean running;
 
-    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false, spawn = false;
+    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone;
     public float tracker;
@@ -75,8 +74,8 @@ public abstract class PlayState extends State{
     private String yourScoreName;
     BitmapFont yourBitmapFontName;
     public Stage stage;
-    public Direction orientation;
-    float animateTime, angle;
+    float animateTime;
+    float[] angle;
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -152,9 +151,8 @@ public abstract class PlayState extends State{
         score = 0;
         yourScoreName = "score: 0";
         yourBitmapFontName = new BitmapFont();
-        orientation = Direction.NORTH;
         animateTime = 0f;
-        angle = 0;
+        angle = new float[3];
 
         gameObjects.add(bg);
         gameObjects.add(spikes);
@@ -217,32 +215,9 @@ public abstract class PlayState extends State{
                 touchHeld = true;
 
                 //calculates the relevant numbers needed for omnidirectional movement
-                angle = (float) Math.atan2(relativey, relativex);
-                backgroundTaskExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (angle > 3 * (Math.PI) / 8 && angle <= 5 * (Math.PI) / 8) {
-                            orientation = Direction.NORTH;
-                        } else if (angle > 7 * (Math.PI) / 8 || angle <= -7 * (Math.PI) / 8) {
-                            orientation = Direction.WEST;
-                        } else if (angle < -3 * (Math.PI) /8 && angle >= -5 * (Math.PI) / 8) {
-                            orientation = Direction.SOUTH;
-                        } else if (angle > -(Math.PI) / 8 && angle <= (Math.PI) / 8) {
-                            orientation = Direction.EAST;
-                        } else if (angle > (Math.PI) / 8 && angle <= 3 * (Math.PI) / 8){
-                            orientation = Direction.NORTHEAST;
-                        } else if (angle > 5 * (Math.PI) / 8 && angle <= 7 * (Math.PI) / 8){
-                            orientation = Direction.NORTHWEST;
-                        } else if (angle > -3 * (Math.PI) / 8 && angle <= -(Math.PI) / 8){
-                            orientation = Direction.SOUTHEAST;
-                        } else if (angle > -7 * (Math.PI) / 8 && angle <= -5 * (Math.PI) / 8) {
-                            orientation = Direction.SOUTHWEST;
-                        }
-                        player.setOrientation(orientation);
-                    }
-                });
-                float cos = (float) Math.cos(angle);
-                float sin = (float) Math.sin(angle);
+                angle[playerID] = (float) Math.atan2(relativey, relativex);
+                float cos = (float) Math.cos(angle[playerID]);
+                float sin = (float) Math.sin(angle[playerID]);
                 float ratio;
                 //setting joystick centre coordinates
                 if ((Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
@@ -289,12 +264,38 @@ public abstract class PlayState extends State{
                     coordSender.send();
                 }
             }, 0, 1, TimeUnit.MILLISECONDS);
+            backgroundTaskExecutor.scheduleWithFixedDelay(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < 3; i++) {
+                        if (((Player)players.get(i)).x != ((Player)players.get(i)).getPrev_x() ||
+                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05))) > 5 ) {
+                            if (angle[i] > 3 * (Math.PI) / 8 && angle[i] <= 5 * (Math.PI) / 8) {
+                                ((Player) players.get(i)).setOrientation(Direction.NORTH);
+                            } else if (angle[i] > 7 * (Math.PI) / 8 || angle[i] <= -7 * (Math.PI) / 8) {
+                                ((Player) players.get(i)).setOrientation(Direction.WEST);
+                            } else if (angle[i] < -3 * (Math.PI) / 8 && angle[i] >= -5 * (Math.PI) / 8) {
+                                ((Player) players.get(i)).setOrientation(Direction.SOUTH);
+                            } else if (angle[i] > -(Math.PI) / 8 && angle[i] <= (Math.PI) / 8) {
+                                ((Player) players.get(i)).setOrientation(Direction.EAST);
+                            } else if (angle[i] > (Math.PI) / 8 && angle[i] <= 3 * (Math.PI) / 8) {
+                                ((Player) players.get(i)).setOrientation(Direction.NORTHEAST);
+                            } else if (angle[i] > 5 * (Math.PI) / 8 && angle[i] <= 7 * (Math.PI) / 8) {
+                                ((Player) players.get(i)).setOrientation(Direction.NORTHWEST);
+                            } else if (angle[i] > -3 * (Math.PI) / 8 && angle[i] <= -(Math.PI) / 8) {
+                                ((Player) players.get(i)).setOrientation(Direction.SOUTHEAST);
+                            } else if (angle[i] > -7 * (Math.PI) / 8 && angle[i] <= -5 * (Math.PI) / 8) {
+                                ((Player) players.get(i)).setOrientation(Direction.SOUTHWEST);
+                            }
+                        }
+                    }
+                }
+            }, 0, 30, TimeUnit.MILLISECONDS);
         }
 
         handleInput();
 
         while (tracker < 1000) {
-            spawn = false;
             try {
                 mapCon.acquire();
                 mapMod.acquire();
@@ -424,6 +425,9 @@ public abstract class PlayState extends State{
 
 
     private void spawnObjects(){
+        if (score % 60 == 0){
+            stage = Stage.values()[mapRandomizer.nextInt(2)];
+        }
         for (int i = 0; i < path.length; i++) {
             switch (path[i]){
                 case SWITCH:
@@ -458,9 +462,6 @@ public abstract class PlayState extends State{
     }
 
     private void spawnBg(){
-        if (score % 20 == 0){
-            stage = Stage.values()[mapRandomizer.nextInt(2)];
-        }
         Background backg = new Background(trackerBG, stage);
         Overlay effect = new Overlay(trackerBG, stage);
         bg.add(backg);
@@ -539,7 +540,7 @@ public abstract class PlayState extends State{
 
         if (player.y < 150){
             MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
-            goToRestartState();
+//            goToRestartState();
         }
     }
     private boolean checkObstacleCollision(){
@@ -775,12 +776,14 @@ public abstract class PlayState extends State{
                 }
                 if (gameObject instanceof Player){
                     animateTime += Gdx.graphics.getDeltaTime();
-                    if (touchHeld) {
-                        ((Player) gameObject).setCurrentFrame(orientation, animateTime, true);
+                    if (((Player)gameObject).x != ((Player)gameObject).getPrev_x() ||
+                            Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) 0.05))) > 5 ){
+                        ((Player) gameObject).setCurrentFrame(animateTime, true);
                     }
                     else {
-                        ((Player) gameObject).setOrientation(orientation);
+                        ((Player) gameObject).setDirection();
                     }
+                    ((Player)gameObject).setPrevCoord(((Player)gameObject).x, ((Player)gameObject).y);
                 }
                 gameObject.draw(sb);
             }
@@ -814,6 +817,7 @@ public abstract class PlayState extends State{
                     float y = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, other);
                     players.get(other).x = x;
                     players.get(other).y = y;
+                    angle[other] = ((float)Math.atan2(y - ((Player)players.get(other)).getPrev_y(), x - ((Player)players.get(other)).getPrev_x()));
                     break;
 
                 //map
@@ -906,6 +910,13 @@ public abstract class PlayState extends State{
                         }
                     }
                     break;
+                case MessageCode.TELEPORT:
+                    int otherp = (int) message[1];
+                    float x1 = (float) message[2] * 10 + (float) message[3] / 10;
+                    float y1 = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, otherp);
+                    players.get(MacroHardv2.actionResolver.getmyidint()).x = x1;
+                    players.get(MacroHardv2.actionResolver.getmyidint()).y = y1;
+                    break;
             }
         }
     }
@@ -995,13 +1006,10 @@ public abstract class PlayState extends State{
     }
 
     private MapTile[] genPower(MapTile[] new_row){
-        while (true){
-            int temp = mapRandomizer.nextInt(9);
-            if (new_row[temp] == MapTile.EMPTY){
-                new_row[temp] = MapTile.POWER;
-                powerCounter = 0;
-                break;
-            }
+        int temp = mapRandomizer.nextInt(9);
+        if (new_row[temp] == MapTile.EMPTY){
+            new_row[temp] = MapTile.POWER;
+            powerCounter = 0;
         }
         return new_row;
     }
@@ -1062,7 +1070,13 @@ public abstract class PlayState extends State{
             new_row[i] = MapTile.SWITCH;
             return new_row;
         } else {
-            mapBuffer.get(mapBuffer.size() - j)[i] = MapTile.SWITCH;
+            try {
+                mapMod.acquire();
+                mapBuffer.get(mapBuffer.size() - j)[i] = MapTile.SWITCH;
+                mapMod.release();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return null;
         }
     }
@@ -1086,14 +1100,14 @@ public abstract class PlayState extends State{
             spikeCounter = 0;
         }
 
+        // updating the memory
+        memory.remove(memory.size() - 1);
+        memory.add(0, new_row);
+
         // spawning door
         if (doorCounter == 15) {
             new_row = genDoor(new_row);
         }
-
-        // updating the memory
-        memory.remove(memory.size() - 1);
-        memory.add(0, new_row);
 
         // spawning door switch
         if (doorCounter == 14 || doorCounter == 18) {
@@ -1120,6 +1134,4 @@ public abstract class PlayState extends State{
             e.printStackTrace();
         }
     }
-
-
 }
