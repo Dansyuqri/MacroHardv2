@@ -6,21 +6,4 @@ package com.mygdx.game.customEnum;
  */
 public enum MapTile {
     EMPTY, OBSTACLES, POWER, DOOR, SWITCH, SPIKES, HOLE;
-    public byte toByte(){
-        for (int i = 0; i < values().length; i++) {
-            if (this.equals(values()[i])){
-                return (byte) i;
-            }
-        }
-        return (byte) -1;
-    }
-
-    public static MapTile fromByte(byte b){
-        for (int i = 0; i < values().length; i++) {
-            if (b == (byte) i){
-                return values()[i];
-            }
-        }
-        return EMPTY;
-    }
 }

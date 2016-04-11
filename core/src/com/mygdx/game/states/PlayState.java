@@ -65,7 +65,7 @@ public abstract class PlayState extends State{
     protected final int playerID;
     private boolean running;
 
-    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false, spawn = false;
+    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
     protected float gameSpeed, speedChange, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
     protected int playerSpeed, dangerZone;
     public float tracker;
@@ -299,7 +299,6 @@ public abstract class PlayState extends State{
         handleInput();
 
         while (tracker < 1000) {
-            spawn = false;
             try {
                 mapCon.acquire();
                 mapMod.acquire();
@@ -429,7 +428,7 @@ public abstract class PlayState extends State{
 
 
     private void spawnObjects(){
-        if (score % 20 == 0){
+        if (score % 60 == 0){
             stage = Stage.values()[mapRandomizer.nextInt(2)];
         }
         for (int i = 0; i < path.length; i++) {
@@ -1101,7 +1100,7 @@ public abstract class PlayState extends State{
         }
 
         // spawning door
-        if (doorCounter == 22) {
+        if (doorCounter == 15) {
             new_row = genDoor(new_row);
         }
 
@@ -1110,7 +1109,7 @@ public abstract class PlayState extends State{
         memory.add(0, new_row);
 
         // spawning door switch
-        if (doorCounter == 20 || doorCounter == 24) {
+        if (doorCounter == 14 || doorCounter == 18) {
             MapTile[] result;
             if ((result = genSwitch(memory, current, new_row)) != null){
                 new_row = result;
