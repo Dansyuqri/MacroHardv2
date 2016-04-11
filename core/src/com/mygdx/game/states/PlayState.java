@@ -22,6 +22,7 @@ import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Door;
 import com.mygdx.game.objects.Obstacle;
 import com.mygdx.game.objects.Power;
+import com.mygdx.game.objects.Sand;
 import com.mygdx.game.objects.SideWall;
 import com.mygdx.game.objects.Spikes;
 import com.mygdx.game.objects.Switch;
@@ -102,6 +103,7 @@ public abstract class PlayState extends State{
     private ArrayList<GameObject> icons = new ArrayList<GameObject>();
     protected ArrayList<GameObject> ghosts = new ArrayList<GameObject>();
     private ArrayList<GameObject> fogs = new ArrayList<GameObject>();
+    private ArrayList<GameObject> sands = new ArrayList<GameObject>();
 
     //final values
     final int tileLength = 50;
@@ -157,6 +159,7 @@ public abstract class PlayState extends State{
         gameObjects.add(bg);
         gameObjects.add(spikes);
         gameObjects.add(holes);
+        gameObjects.add(sands);
         gameObjects.add(powers);
         gameObjects.add(doors);
         gameObjects.add(obstacles);
@@ -426,7 +429,7 @@ public abstract class PlayState extends State{
 
     private void spawnObjects(){
         if (score % 60 == 0){
-            stage = Stage.values()[mapRandomizer.nextInt(2)];
+            stage = Stage.values()[mapRandomizer.nextInt(3)];
         }
         for (int i = 0; i < path.length; i++) {
             switch (path[i]){
@@ -452,6 +455,10 @@ public abstract class PlayState extends State{
                         holes.add(new Hole((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength,stage));
                     }
                     break;
+                case SAND:
+                    if (stage == Stage.DESERT){
+                        sands.add(new Sand((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
+                    }
             }
         }
         if (score > 200 && stage == Stage.DUNGEON) {
@@ -1005,6 +1012,17 @@ public abstract class PlayState extends State{
         return new_row;
     }
 
+    private MapTile[] genQuickSand(MapTile[] new_row){
+        int holeNo = mapRandomizer.nextInt(3);
+        for (int j = 0; j < holeNo; j++) {
+            int pos = mapRandomizer.nextInt(9);
+            if (new_row[pos] == MapTile.EMPTY){
+                new_row[pos] = MapTile.SAND;
+            }
+        }
+        return new_row;
+    }
+
     private MapTile[] genPower(MapTile[] new_row){
         int temp = mapRandomizer.nextInt(9);
         if (new_row[temp] == MapTile.EMPTY){
@@ -1095,8 +1113,13 @@ public abstract class PlayState extends State{
 
         // creating random spikes
         if (spikeCounter > 3) {
-            new_row = genSpikes(new_row);
-            new_row = genHole(new_row);
+            if (stage == Stage.DUNGEON) {
+                new_row = genSpikes(new_row);
+            } else if (stage == Stage.ICE) {
+                new_row = genHole(new_row);
+            } else if (stage == Stage.DESERT){
+                new_row = genQuickSand(new_row);
+            }
             spikeCounter = 0;
         }
 
