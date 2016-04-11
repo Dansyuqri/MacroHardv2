@@ -543,7 +543,7 @@ public abstract class PlayState extends State{
 
         if (player.y < 150){
             MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
-            goToRestartState();
+//            goToRestartState();
         }
     }
     private boolean checkObstacleCollision(){
@@ -1002,13 +1002,10 @@ public abstract class PlayState extends State{
     }
 
     private MapTile[] genPower(MapTile[] new_row){
-        while (true){
-            int temp = mapRandomizer.nextInt(9);
-            if (new_row[temp] == MapTile.EMPTY){
-                new_row[temp] = MapTile.POWER;
-                powerCounter = 0;
-                break;
-            }
+        int temp = mapRandomizer.nextInt(9);
+        if (new_row[temp] == MapTile.EMPTY){
+            new_row[temp] = MapTile.POWER;
+            powerCounter = 0;
         }
         return new_row;
     }
@@ -1099,14 +1096,14 @@ public abstract class PlayState extends State{
             spikeCounter = 0;
         }
 
+        // updating the memory
+        memory.remove(memory.size() - 1);
+        memory.add(0, new_row);
+
         // spawning door
         if (doorCounter == 15) {
             new_row = genDoor(new_row);
         }
-
-        // updating the memory
-        memory.remove(memory.size() - 1);
-        memory.add(0, new_row);
 
         // spawning door switch
         if (doorCounter == 14 || doorCounter == 18) {
