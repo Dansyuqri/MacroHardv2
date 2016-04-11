@@ -461,6 +461,7 @@ public abstract class PlayState extends State{
         bg.add(backg);
         effects.add(effect);
         if (stage == Stage.ICE){
+            gsm.startMusic("Howling Wind.mp3",(float)1);
             Fog fog = new Fog(0,trackerBG);
             fogs.add(fog);
         }
@@ -549,7 +550,7 @@ public abstract class PlayState extends State{
                     if (!obstacle.isDestroyed()){
                         mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, obstacle.x + tileLength/2, obstacle.y);
                     }
-                    gsm.startMusic("WallDestroySound.wav");
+                    gsm.startMusic("WallDestroySound.wav",(float)1);
                     obstacleIterator.remove();
                     break;
                 }
@@ -600,6 +601,7 @@ public abstract class PlayState extends State{
                 if (hole.isBroken()) {
                     goToRestartState();
                 } else {
+                    gsm.startMusic("IceBreak.mp3",(float)1);
                     backgroundTaskExecutor.schedule(new Runnable() {
                         @Override
                         public void run() {
@@ -645,7 +647,7 @@ public abstract class PlayState extends State{
         synchronized (Switch.class) {
             if (gotSwitch) {
                 open = true;
-                gsm.startMusic("GateSound.wav");
+                gsm.startMusic("GateSound.wav",(float)1);
             }
         }
 
@@ -664,6 +666,7 @@ public abstract class PlayState extends State{
         while (powerIterator.hasNext()) {
             Power tempPower = (Power) powerIterator.next();
             if (tempPower.collides(player, this)) {
+                gsm.startMusic("PowerUpSound.wav",(float)1);
                 if (tempPower.isPassive()) {
                     switch(tempPower.getType()) {
                         case FREEZE_MAZE:
@@ -704,7 +707,6 @@ public abstract class PlayState extends State{
                                 ex.printStackTrace();
                             }
                             gameSpeedIsAvailable = false;
-                            gsm.startMusic("TimeSlowSound.mp3");
                             gameSpeed *= 0.4;
                             backgroundTaskExecutor.schedule(new Runnable() {
                                 @Override

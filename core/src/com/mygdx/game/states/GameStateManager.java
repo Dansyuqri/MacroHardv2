@@ -22,6 +22,9 @@ public class GameStateManager {
         assetManager.load("TimeSlowSound.mp3", Music.class);
         assetManager.load("MenuSelectionClick.wav", Music.class);
         assetManager.load("GateSound.wav", Music.class);
+        assetManager.load("Dance Of Death.mp3", Music.class);
+        assetManager.load("Howling Wind.mp3", Music.class);
+        assetManager.load("IceBreak.mp3", Music.class);
         assetManager.finishLoading();
     }
 
@@ -48,24 +51,27 @@ public class GameStateManager {
         return states.peek();
     }
 
-    public void startMusicLoop(String path) {
+    public void startMusicLoop(String path, float volume) {
         if(assetManager.isLoaded(path)) {
             Music music = assetManager.get(path, Music.class);
-            music.setVolume((float)0.5);
+            music.setVolume(volume);
             music.play();
             music.setLooping(true);
         }
     }
 
-    public void startMusic(String path) {
+    public void startMusic(String path,float volume) {
         if(assetManager.isLoaded(path)) {
             Music music = assetManager.get(path, Music.class);
-            music.setVolume(1);
+            music.setVolume(volume);
             music.play();
         }
     }
 
-
+    public void stopMusic(String path){
+        Music music = assetManager.get(path, Music.class);
+        music.stop();
+    }
     public void disposeMusic(String path){
         this.assetManager.unload(path);
     }
