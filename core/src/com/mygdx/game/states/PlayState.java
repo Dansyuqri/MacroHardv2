@@ -1126,20 +1126,20 @@ public abstract class PlayState extends State{
         memory.add(0, new_row);
 
         // spawning door
-//        if (doorCounter == 15) {
-//            new_row = genDoor(new_row);
-//        }
-//
-//        // spawning door switch
-//        if (doorCounter == 14 || doorCounter == 18) {
-//            MapTile[] result;
-//            if ((result = genSwitch(memory, current, new_row)) != null){
-//                new_row = result;
-//            }
-//        }
+        if (doorCounter == 15) {
+            new_row = genDoor(new_row);
+        }
+
+        // spawning door switch
+        if (doorCounter == 14 || doorCounter == 18) {
+            MapTile[] result;
+            if ((result = genSwitch(memory, current, new_row)) != null){
+                new_row = result;
+            }
+        }
 
         // spawning power ups after a certain time
-        if (powerCounter > 2) {
+        if (powerCounter > 8) {
             new_row = genPower(new_row);
         }
 
