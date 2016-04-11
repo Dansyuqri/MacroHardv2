@@ -16,7 +16,7 @@ public class Switch extends Obstacle implements Collidable{
 
     public Switch(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height, stage);
-        this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
+        this.setImage(new Texture(Gdx.files.internal("pressure_plate1.png")));
     }
 
     @Override
@@ -27,7 +27,7 @@ public class Switch extends Obstacle implements Collidable{
     public void setOn(){
         if (!on) {
             MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS});
-            this.setImage(new Texture(Gdx.files.internal("switch_on.png")));
+            this.setImage(new Texture(Gdx.files.internal("pressure_plate1_pressed.png")));
             on = true;
         }
     }
@@ -35,7 +35,7 @@ public class Switch extends Obstacle implements Collidable{
     public void setOff()
     {
         if (on) {
-            this.setImage(new Texture(Gdx.files.internal("switch_off.png")));
+            this.setImage(new Texture(Gdx.files.internal("pressure_plate1.png")));
             on = false;
         }
     }

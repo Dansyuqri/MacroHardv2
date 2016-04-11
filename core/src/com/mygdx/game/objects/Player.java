@@ -104,6 +104,19 @@ public class Player extends Movable {
         this.orientation = orientation;
     }
 
+    public void setPrevCoord(float prev_x, float prev_y){
+        this.prev_x = prev_x;
+        this.prev_y = prev_y;
+    }
+
+    public float getPrev_x() {
+        return prev_x;
+    }
+
+    public float getPrev_y() {
+        return prev_y;
+    }
+
     public Direction getOrientation() {
         return orientation;
     }
