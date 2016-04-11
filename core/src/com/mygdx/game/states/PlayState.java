@@ -117,7 +117,7 @@ public abstract class PlayState extends State{
 
     protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
-
+        Gdx.input.setCatchBackKey(true);
         this.playerID = playerID;
         player = (Player) players.get(playerID);
 
@@ -201,9 +201,11 @@ public abstract class PlayState extends State{
         coordSender = new PlayerCoordinateSender(this);
         running = false;
     }
-
     @Override
     protected void handleInput() {
+        if(Gdx.input.isCatchBackKey()) {//Ignores back button
+        }
+
         if(Gdx.input.isTouched()) {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
             cam.unproject(touchPos);
