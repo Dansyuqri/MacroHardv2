@@ -255,7 +255,7 @@ public abstract class PlayState extends State{
                     coordSender.send();
                     if(playerID == 0){
                         mapSynchronizer.sendSyncRender();
-                        System.out.println("HEHE HOST: " + mapSynchronizer.getPlayerRender());
+                        //System.out.println("HEHE HOST: " + mapSynchronizer.getPlayerRender());
                     }
                 }
             }, 0, 1, TimeUnit.MILLISECONDS);
@@ -938,8 +938,8 @@ public abstract class PlayState extends State{
                     }
                     String syncRenderString = new String(syncRenderBytes);
                     mapSynchronizer.setHostSyncRender(Long.decode(syncRenderString));
-                    System.out.println("HEHE HOST SYNC: " + mapSynchronizer.getHostRender());
-                    System.out.println("HEHE PLAYER SYNC: " + mapSynchronizer.getPlayerRender());
+                    //System.out.println("HEHE HOST SYNC: " + mapSynchronizer.getHostRender());
+                    //System.out.println("HEHE PLAYER SYNC: " + mapSynchronizer.getPlayerRender());
                     break;
             }
         }

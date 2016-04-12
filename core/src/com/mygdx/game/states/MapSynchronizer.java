@@ -28,7 +28,7 @@ public class MapSynchronizer extends Movable{
     }
 
     public void updateSyncRender(){
-        this.PlayersyncRender += 0.1;
+        this.PlayersyncRender += 1;
     }
 
     public long getPlayerRender(){
