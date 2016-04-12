@@ -14,6 +14,9 @@ import com.badlogic.gdx.graphics.g2d.Animation;
  */
 public class Obstacle extends Movable implements Collidable {
     private boolean destroyed = false;
+    private boolean toDestroy = false;
+    private Stage stage;
+    float wallDestroyTime;
 
     private static final int        FRAME_COLS = 4;
     private static final int        FRAME_ROWS = 3;
@@ -26,51 +29,57 @@ public class Obstacle extends Movable implements Collidable {
 
     public Obstacle(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
-        wallSheet = new Texture(Gdx.files.internal("wall4.1.png"));
+        this.stage = stage;
+        wallDestroyTime = 0f;
+
+        wallSheet = new Texture(Gdx.files.internal("wall.png"));
         TextureRegion[][] tmp = TextureRegion.split(wallSheet, wallSheet.getWidth()/FRAME_COLS, wallSheet.getHeight()/FRAME_ROWS);
         destroyFramesDun = new TextureRegion[3];
         destroyFramesIce = new TextureRegion[3];
         destroyFramesDes = new TextureRegion[3];
         for(int i = 0; i < FRAME_COLS-1; i++){
-            destroyFramesDun[i] = tmp[0][i];
-            destroyFramesIce[i] = tmp[1][i];
-            destroyFramesDes[i] = tmp[2][i];
+            destroyFramesDun[i] = tmp[0][i+1];
+            destroyFramesIce[i] = tmp[1][i+1];
+            destroyFramesDes[i] = tmp[2][i+1];
         }
         dunWall = tmp[0][0];
         iceWall = tmp[1][0];
         desWall = tmp[2][0];
-        destroyAnimationDun = new Animation(0.25f, destroyFramesDun);
-        destroyAnimationIce = new Animation(0.25f, destroyFramesIce);
-        destroyAnimationDes = new Animation(0.25f, destroyFramesDes);
+        destroyAnimationDun = new Animation(0.15f, destroyFramesDun);
+        destroyAnimationIce = new Animation(0.15f, destroyFramesIce);
+        destroyAnimationDes = new Animation(0.15f, destroyFramesDes);
 
         if (stage == Stage.DUNGEON) {
-            this.setImage(new Texture(Gdx.files.internal("wall4.1.png")));
+//            this.setImage(new Texture(Gdx.files.internal("wall4.1.png")));
+            this.setImage(dunWall);
         }
         else if (stage == Stage.ICE){
-            this.setImage(new Texture(Gdx.files.internal("wall4.3.png")));
+//            this.setImage(new Texture(Gdx.files.internal("wall4.3.png")));
+            this.setImage(iceWall);
         }
         else if (stage == Stage.DESERT){
-            this.setImage(new Texture(Gdx.files.internal("wall4.4.png")));
+//            this.setImage(new Texture(Gdx.files.internal("wall4.4.png")));
+            this.setImage(desWall);
         }
     }
 
-//    public void setImage(TextureRegion image){
-//        this.playImage = image;
-//    }
-//
-//    @Override
-//    public Texture getImage() {
-//        return wallSheet;
-//    }
-//
-//    @Override
-//    public void draw(SpriteBatch sb){
-//        sb.draw(playImage, x, y);
-//    }
+    public void setImage(TextureRegion image){
+        this.playImage = image;
+    }
+
+    @Override
+    public Texture getImage() {
+        return wallSheet;
+    }
+
+    @Override
+    public void draw(SpriteBatch sb){
+        sb.draw(playImage, x, y);
+    }
 
     @Override
     public boolean collides(Player player, PlayState playState) {
-        if (player.overlaps(this)) {
+        if (player.overlaps(this) && !toDestroy) {
             return true;
         }
         else {
@@ -85,4 +94,26 @@ public class Obstacle extends Movable implements Collidable {
     public boolean isDestroyed() {
         return destroyed;
     }
+
+    public void setCurrentFrame(float stateTime, boolean check){
+        if (stage == Stage.DUNGEON){
+            this.setImage(destroyAnimationDun.getKeyFrame(stateTime, check));
+        } else if (stage == Stage.ICE){
+            this.setImage(destroyAnimationIce.getKeyFrame(stateTime, check));
+        } else if (stage == Stage.DESERT){
+            this.setImage(destroyAnimationDes.getKeyFrame(stateTime, check));
+        }
+    }
+
+    public void setToDestroy(boolean toDestroy) {
+        this.toDestroy = toDestroy;
+    }
+
+    public boolean isToDestroy() {
+        return toDestroy;
+    }
+
+    public void setWallDestroyTime(float wallDestroyTime){ this.wallDestroyTime = wallDestroyTime;}
+
+    public float getWallDestroyTime(){ return wallDestroyTime; }
 }

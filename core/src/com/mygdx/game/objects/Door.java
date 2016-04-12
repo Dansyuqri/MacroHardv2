@@ -9,12 +9,12 @@ import com.mygdx.game.states.PlayState;
 /**
  * Created by Syuqri on 3/9/2016.
  */
-public class Door extends Obstacle implements Collidable{
+public class Door extends Movable implements Collidable{
     private boolean open = false;
     private boolean destroyed = false;
 
     public Door(float x, float y, float width, float height, Stage stage){
-        super(x, y, width, height, stage);
+        super(x, y, width, height);
         this.setImage(new Texture(Gdx.files.internal("gate_closed.png")));
     }
 
@@ -40,5 +40,13 @@ public class Door extends Obstacle implements Collidable{
         else {
             return false;
         }
+    }
+
+    public void setDestroyed(boolean destroyed) {
+        this.destroyed = destroyed;
+    }
+
+    public boolean isDestroyed() {
+        return destroyed;
     }
 }

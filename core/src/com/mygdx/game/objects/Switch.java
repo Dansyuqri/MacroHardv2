@@ -11,11 +11,11 @@ import com.mygdx.game.states.PlayState;
 /**
  * Created by Syuqri on 3/9/2016.
  */
-public class Switch extends Obstacle implements Collidable{
+public class Switch extends Movable implements Collidable{
     private boolean on = false;
 
     public Switch(float x, float y, float width, float height, Stage stage){
-        super(x, y, width, height, stage);
+        super(x, y, width, height);
         this.setImage(new Texture(Gdx.files.internal("pressure_plate1.png")));
     }
 
