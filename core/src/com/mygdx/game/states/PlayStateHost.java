@@ -34,7 +34,7 @@ public class PlayStateHost extends PlayState {
         String seedString = Long.toString(seed);
         byte[] seedStringBytes = seedString.getBytes();
         byte[] result = new byte[seedStringBytes.length + 1];
-        result[0] = MessageCode.MAP_TILES;
+        result[0] = MessageCode.MAP_SEED;
         for (int i = 0; i < seedStringBytes.length; i++) {
             result[i+1] = seedStringBytes[i];
         }

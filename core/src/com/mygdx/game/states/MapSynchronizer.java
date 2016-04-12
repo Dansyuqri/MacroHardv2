@@ -17,12 +17,45 @@ public class MapSynchronizer extends Movable{
     private float[] yOffset;
     private CountDownLatch HostL = new CountDownLatch(1);
     private CountDownLatch PlayerL1 = new CountDownLatch(1);
-    private long latency;
+    private long latency, PlayersyncRender, HostsyncRender;
 
     MapSynchronizer(){
         super(0, 450, 0, 0);
         set = new boolean[]{false, false, false};
         yOffset = new float[3];
+        this.PlayersyncRender = 0;
+        this.HostsyncRender=0;
+    }
+
+    public void updateSyncRender(){
+        this.PlayersyncRender += 0.1;
+    }
+
+    public long getPlayerRender(){
+        return this.PlayersyncRender;
+    }
+
+    public long getHostRender(){
+        return this.HostsyncRender;
+    }
+
+    public void sendSyncRender(){
+        MacroHardv2.actionResolver.sendPing(wrapSyncRender(PlayersyncRender));
+    }
+
+    public void setHostSyncRender(long sync){
+        this.HostsyncRender = sync;
+    }
+
+    private byte[] wrapSyncRender(long syncrender){
+        String SyncRenderString = Long.toString(syncrender);
+        byte[] SyncRenderBytes = SyncRenderString.getBytes();
+        byte[] result = new byte[SyncRenderBytes.length + 1];
+        result[0] = MessageCode.SyncRender;
+        for (int i = 0; i < SyncRenderBytes.length; i++) {
+            result[i+1] = SyncRenderBytes[i];
+        }
+        return result;
     }
 
     public void set(int id){
@@ -97,4 +130,5 @@ public class MapSynchronizer extends Movable{
         message[4] = (byte)((y*10)%100);
         MacroHardv2.actionResolver.sendReliable(message);
     }
+
 }

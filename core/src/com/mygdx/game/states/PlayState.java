@@ -239,6 +239,7 @@ public abstract class PlayState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
+        mapSynchronizer.updateSyncRender();
         long start = System.currentTimeMillis();
         //Host
         if(!sync){
@@ -252,6 +253,10 @@ public abstract class PlayState extends State{
                 @Override
                 public void run() {
                     coordSender.send();
+                    if(playerID == 0){
+                        mapSynchronizer.sendSyncRender();
+                        System.out.println("HEHE HOST: " + mapSynchronizer.getPlayerRender());
+                    }
                 }
             }, 0, 1, TimeUnit.MILLISECONDS);
             backgroundTaskExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -427,8 +432,7 @@ public abstract class PlayState extends State{
                     obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength, stage));
                     break;
                 case POWER:
-//                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
-                    powers.add(new Power(PowerType.DESTROY_WALL, tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength, stage));
@@ -535,8 +539,8 @@ public abstract class PlayState extends State{
         }
 
         if (player.y < 150){
-//            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
-//            goToRestartState();
+            //MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
+            //goToRestartState();
         }
     }
     private boolean checkObstacleCollision(){
@@ -547,12 +551,13 @@ public abstract class PlayState extends State{
             Obstacle obstacle = (Obstacle)obstacleIterator.next();
             if (obstacle.collides(player, this) || obstacle.isDestroyed()){
 //              DESTROY_WALL implementation
-                if (player.getCanDestroy()) {
-                    obstacle.setToDestroy(true);
+                if (player.getCanDestroy() || obstacle.isDestroyed()) {
                     if (!obstacle.isDestroyed()){
                         mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, obstacle.x + tileLength/2, obstacle.y + tileLength/2);
                     }
-                    gsm.startMusic("WallDestroySound.wav", (float) 1);
+                    gsm.startMusic("WallDestroySound.wav",(float)1);
+                    obstacleIterator.remove();
+                    break;
                 }
                 return true;
             }
@@ -793,13 +798,6 @@ public abstract class PlayState extends State{
                         ((Player) gameObject).setDirection();
                     }
                     ((Player)gameObject).setPrevCoord(((Player)gameObject).x, ((Player)gameObject).y);
-                } else if (gameObject instanceof Obstacle && ((Obstacle)gameObject).isToDestroy()){
-                    ((Obstacle)gameObject).setWallDestroyTime(((Obstacle) gameObject).getWallDestroyTime() + Gdx.graphics.getDeltaTime());
-                    ((Obstacle)gameObject).setCurrentFrame(((Obstacle) gameObject).getWallDestroyTime(), true);
-                    if (((Obstacle)gameObject).getWallDestroyTime() > 0.4){
-                        ((Obstacle)gameObject).setDestroyed(true);
-                        gameObjectIterator.remove();
-                    }
                 }
                 gameObject.draw(sb);
             }
@@ -837,7 +835,7 @@ public abstract class PlayState extends State{
                     break;
 
                 //map
-                case MessageCode.MAP_TILES:
+                case MessageCode.MAP_SEED:
                     byte[] seedStringBytes = new byte[message.length - 1];
                     for (int i = 0; i < message.length - 1; i++) {
                         seedStringBytes[i] = message[i + 1];
@@ -915,7 +913,7 @@ public abstract class PlayState extends State{
                     y = (float) message[3] * 10 + (float) message[4] / 10;
                     for (GameObject obstacle: obstacles) {
                         if (obstacle.contains(x, y)){
-                            ((Obstacle)obstacle).setToDestroy(true);
+                            ((Obstacle)obstacle).setDestroyed(true);
                             break;
                         }
                     }
@@ -932,6 +930,16 @@ public abstract class PlayState extends State{
                     float y1 = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, otherp);
                     player.x = x1;
                     player.y = y1;
+                    break;
+                case MessageCode.SyncRender:
+                    byte[] syncRenderBytes = new byte[message.length - 1];
+                    for (int i = 0; i < message.length - 1; i++) {
+                        syncRenderBytes[i] = message[i + 1];
+                    }
+                    String syncRenderString = new String(syncRenderBytes);
+                    mapSynchronizer.setHostSyncRender(Long.decode(syncRenderString));
+                    System.out.println("HEHE HOST SYNC: " + mapSynchronizer.getHostRender());
+                    System.out.println("HEHE PLAYER SYNC: " + mapSynchronizer.getPlayerRender());
                     break;
             }
         }
