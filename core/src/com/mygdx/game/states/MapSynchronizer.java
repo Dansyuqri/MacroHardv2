@@ -13,16 +13,13 @@ import static java.lang.Thread.sleep;
  */
 public class MapSynchronizer extends Movable{
 
-    private boolean[] set;
-    private float[] yOffset;
     private CountDownLatch HostL = new CountDownLatch(1);
     private CountDownLatch PlayerL1 = new CountDownLatch(1);
-    private long latency, MysyncRender, OthersyncRender;
+    private long MysyncRender, OthersyncRender;
+    private long[] latency;
 
     MapSynchronizer(){
         super(0, 450, 0, 0);
-        set = new boolean[]{false, false, false};
-        yOffset = new float[3];
         this.MysyncRender = 0;
         this.OthersyncRender=0;
     }
@@ -58,21 +55,6 @@ public class MapSynchronizer extends Movable{
         return result;
     }
 
-    public void set(int id){
-        if (!set[id]) {
-            set[id] = true;
-            yOffset[id] = 450 - y;
-        }
-    }
-
-    public float offset(float y, int id){
-        return y - yOffset[id];
-    }
-
-    public boolean isSet(int id){
-        return set[id];
-    }
-
     public void sync(){
         if(MacroHardv2.actionResolver.getmyidint()==0){
             byte[] temp = new byte[4];
@@ -91,14 +73,14 @@ public class MapSynchronizer extends Movable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            latency = (System.currentTimeMillis() - start)/2;
+            latency[1] = (System.currentTimeMillis() - start)/2;
             //0 for ping, 1 for sleep
             temp[2] = 1;
             //Sleep duration
-            temp[3] = (byte)latency;
+            temp[3] = (byte)latency[1];
             MacroHardv2.actionResolver.sendReliable(temp);
             try {
-                sleep(latency);
+                sleep(latency[1]);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -118,8 +100,8 @@ public class MapSynchronizer extends Movable{
     public CountDownLatch getplayer1(){
         return this.PlayerL1;
     }
-    public float getLatency(){
-        return latency/1000;
+    public float getLatency(int player){
+        return latency[player]/1000;
     }
     public void sendMessage(int messageCode, float x, float y){
         byte[] message = new byte[5];

@@ -69,12 +69,11 @@ public abstract class PlayState extends State{
     private boolean running;
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
-    protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
+    protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit;
     protected int playerSpeed, dangerZone, threadsleep;
     public float tracker;
     public float trackerBG;
     protected int score;
-    private String yourScoreName;
     BitmapFont yourBitmapFontName;
     public Stage stage;
     float animateTime;
@@ -153,7 +152,6 @@ public abstract class PlayState extends State{
         tracker = 800;
         trackerBG = 800;
         score = 0;
-        yourScoreName = "score: 0";
         yourBitmapFontName = new BitmapFont();
         animateTime = 0f;
         angle = new float[3];
@@ -560,7 +558,7 @@ public abstract class PlayState extends State{
                     if (!obstacle.isDestroyed()){
                         mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, obstacle.x + tileLength/2, obstacle.y + tileLength/2);
                     }
-                    gsm.startMusic("WallDestroySound.wav",(float)1);
+                    gsm.startMusic("WallDestroySound.wav", (float) 1);
                 }
                 return true;
             }
@@ -573,7 +571,7 @@ public abstract class PlayState extends State{
 //              DESTROY_WALL implementation
                 if (player.getCanDestroy() || door.isDestroyed()) {
                     if (!door.isDestroyed()){
-                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, door.x + tileLength/2, door.y);
+                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, door.x + tileLength/2, door.y + tileLength/2);
                     }
                     doorIterator.remove();
                     break;
@@ -621,6 +619,7 @@ public abstract class PlayState extends State{
 
             if (hole.isBreakHole()) {
                 hole.setBroken();
+                mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, hole.x + tileLength / 2, hole.y + tileLength / 2);
             }
         }
 
@@ -742,7 +741,10 @@ public abstract class PlayState extends State{
     private void checkDangerZone(Player p) {
         if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
             if (!(player.getPassivePower().equals(PowerType.FREEZE_MAZE) || player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN))) {
-//                gameSpeed += speedIncrease;
+                synchronized ((Object) gameSpeed) {
+                    gameSpeed += speedIncrease;
+                }
+                sendGameSpeed();
             }
         }
     }
@@ -759,7 +761,7 @@ public abstract class PlayState extends State{
                 },5,TimeUnit.SECONDS);
                 break;
             case PLAYERS_COMBINE:
-                byte[] message = wrapCoords(MacroHardv2.actionResolver.getmyidint(),player.x,player.y);
+                byte[] message = sendTeleport(playerID, player.x, player.y);
                 MacroHardv2.actionResolver.sendReliable(message);
         }
     }
@@ -834,11 +836,8 @@ public abstract class PlayState extends State{
                 //other player's coordinates
                 case MessageCode.PLAYER_POSITION:
                     int other = (int) message[1];
-                    if (!mapSynchronizer.isSet(other)){
-                        mapSynchronizer.set(other);
-                    }
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
-                    float y = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, other);
+                    float y = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency(other);
                     players.get(other).x = x;
                     players.get(other).y = y;
                     angle[other] = ((float)Math.atan2(y - ((Player)players.get(other)).getPrev_y(), x - ((Player)players.get(other)).getPrev_x()));
@@ -872,7 +871,7 @@ public abstract class PlayState extends State{
 
                 //game speed update
                 case MessageCode.CHANGE_GAME_SPEED:
-                    synchronized (Player.class) {
+                    synchronized ((Object) gameSpeed) {
                         gameSpeed = ((float) message[1] * 10 + (float) message[2] / 10);
                     }
                     break;
@@ -937,7 +936,7 @@ public abstract class PlayState extends State{
                 case MessageCode.TELEPORT:
                     int otherp = (int) message[1];
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
-                    float y1 = mapSynchronizer.offset((float) message[4] * 10 + (float) message[5] / 10, otherp);
+                    float y1 = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency(otherp);
                     player.x = x1;
                     player.y = y1;
                     break;
@@ -948,8 +947,6 @@ public abstract class PlayState extends State{
                     }
                     String syncRenderString = new String(syncRenderBytes);
                     mapSynchronizer.setHostSyncRender(Long.decode(syncRenderString));
-                    System.out.println("HEHE HOST SYNC: " + mapSynchronizer.getOtherRender());
-                    System.out.println("HEHE PLAYER SYNC: " + mapSynchronizer.getMyRender());
                     break;
             }
         }
@@ -1187,7 +1184,7 @@ public abstract class PlayState extends State{
             e.printStackTrace();
         }
     }
-    private static byte[] wrapCoords(int id, float x, float y){
+    private static byte[] sendTeleport(int id, float x, float y){
         byte[] result = new byte[6];
         result[0] = MessageCode.TELEPORT;
         result[1] = (byte) id;
