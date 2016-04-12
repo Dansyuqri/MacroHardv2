@@ -44,7 +44,7 @@ import java.util.concurrent.Semaphore;
 public abstract class PlayState extends State{
 
     //Synchronising
-    public static final float deltaCap = 0.05f;
+    public static final float deltaCap = 0.04f;
     protected boolean sync = false;
 
     //objects
@@ -70,7 +70,7 @@ public abstract class PlayState extends State{
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
     protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit, tempGameSpeed;
-    protected int playerSpeed, dangerZone;
+    protected int playerSpeed, dangerZone, threadsleep;
     public float tracker;
     public float trackerBG;
     protected int score;
@@ -111,7 +111,7 @@ public abstract class PlayState extends State{
     final int tileLength = 50;
 
     //map making objects
-    private int doorCounter, powerCounter, spikeCounter;
+    private int doorCounter, powerCounter, spikeCounter, stageCounter;
     private ArrayList<MapTile[]> memory;
     private boolean[] current = createArray(true);
     protected MapMaker mapMaker;
@@ -140,6 +140,7 @@ public abstract class PlayState extends State{
         joystick = new JoyStick();
 
         //misc values initialization
+        threadsleep = 25;
         gameSpeed = 60;
         speedIncrease = (float) 0.07;
         playerSpeed = 200;
@@ -253,10 +254,7 @@ public abstract class PlayState extends State{
                 @Override
                 public void run() {
                     coordSender.send();
-                    if(playerID == 0){
-                        mapSynchronizer.sendSyncRender();
-                        //System.out.println("HEHE HOST: " + mapSynchronizer.getPlayerRender());
-                    }
+                    mapSynchronizer.sendSyncRender();
                 }
             }, 0, 1, TimeUnit.MILLISECONDS);
             backgroundTaskExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -264,7 +262,7 @@ public abstract class PlayState extends State{
                 public void run() {
                     for (int i = 0; i < 3; i++) {
                         if (((Player)players.get(i)).x != ((Player)players.get(i)).getPrev_x() ||
-                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap))) > 5 ) {
+                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * deltaCap)) > 5 ) {
                             if (angle[i] > 3 * (Math.PI) / 8 && angle[i] <= 5 * (Math.PI) / 8) {
                                 ((Player) players.get(i)).setOrientation(Direction.NORTH);
                             } else if (angle[i] > 7 * (Math.PI) / 8 || angle[i] <= -7 * (Math.PI) / 8) {
@@ -300,7 +298,7 @@ public abstract class PlayState extends State{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
+            score++;
             spawnObjects();
             spawnSides(tracker + tileLength);
             tracker += tileLength;
@@ -320,7 +318,7 @@ public abstract class PlayState extends State{
         draw(sb);
         sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
         yourBitmapFontName.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-        yourBitmapFontName.draw(sb, yourScoreName, 25, 100);
+        yourBitmapFontName.draw(sb, "score: " + score, 25, 100);
 
         sb.end();
 
@@ -330,8 +328,8 @@ public abstract class PlayState extends State{
 
         checkDangerZone(player);
 
-        tracker -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
-        trackerBG -= gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
+        tracker -= gameSpeed * deltaCap;
+        trackerBG -= gameSpeed * deltaCap;
 
         for (ArrayList<GameObject> gameObj: gameObjects){
             for (GameObject gameObject : gameObj) {
@@ -350,9 +348,20 @@ public abstract class PlayState extends State{
         }
 
         long time = System.currentTimeMillis() - start;
-        if (time < 25){
+
+        if(mapSynchronizer.getMyRender()>mapSynchronizer.getOtherRender()){
+            threadsleep = 35;
+            System.out.println("HEHE: Speeding up");
+        }
+        else{
+            System.out.println("HEHE: Normal Speed");
+            threadsleep = 22;
+        }
+
+
+        if (time < threadsleep){
             try {
-                Thread.currentThread().sleep(25 - time);
+                Thread.currentThread().sleep(threadsleep - time);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -420,9 +429,6 @@ public abstract class PlayState extends State{
 
 
     private void spawnObjects(){
-        if (score % 60 == 0){
-            stage = Stage.values()[mapRandomizer.nextInt(3)];
-        }
         for (int i = 0; i < path.length; i++) {
             switch (path[i]){
                 case SWITCH:
@@ -476,8 +482,6 @@ public abstract class PlayState extends State{
      Spawn side walls to fill up the gap between the playing field and the actual maze
      */
     private void spawnSides(float in){
-        score++;
-        yourScoreName = "score: " + score;
         for (int i = 0; i < 2; i++) {
             SideWall sideWall = new SideWall(tileLength,in,i);
             sideWalls.add(sideWall);
@@ -489,24 +493,24 @@ public abstract class PlayState extends State{
     private void movePlayer(float x, float y, float ratio){
         float prevx = player.x;
         float prevy = player.y;
-        player.x += ratio * x * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
-        player.y += ratio * y * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
+        player.x += ratio * x * playerSpeed * deltaCap;
+        player.y += ratio * y * playerSpeed * deltaCap;
         if (checkObstacleCollision()){
             player.x = prevx;
             player.y = prevy;
 
             if (x > 0) {
-                player.x += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
+                player.x += ratio * playerSpeed * deltaCap;
             } else {
-                player.x -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
+                player.x -= ratio * playerSpeed * deltaCap;
             }
             if (checkObstacleCollision()){
                 player.x = prevx;
             }
             if (y > 0) {
-                player.y += ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
+                player.y += ratio * playerSpeed * deltaCap;
             } else {
-                player.y -= ratio * playerSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap);
+                player.y -= ratio * playerSpeed * deltaCap;
             }
             if (checkObstacleCollision()){
                 player.y = prevy;
@@ -551,13 +555,12 @@ public abstract class PlayState extends State{
             Obstacle obstacle = (Obstacle)obstacleIterator.next();
             if (obstacle.collides(player, this) || obstacle.isDestroyed()){
 //              DESTROY_WALL implementation
-                if (player.getCanDestroy() || obstacle.isDestroyed()) {
+                if (player.getCanDestroy()) {
+                    obstacle.setToDestroy(true);
                     if (!obstacle.isDestroyed()){
                         mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, obstacle.x + tileLength/2, obstacle.y + tileLength/2);
                     }
                     gsm.startMusic("WallDestroySound.wav",(float)1);
-                    obstacleIterator.remove();
-                    break;
                 }
                 return true;
             }
@@ -675,24 +678,24 @@ public abstract class PlayState extends State{
                 if (tempPower.isPassive()) {
                     switch(tempPower.getType()) {
                         case FREEZE_MAZE:
-                            try {
-                                while (!gameSpeedIsAvailable) {
-                                    wait();
-                                }
-                            } catch (InterruptedException ex) {
-                                ex.printStackTrace();
-                            }
-                            gameSpeedIsAvailable = false;
-                            tempGameSpeed = gameSpeed;
-                            gameSpeed = 0;
-                            backgroundTaskExecutor.schedule(new Runnable() {
-                                @Override
-                                public void run() {
-                                    gameSpeed = tempGameSpeed;
-                                    gameSpeedIsAvailable = true;
-                                    notifyAll();
-                                }
-                            }, 5, TimeUnit.SECONDS);
+//                            try {
+//                                while (!gameSpeedIsAvailable) {
+//                                    wait();
+//                                }
+//                            } catch (InterruptedException ex) {
+//                                ex.printStackTrace();
+//                            }
+//                            gameSpeedIsAvailable = false;
+//                            tempGameSpeed = gameSpeed;
+//                            gameSpeed = 0;
+//                            backgroundTaskExecutor.schedule(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    gameSpeed = tempGameSpeed;
+//                                    gameSpeedIsAvailable = true;
+//                                    notifyAll();
+//                                }
+//                            }, 5, TimeUnit.SECONDS);
                             break;
                         case SPEED_PLAYER_UP:
                             playerSpeed *= 0.7;
@@ -704,23 +707,23 @@ public abstract class PlayState extends State{
                             },5, TimeUnit.SECONDS);
                             break;
                         case SLOW_GAME_DOWN:
-                            try {
-                                while (!gameSpeedIsAvailable) {
-                                    wait();
-                                }
-                            } catch (InterruptedException ex) {
-                                ex.printStackTrace();
-                            }
-                            gameSpeedIsAvailable = false;
-                            gameSpeed *= 0.4;
-                            backgroundTaskExecutor.schedule(new Runnable() {
-                                @Override
-                                public void run() {
-                                    gameSpeed /= 0.4;
-                                    gameSpeedIsAvailable = true;
-                                    notifyAll();
-                                }
-                            },5, TimeUnit.SECONDS);
+//                            try {
+//                                while (!gameSpeedIsAvailable) {
+//                                    wait();
+//                                }
+//                            } catch (InterruptedException ex) {
+//                                ex.printStackTrace();
+//                            }
+//                            gameSpeedIsAvailable = false;
+//                            gameSpeed *= 0.4;
+//                            backgroundTaskExecutor.schedule(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    gameSpeed /= 0.4;
+//                                    gameSpeedIsAvailable = true;
+//                                    notifyAll();
+//                                }
+//                            },5, TimeUnit.SECONDS);
                             break;
                     }
                 } else {
@@ -739,7 +742,7 @@ public abstract class PlayState extends State{
     private void checkDangerZone(Player p) {
         if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
             if (!(player.getPassivePower().equals(PowerType.FREEZE_MAZE) || player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN))) {
-                gameSpeed += speedIncrease;
+//                gameSpeed += speedIncrease;
             }
         }
     }
@@ -757,7 +760,7 @@ public abstract class PlayState extends State{
                 break;
             case PLAYERS_COMBINE:
                 byte[] message = wrapCoords(MacroHardv2.actionResolver.getmyidint(),player.x,player.y);
-                MacroHardv2.actionResolver.sendPing(message);
+                MacroHardv2.actionResolver.sendReliable(message);
         }
     }
 
@@ -791,13 +794,20 @@ public abstract class PlayState extends State{
                 if (gameObject instanceof Player){
                     animateTime += Gdx.graphics.getDeltaTime();
                     if (((Player)gameObject).x != ((Player)gameObject).getPrev_x() ||
-                            Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed * Math.min(Gdx.graphics.getDeltaTime(), (float) deltaCap))) > 5 ){
+                            Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed * deltaCap)) > 5 ){
                         ((Player) gameObject).setCurrentFrame(animateTime, true);
                     }
                     else {
                         ((Player) gameObject).setDirection();
                     }
                     ((Player)gameObject).setPrevCoord(((Player)gameObject).x, ((Player)gameObject).y);
+                } else if (gameObject instanceof Obstacle && ((Obstacle)gameObject).isToDestroy()){
+                    ((Obstacle)gameObject).setWallDestroyTime(((Obstacle) gameObject).getWallDestroyTime() + Gdx.graphics.getDeltaTime());
+                    ((Obstacle)gameObject).setCurrentFrame(((Obstacle) gameObject).getWallDestroyTime(), true);
+                    if (((Obstacle)gameObject).getWallDestroyTime() > 0.4){
+                        ((Obstacle)gameObject).setDestroyed(true);
+                        gameObjectIterator.remove();
+                    }
                 }
                 gameObject.draw(sb);
             }
@@ -913,7 +923,7 @@ public abstract class PlayState extends State{
                     y = (float) message[3] * 10 + (float) message[4] / 10;
                     for (GameObject obstacle: obstacles) {
                         if (obstacle.contains(x, y)){
-                            ((Obstacle)obstacle).setDestroyed(true);
+                            ((Obstacle)obstacle).setToDestroy(true);
                             break;
                         }
                     }
@@ -938,8 +948,8 @@ public abstract class PlayState extends State{
                     }
                     String syncRenderString = new String(syncRenderBytes);
                     mapSynchronizer.setHostSyncRender(Long.decode(syncRenderString));
-                    //System.out.println("HEHE HOST SYNC: " + mapSynchronizer.getHostRender());
-                    //System.out.println("HEHE PLAYER SYNC: " + mapSynchronizer.getPlayerRender());
+                    System.out.println("HEHE HOST SYNC: " + mapSynchronizer.getOtherRender());
+                    System.out.println("HEHE PLAYER SYNC: " + mapSynchronizer.getMyRender());
                     break;
             }
         }
@@ -1116,6 +1126,10 @@ public abstract class PlayState extends State{
     }
 
     void wallCoord() {
+        stageCounter++;
+        if (stageCounter % 60 == 0){
+            stage = Stage.values()[mapRandomizer.nextInt(3)];
+        }
         powerCounter += 1;
         doorCounter = (doorCounter + 1)%30;
         spikeCounter += 1;

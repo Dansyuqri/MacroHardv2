@@ -17,34 +17,34 @@ public class MapSynchronizer extends Movable{
     private float[] yOffset;
     private CountDownLatch HostL = new CountDownLatch(1);
     private CountDownLatch PlayerL1 = new CountDownLatch(1);
-    private long latency, PlayersyncRender, HostsyncRender;
+    private long latency, MysyncRender, OthersyncRender;
 
     MapSynchronizer(){
         super(0, 450, 0, 0);
         set = new boolean[]{false, false, false};
         yOffset = new float[3];
-        this.PlayersyncRender = 0;
-        this.HostsyncRender=0;
+        this.MysyncRender = 0;
+        this.OthersyncRender=0;
     }
 
     public void updateSyncRender(){
-        this.PlayersyncRender += 1;
+        this.MysyncRender += 1;
     }
 
-    public long getPlayerRender(){
-        return this.PlayersyncRender;
+    public long getMyRender(){
+        return this.MysyncRender;
     }
 
-    public long getHostRender(){
-        return this.HostsyncRender;
+    public long getOtherRender(){
+        return this.OthersyncRender;
     }
 
     public void sendSyncRender(){
-        MacroHardv2.actionResolver.sendPing(wrapSyncRender(PlayersyncRender));
+        MacroHardv2.actionResolver.sendPing(wrapSyncRender(MysyncRender));
     }
 
     public void setHostSyncRender(long sync){
-        this.HostsyncRender = sync;
+        this.OthersyncRender = sync;
     }
 
     private byte[] wrapSyncRender(long syncrender){

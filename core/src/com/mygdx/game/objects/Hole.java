@@ -13,13 +13,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Samuel on 3/4/2016.
  */
-public class Hole extends Obstacle implements Collidable {
+public class Hole extends Movable implements Collidable {
     private boolean broken = false;
     private boolean breakHole = false;
     public static final int HOLE_BREAK_TIME = 3;
 
     public Hole(float x, float y, float width, float height, Stage stage){
-        super(x, y, width, height, stage);
+        super(x, y, width, height);
         this.setImage(new Texture(Gdx.files.internal("hole1.png")));
     }
 
