@@ -192,6 +192,7 @@ public abstract class PlayState extends State{
     }
     @Override
     protected void handleInput() {
+        System.out.println("IN PS");
         if(Gdx.input.isTouched()) {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
             cam.unproject(touchPos);
@@ -542,7 +543,7 @@ public abstract class PlayState extends State{
 
         if (player.y < 150){
             //MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
-            //goToRestartState();
+            goToRestartState();
         }
     }
     private boolean checkObstacleCollision(){

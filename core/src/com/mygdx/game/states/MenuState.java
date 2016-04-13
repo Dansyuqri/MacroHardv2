@@ -71,6 +71,7 @@ public class MenuState extends State{
 
     @Override
     public void handleInput() {
+        System.out.println("IN MS");
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.input.getY();
         cam.unproject(touchPos);
@@ -136,9 +137,9 @@ public class MenuState extends State{
                 touched = false;
             }
             else if(instructionBtn.contains(touchPos.x,touchPos.y)){
-                gsm.startMusic("MenuSelectionClick.wav",(float)1);
+                gsm.startMusic("MenuSelectionClick.wav", (float) 1);
                 gsm.set(new InstructionState(gsm));
-                dispose();
+                //dispose();
                 touched = false;
             }
             else if(quickGameBtn.contains(touchPos.x,touchPos.y)){

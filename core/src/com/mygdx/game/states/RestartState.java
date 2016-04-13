@@ -53,6 +53,7 @@ public class RestartState extends State{
     }
     @Override
     protected void handleInput() {
+        System.out.println("IN RS");
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.input.getY();
         cam.unproject(touchPos);

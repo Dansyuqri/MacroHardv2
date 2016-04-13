@@ -16,7 +16,7 @@ public class MapSynchronizer extends Movable{
     private CountDownLatch HostL = new CountDownLatch(1);
     private CountDownLatch PlayerL1 = new CountDownLatch(1);
     private long MysyncRender, OthersyncRender;
-    private long[] latency;
+    private long[] latency = new long[3];
 
     MapSynchronizer(){
         super(0, 450, 0, 0);
