@@ -52,7 +52,6 @@ public abstract class PlayState extends State{
     protected Semaphore mapCon;
     protected Semaphore mapMod;
     protected Semaphore seedSem;
-    protected boolean gameSpeedIsAvailable;
 
     private JoyStick joystick;
     protected Player player;
@@ -69,7 +68,7 @@ public abstract class PlayState extends State{
     private boolean running;
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
-    protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit;
+    protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit, slowGameDown, freezeMaze;
     protected int playerSpeed, dangerZone, threadsleep;
     public float tracker;
     public float trackerBG;
@@ -127,7 +126,6 @@ public abstract class PlayState extends State{
         mapCon = new Semaphore(-4);
         mapMod = new Semaphore(1);
         seedSem = new Semaphore(0);
-        gameSpeedIsAvailable = true;
 
         touchHeld = false;
 
@@ -144,6 +142,8 @@ public abstract class PlayState extends State{
         speedIncrease = (float) 0.07;
         playerSpeed = 200;
         dangerZone = 300;
+        slowGameDown = 1;
+        freezeMaze = 1;
         doorCounter = 0;
         powerCounter = 0;
         spikeCounter = 0;
@@ -678,24 +678,13 @@ public abstract class PlayState extends State{
                 if (tempPower.isPassive()) {
                     switch(tempPower.getType()) {
                         case FREEZE_MAZE:
-//                            try {
-//                                while (!gameSpeedIsAvailable) {
-//                                    wait();
-//                                }
-//                            } catch (InterruptedException ex) {
-//                                ex.printStackTrace();
-//                            }
-//                            gameSpeedIsAvailable = false;
-//                            tempGameSpeed = gameSpeed;
-//                            gameSpeed = 0;
-//                            backgroundTaskExecutor.schedule(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    gameSpeed = tempGameSpeed;
-//                                    gameSpeedIsAvailable = true;
-//                                    notifyAll();
-//                                }
-//                            }, 5, TimeUnit.SECONDS);
+                            freezeMaze = 0;
+                            backgroundTaskExecutor.schedule(new Runnable() {
+                                @Override
+                                public void run() {
+                                    freezeMaze = 1;
+                                }
+                            }, 5, TimeUnit.SECONDS);
                             break;
                         case SPEED_PLAYER_UP:
                             playerSpeed *= 0.7;
@@ -707,23 +696,13 @@ public abstract class PlayState extends State{
                             },5, TimeUnit.SECONDS);
                             break;
                         case SLOW_GAME_DOWN:
-//                            try {
-//                                while (!gameSpeedIsAvailable) {
-//                                    wait();
-//                                }
-//                            } catch (InterruptedException ex) {
-//                                ex.printStackTrace();
-//                            }
-//                            gameSpeedIsAvailable = false;
-//                            gameSpeed *= 0.4;
-//                            backgroundTaskExecutor.schedule(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    gameSpeed /= 0.4;
-//                                    gameSpeedIsAvailable = true;
-//                                    notifyAll();
-//                                }
-//                            },5, TimeUnit.SECONDS);
+                            slowGameDown = (float) 0.4;
+                            backgroundTaskExecutor.schedule(new Runnable() {
+                                @Override
+                                public void run() {
+                                    slowGameDown = 1;
+                                }
+                            },5, TimeUnit.SECONDS);
                             break;
                     }
                 } else {
