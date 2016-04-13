@@ -69,7 +69,7 @@ public abstract class PlayState extends State{
     private boolean running;
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
-    protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit;
+    protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit, slowGameDown, freezeMaze;
     protected int playerSpeed, dangerZone, threadsleep;
     public float tracker;
     public float trackerBG;
@@ -144,6 +144,8 @@ public abstract class PlayState extends State{
         speedIncrease = (float) 0.07;
         playerSpeed = 200;
         dangerZone = 300;
+        slowGameDown = 1;
+        freezeMaze = 1;
         doorCounter = 0;
         powerCounter = 0;
         spikeCounter = 0;
@@ -542,7 +544,7 @@ public abstract class PlayState extends State{
         }
 
         if (player.y < 150){
-            //MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
             goToRestartState();
         }
     }
@@ -607,21 +609,17 @@ public abstract class PlayState extends State{
             if (hole.collides(player, this)) {
                 if (hole.isBroken()) {
                     goToRestartState();
-                } else {
+                } else if (!hole.isBreakHole()){
                     gsm.startMusic("IceBreak.mp3",(float)1);
-                    backgroundTaskExecutor.schedule(new Runnable() {
-                        @Override
-                        public void run() {
-                            hole.setBreakHole(true);
-                        }
-                    }, Hole.HOLE_BREAK_TIME, TimeUnit.SECONDS);
+                    hole.setBreakHole(true);
+                    mapSynchronizer.sendMessage(MessageCode.BREAK_HOLE, hole.x + tileLength / 2, hole.y + tileLength / 2);
                 }
             }
 
-            if (hole.isBreakHole()) {
-                hole.setBroken();
-                mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, hole.x + tileLength / 2, hole.y + tileLength / 2);
-            }
+//            if (hole.isBroken()) {
+//                hole.setBroken();
+//                mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, hole.x + tileLength / 2, hole.y + tileLength / 2);
+//            }
         }
 
     }
@@ -678,24 +676,13 @@ public abstract class PlayState extends State{
                 if (tempPower.isPassive()) {
                     switch(tempPower.getType()) {
                         case FREEZE_MAZE:
-//                            try {
-//                                while (!gameSpeedIsAvailable) {
-//                                    wait();
-//                                }
-//                            } catch (InterruptedException ex) {
-//                                ex.printStackTrace();
-//                            }
-//                            gameSpeedIsAvailable = false;
-//                            tempGameSpeed = gameSpeed;
-//                            gameSpeed = 0;
-//                            backgroundTaskExecutor.schedule(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    gameSpeed = tempGameSpeed;
-//                                    gameSpeedIsAvailable = true;
-//                                    notifyAll();
-//                                }
-//                            }, 5, TimeUnit.SECONDS);
+                            freezeMaze = 0;
+                            backgroundTaskExecutor.schedule(new Runnable() {
+                                 @Override
+                                    public void run() {
+                                    freezeMaze = 1;
+                                    }
+                                }, 5, TimeUnit.SECONDS);
                             break;
                         case SPEED_PLAYER_UP:
                             playerSpeed *= 0.7;
@@ -707,23 +694,13 @@ public abstract class PlayState extends State{
                             },5, TimeUnit.SECONDS);
                             break;
                         case SLOW_GAME_DOWN:
-//                            try {
-//                                while (!gameSpeedIsAvailable) {
-//                                    wait();
-//                                }
-//                            } catch (InterruptedException ex) {
-//                                ex.printStackTrace();
-//                            }
-//                            gameSpeedIsAvailable = false;
-//                            gameSpeed *= 0.4;
-//                            backgroundTaskExecutor.schedule(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    gameSpeed /= 0.4;
-//                                    gameSpeedIsAvailable = true;
-//                                    notifyAll();
-//                                }
-//                            },5, TimeUnit.SECONDS);
+                            slowGameDown = (float) 0.4;
+                            backgroundTaskExecutor.schedule(new Runnable() {
+                                @Override
+                                public void run() {
+                                    slowGameDown = 1;
+                                    }
+                                },5, TimeUnit.SECONDS);
                             break;
                     }
                 } else {
@@ -804,12 +781,22 @@ public abstract class PlayState extends State{
                         ((Player) gameObject).setDirection();
                     }
                     ((Player)gameObject).setPrevCoord(((Player)gameObject).x, ((Player)gameObject).y);
-                } else if (gameObject instanceof Obstacle && ((Obstacle)gameObject).isToDestroy()){
+                }
+
+                else if (gameObject instanceof Obstacle && ((Obstacle)gameObject).isToDestroy()){
                     ((Obstacle)gameObject).setWallDestroyTime(((Obstacle) gameObject).getWallDestroyTime() + Gdx.graphics.getDeltaTime());
                     ((Obstacle)gameObject).setCurrentFrame(((Obstacle) gameObject).getWallDestroyTime(), true);
                     if (((Obstacle)gameObject).getWallDestroyTime() > 0.4){
                         ((Obstacle)gameObject).setDestroyed(true);
                         gameObjectIterator.remove();
+                    }
+                }
+
+                else if (gameObject instanceof Hole && ((Hole)gameObject).isBreakHole() && !((Hole)gameObject).isBroken()){
+                    ((Hole)gameObject).setHoleDestroyTime(((Hole) gameObject).getHoleDestroyTime() + Gdx.graphics.getDeltaTime());
+                    ((Hole)gameObject).setCurrentFrame(((Hole) gameObject).getHoleDestroyTime(), true);
+                    if (((Hole)gameObject).getHoleDestroyTime() > 2.9){
+                        ((Hole)gameObject).setBroken();
                     }
                 }
                 gameObject.draw(sb);
@@ -963,6 +950,22 @@ public abstract class PlayState extends State{
     public int getScore() {
         return score;
     }
+
+    private static byte[] sendTeleport(int id, float x, float y){
+        byte[] result = new byte[6];
+        result[0] = MessageCode.TELEPORT;
+        result[1] = (byte) id;
+        result[2] = (byte) (x/10);
+        result[3] = (byte)((x*10)%100);
+        result[4] = (byte)(y/10);
+        result[5] = (byte)((y*10)%100);
+        return result;
+    }
+
+    /***********************************************
+     * MAP GENERATION METHODS HERE
+     ************************************************
+     */
 
     private MapTile[] generator(MapTile[] new_row){
         boolean test = false;
@@ -1185,14 +1188,6 @@ public abstract class PlayState extends State{
             e.printStackTrace();
         }
     }
-    private static byte[] sendTeleport(int id, float x, float y){
-        byte[] result = new byte[6];
-        result[0] = MessageCode.TELEPORT;
-        result[1] = (byte) id;
-        result[2] = (byte) (x/10);
-        result[3] = (byte)((x*10)%100);
-        result[4] = (byte)(y/10);
-        result[5] = (byte)((y*10)%100);
-        return result;
-    }
+
+
 }
