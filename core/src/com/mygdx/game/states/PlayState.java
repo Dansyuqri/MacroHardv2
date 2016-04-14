@@ -52,7 +52,6 @@ public abstract class PlayState extends State{
     protected Semaphore mapCon;
     protected Semaphore mapMod;
     protected Semaphore seedSem;
-    protected boolean gameSpeedIsAvailable;
 
     private JoyStick joystick;
     protected Player player;
@@ -127,7 +126,6 @@ public abstract class PlayState extends State{
         mapCon = new Semaphore(-4);
         mapMod = new Semaphore(1);
         seedSem = new Semaphore(0);
-        gameSpeedIsAvailable = true;
 
         touchHeld = false;
 
@@ -262,7 +260,7 @@ public abstract class PlayState extends State{
                 public void run() {
                     for (int i = 0; i < 3; i++) {
                         if (((Player)players.get(i)).x != ((Player)players.get(i)).getPrev_x() ||
-                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * deltaCap)) > 5 ) {
+                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * freezeMaze * slowGameDown * deltaCap)) > 5 ) {
                             if (angle[i] > 3 * (Math.PI) / 8 && angle[i] <= 5 * (Math.PI) / 8) {
                                 ((Player) players.get(i)).setOrientation(Direction.NORTH);
                             } else if (angle[i] > 7 * (Math.PI) / 8 || angle[i] <= -7 * (Math.PI) / 8) {
@@ -328,18 +326,18 @@ public abstract class PlayState extends State{
 
         checkDangerZone(player);
 
-        tracker -= gameSpeed * deltaCap;
-        trackerBG -= gameSpeed * deltaCap;
+        tracker -= gameSpeed * slowGameDown * freezeMaze * deltaCap;
+        trackerBG -= gameSpeed * slowGameDown * freezeMaze  * deltaCap;
 
         for (ArrayList<GameObject> gameObj: gameObjects){
             for (GameObject gameObject : gameObj) {
                 if (gameObject instanceof Movable) {
-                    ((Movable) gameObject).scroll(gameSpeed);
+                    ((Movable) gameObject).scroll(gameSpeed * slowGameDown * freezeMaze );
                 }
             }
         }
 
-        mapSynchronizer.scroll(gameSpeed);
+        mapSynchronizer.scroll(gameSpeed * slowGameDown * freezeMaze );
 
         synchronized (this) {
             if (end) {
@@ -439,6 +437,7 @@ public abstract class PlayState extends State{
                     break;
                 case POWER:
                     powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    //powers.add(new Power(PowerType.values()[(int)(Math.random() * 2 + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength, stage));
@@ -675,28 +674,34 @@ public abstract class PlayState extends State{
                 if (tempPower.isPassive()) {
                     switch(tempPower.getType()) {
                         case FREEZE_MAZE:
+                            // TODO: inform the others
                             freezeMaze = 0;
                             backgroundTaskExecutor.schedule(new Runnable() {
                                  @Override
                                     public void run() {
+                                     // TODO: inform the others
                                     freezeMaze = 1;
                                     }
                                 }, 5, TimeUnit.SECONDS);
                             break;
                         case SPEED_PLAYER_UP:
+                            // TODO: inform the others
                             playerSpeed *= 0.7;
                             backgroundTaskExecutor.schedule(new Runnable() {
                                 @Override
                                 public void run() {
+                                    // TODO: inform the others
                                     playerSpeed /= 0.7;
                                 }
                             },5, TimeUnit.SECONDS);
                             break;
                         case SLOW_GAME_DOWN:
+                            // TODO: inform the others
                             slowGameDown = (float) 0.4;
                             backgroundTaskExecutor.schedule(new Runnable() {
                                 @Override
                                 public void run() {
+                                    // TODO: inform the others
                                     slowGameDown = 1;
                                     }
                                 },5, TimeUnit.SECONDS);
@@ -716,9 +721,9 @@ public abstract class PlayState extends State{
      */
 
     private void checkDangerZone(Player p) {
-        if (p.getY()<=dangerZone && gameSpeed<=dangerZoneSpeedLimit) {
+        if (p.getY()<=dangerZone && gameSpeed <=dangerZoneSpeedLimit) {
             if (!(player.getPassivePower().equals(PowerType.FREEZE_MAZE) || player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN))) {
-                synchronized ((Object) gameSpeed) {
+                synchronized ((Object) gameSpeed ) {
                     gameSpeed += speedIncrease;
                 }
                 sendGameSpeed();
@@ -773,7 +778,7 @@ public abstract class PlayState extends State{
                 if (gameObject instanceof Player){
                     animateTime += Gdx.graphics.getDeltaTime();
                     if (((Player)gameObject).x != ((Player)gameObject).getPrev_x() ||
-                            Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed * deltaCap)) > 5 ){
+                            Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed * slowGameDown * freezeMaze  * deltaCap)) > 5 ){
                         ((Player) gameObject).setCurrentFrame(animateTime, true);
                     }
                     else {
@@ -1174,7 +1179,7 @@ public abstract class PlayState extends State{
             }
         }
 
-        // spawning power ups after a certain time
+        // spawning power ups after a certain time. 2 is for testing. 8 is used
         if (powerCounter > 8) {
             new_row = genPower(new_row);
         }
