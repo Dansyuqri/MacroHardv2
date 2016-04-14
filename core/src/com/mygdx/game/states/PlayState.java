@@ -30,6 +30,7 @@ import com.mygdx.game.objects.JoyStick;
 import com.mygdx.game.objects.Player;
 import com.mygdx.game.objects.UI;
 
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -471,7 +472,7 @@ public abstract class PlayState extends State{
         bg.add(backg);
         effects.add(effect);
         if (stage == Stage.ICE){
-            gsm.startMusic("Howling Wind.mp3",(float)1);
+            gsm.startMusic("Howling Wind.mp3", (float) 1);
             Fog fog = new Fog(0,trackerBG);
             fogs.add(fog);
         }
@@ -560,6 +561,7 @@ public abstract class PlayState extends State{
                         mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, obstacle.x + tileLength/2, obstacle.y + tileLength/2);
                     }
                     gsm.startMusic("WallDestroySound.wav", (float) 1);
+                    //gsm.disposeMusic("Howling Wind.mp3");
                 }
                 return true;
             }
@@ -674,35 +676,33 @@ public abstract class PlayState extends State{
                 if (tempPower.isPassive()) {
                     switch(tempPower.getType()) {
                         case FREEZE_MAZE:
-                            // TODO: inform the others
                             freezeMaze = 0;
+                            MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze));
                             backgroundTaskExecutor.schedule(new Runnable() {
                                  @Override
                                     public void run() {
-                                     // TODO: inform the others
                                     freezeMaze = 1;
+                                    MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze));
                                     }
                                 }, 5, TimeUnit.SECONDS);
                             break;
                         case SPEED_PLAYER_UP:
-                            // TODO: inform the others
                             playerSpeed *= 0.7;
                             backgroundTaskExecutor.schedule(new Runnable() {
                                 @Override
                                 public void run() {
-                                    // TODO: inform the others
                                     playerSpeed /= 0.7;
                                 }
                             },5, TimeUnit.SECONDS);
                             break;
                         case SLOW_GAME_DOWN:
-                            // TODO: inform the others
                             slowGameDown = (float) 0.4;
+                            MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
                             backgroundTaskExecutor.schedule(new Runnable() {
                                 @Override
                                 public void run() {
-                                    // TODO: inform the others
                                     slowGameDown = 1;
+                                    MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
                                     }
                                 },5, TimeUnit.SECONDS);
                             break;
@@ -928,6 +928,14 @@ public abstract class PlayState extends State{
                         }
                     }
                     break;
+                case MessageCode.FREEZE:
+                    float freeze = (float) message[1] * 10 + (float) message[2] / 10;
+                    freezeMaze = freeze;
+                    break;
+                case MessageCode.SLOWGAME:
+                    float slow = (float) message[1] * 10 + (float) message[2] / 10;
+                    slowGameDown = slow;
+                    break;
                 case MessageCode.TELEPORT:
                     int otherp = (int) message[1];
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
@@ -967,6 +975,22 @@ public abstract class PlayState extends State{
         result[3] = (byte)((x*10)%100);
         result[4] = (byte)(y/10);
         result[5] = (byte)((y*10)%100);
+        return result;
+    }
+
+    private static byte[] sendFreeze(float x){
+        byte[] result = new byte[3];
+        result[0] = MessageCode.FREEZE;
+        result[1] = (byte) (x/10);
+        result[2] = (byte)((x*10)%100);
+        return result;
+    }
+
+    private static byte[] sendSlow(float x) {
+        byte[] result = new byte[3];
+        result[0] = MessageCode.SLOWGAME;
+        result[1] = (byte) (x / 10);
+        result[2] = (byte) ((x * 10) % 100);
         return result;
     }
 
