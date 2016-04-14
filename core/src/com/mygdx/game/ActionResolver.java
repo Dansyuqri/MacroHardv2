@@ -22,4 +22,6 @@ public interface ActionResolver {
     void Acceptinvites();
     void Seeinvites();
     int getmyidint();
+    void leaveroom();
+
 }

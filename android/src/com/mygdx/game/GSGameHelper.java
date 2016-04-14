@@ -152,6 +152,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         }
         Gdx.app.log("R", "Room Created");
         mRoomID = arg1.getRoomId();
+        System.out.println("HEHE: ROOM CREATED" + mRoomID);
         Intent i = Games.RealTimeMultiplayer.getWaitingRoomIntent(getApiClient(), arg1, 2);
         this.activity.startActivityForResult(i, RC_WAITING_ROOM);
     }
@@ -445,5 +446,14 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         System.out.println("I am invite " + mIncomingInvitationId);
         acceptInviteToRoom(mIncomingInvitationId);
         mIncomingInvitationId = null;
+    }
+
+    void leaveRoom() {
+        Log.d(TAG, "Leaving room.");
+        if (mRoomId != null) {
+            System.out.println("HEHE: LEFT ROOM" + mRoomID);
+            Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomId);
+            mRoomId = null;
+        }
     }
 }

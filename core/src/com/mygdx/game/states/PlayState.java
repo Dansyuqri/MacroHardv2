@@ -194,7 +194,6 @@ public abstract class PlayState extends State{
     }
     @Override
     protected void handleInput() {
-        System.out.println("IN PS");
         if(Gdx.input.isTouched()) {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
             cam.unproject(touchPos);
@@ -352,10 +351,10 @@ public abstract class PlayState extends State{
 
         if(mapSynchronizer.getMyRender()>mapSynchronizer.getOtherRender()){
             threadsleep = 35;
-            System.out.println("HEHE: Speeding up");
+
         }
         else{
-            System.out.println("HEHE: Normal Speed");
+
             threadsleep = 22;
         }
 
@@ -882,14 +881,17 @@ public abstract class PlayState extends State{
                         temp[2] = 0;
                         //Sleep duration
                         temp[3] = 0;
+                        System.out.println("HEHE: PLAYER RECEIVED AND SENT PING");
                         MacroHardv2.actionResolver.sendReliable(temp);
                         break;
                     }
                     else if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() == 0)){
+                        System.out.println("HEHE: HOST RECEIVED PING, COUNTING DOWN");
                         mapSynchronizer.gethost().countDown();
                         break;
                     }
                     else if(message[2] == 1){
+                        System.out.println("HEHE: PLAYER RECEVIED START SEQUENCE");
                         mapSynchronizer.getplayer1().countDown();
                     }
                     break;
@@ -941,6 +943,7 @@ public abstract class PlayState extends State{
     }
 
     public void goToRestartState(){
+        MacroHardv2.actionResolver.leaveroom();
         mapMaker.interrupt();
         backgroundTaskExecutor.shutdownNow();
         dispose();

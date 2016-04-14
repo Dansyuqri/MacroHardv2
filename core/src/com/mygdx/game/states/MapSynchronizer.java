@@ -68,6 +68,7 @@ public class MapSynchronizer extends Movable{
             temp[3] = 0;
             long start = System.currentTimeMillis();
             MacroHardv2.actionResolver.sendReliable(temp);
+            System.out.println("HEHE: HOST SENT PING IS WAITING");
             try {
                 HostL.await();
             } catch (InterruptedException e) {
@@ -78,6 +79,7 @@ public class MapSynchronizer extends Movable{
             temp[2] = 1;
             //Sleep duration
             temp[3] = (byte)latency[1];
+            System.out.println("HEHE: HOST SENDING PLAYER TO START");
             MacroHardv2.actionResolver.sendReliable(temp);
             try {
                 sleep(latency[1]);

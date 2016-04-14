@@ -172,4 +172,7 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 	public int getmyidint(){
 		return _gameHelper.myidno;
 	}
+	public void leaveroom(){
+		_gameHelper.leaveRoom();
+	}
 }
