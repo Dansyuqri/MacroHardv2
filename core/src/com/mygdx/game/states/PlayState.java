@@ -32,11 +32,14 @@ import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Semaphore;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Created by Syuqri on 3/7/2016.
@@ -63,7 +66,7 @@ public abstract class PlayState extends State{
     protected Random mapRandomizer;
 
     //values
-    protected long seed;
+    protected long seed, maxrender = 0;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     private boolean running;
@@ -254,7 +257,9 @@ public abstract class PlayState extends State{
                 @Override
                 public void run() {
                     coordSender.send();
-                    mapSynchronizer.sendSyncRender();
+                    if(playerID == 0){
+                        mapSynchronizer.sendSyncRender();
+                    }
                 }
             }, 0, 1, TimeUnit.MILLISECONDS);
             backgroundTaskExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -343,20 +348,26 @@ public abstract class PlayState extends State{
 
         synchronized (this) {
             if (end) {
-                goToRestartState();
+                //goToRestartState();
             }
         }
 
         long time = System.currentTimeMillis() - start;
 
-        if(mapSynchronizer.getMyRender()>mapSynchronizer.getOtherRender()){
-            threadsleep = 35;
-
+        if(playerID == 0){
+            threadsleep = 25;
         }
         else{
-
-            threadsleep = 22;
+            if(mapSynchronizer.getRenderList()[playerID] > mapSynchronizer.getRenderList()[0]){
+                threadsleep = 30;
+                System.out.println("HEHEHE: Slowing down");
+            }
+            else{
+                threadsleep = 16;
+                System.out.println("HEHEHE: Speeding up");
+            }
         }
+
 
 
         if (time < threadsleep){
@@ -543,8 +554,8 @@ public abstract class PlayState extends State{
         }
 
         if (player.y < 150){
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
-            goToRestartState();
+            //MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
+            //goToRestartState();
         }
     }
     private boolean checkObstacleCollision(){
@@ -887,12 +898,27 @@ public abstract class PlayState extends State{
                     }
                     else if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() == 0)){
                         System.out.println("HEHE: HOST RECEIVED PING, COUNTING DOWN");
+                        mapSynchronizer.setlatency((System.currentTimeMillis() - mapSynchronizer.getstarttime())/2,message[1]);
                         mapSynchronizer.gethost().countDown();
                         break;
                     }
-                    else if(message[2] == 1){
-                        System.out.println("HEHE: PLAYER RECEVIED START SEQUENCE");
+                    else if(message[2] == 1 && (MacroHardv2.actionResolver.getmyidint() == 1)){
+                        System.out.println("HEHE: PLAYER 1 RECEVIED START SEQUENCE");
+                        try {
+                            sleep(message[3]);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         mapSynchronizer.getplayer1().countDown();
+                    }
+                    else if(message[2] == 1 && (MacroHardv2.actionResolver.getmyidint() == 2)){
+                        System.out.println("HEHE: PLAYER 1 RECEVIED START SEQUENCE");
+                        try {
+                            sleep(message[4]);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        mapSynchronizer.getplayer2().countDown();
                     }
                     break;
 
@@ -931,12 +957,23 @@ public abstract class PlayState extends State{
                     player.y = y1;
                     break;
                 case MessageCode.SyncRender:
-                    byte[] syncRenderBytes = new byte[message.length - 1];
-                    for (int i = 0; i < message.length - 1; i++) {
-                        syncRenderBytes[i] = message[i + 1];
+                    byte[] syncRenderBytes = new byte[message.length - 2];
+                    for (int i = 0; i < message.length - 2; i++) {
+                        syncRenderBytes[i] = message[i + 2];
                     }
                     String syncRenderString = new String(syncRenderBytes);
-                    mapSynchronizer.setHostSyncRender(Long.decode(syncRenderString));
+                    long render = Long.decode(syncRenderString);
+                    if(message[1] == 0){
+                        mapSynchronizer.setPlayer0SyncRender(render);
+                    }
+//                    else if(message[1] == 1){
+//                        mapSynchronizer.setPlayer1SyncRender(render);
+//                    }
+//                    else if(message[1] == 2){
+//                        mapSynchronizer.setPlayer2SyncRender(render);
+//                    }
+                    System.out.println("HEHEHE: I AM PLAYER " +playerID);
+                    System.out.println("HEHEHE:" + Arrays.toString(mapSynchronizer.getRenderList())+" HostRender: " + mapSynchronizer.getRenderList()[0]);
                     break;
             }
         }

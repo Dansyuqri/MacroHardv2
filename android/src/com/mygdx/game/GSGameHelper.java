@@ -56,7 +56,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     }
 
     public void quickGame(){
-        Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, 0);
+        Bundle am = RoomConfig.createAutoMatchCriteria(2, 2, 0);
         RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
         roomConfigBuilder.setAutoMatchCriteria(am);
         RoomConfig roomConfig = roomConfigBuilder.build();
@@ -64,7 +64,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     }
 
     public void initMatch(){
-        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1);
+        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 2, 2);
         this.activity.startActivityForResult(intent, RC_SELECT_PLAYERS);
 
     }
@@ -434,7 +434,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     public void inviteplayers(){
         Intent intent;
-        intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1);
+        intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 2, 2);
         activity.startActivityForResult(intent, RC_SELECT_PLAYERS);
     }
     public void seeinvites(){

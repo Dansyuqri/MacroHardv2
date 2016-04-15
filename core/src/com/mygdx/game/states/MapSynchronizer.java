@@ -13,51 +13,71 @@ import static java.lang.Thread.sleep;
  */
 public class MapSynchronizer extends Movable{
 
-    private CountDownLatch HostL = new CountDownLatch(1);
+    private CountDownLatch HostL = new CountDownLatch(2);
     private CountDownLatch PlayerL1 = new CountDownLatch(1);
-    private long MysyncRender, OthersyncRender;
+    private CountDownLatch PlayerL2 = new CountDownLatch(1);
+    private long starttime, largestsleep;
+    private long[] SyncRender = new long[3];
     private long[] latency = new long[3];
 
     MapSynchronizer(){
         super(0, 450, 0, 0);
-        this.MysyncRender = 0;
-        this.OthersyncRender=0;
+        this.starttime = 0;
     }
 
     public void updateSyncRender(){
-        this.MysyncRender += 1;
+        if(MacroHardv2.actionResolver.getmyidint() == 0){
+            this.SyncRender[0] += 1;
+        }
+        else if(MacroHardv2.actionResolver.getmyidint() == 1){
+            this.SyncRender[1] += 1;
+        }
+        else if(MacroHardv2.actionResolver.getmyidint() == 2){
+            this.SyncRender[2] += 1;
+        }
     }
 
-    public long getMyRender(){
-        return this.MysyncRender;
+    public long[] getRenderList(){
+        return this.SyncRender;
     }
 
-    public long getOtherRender(){
-        return this.OthersyncRender;
+    public void setPlayer0SyncRender(long x){
+        SyncRender[0] = x;
+    }
+    public void setPlayer1SyncRender(long x){
+        SyncRender[1] = x;
+    }
+    public void setPlayer2SyncRender(long x){
+        SyncRender[2] = x;
     }
 
     public void sendSyncRender(){
-        MacroHardv2.actionResolver.sendPing(wrapSyncRender(MysyncRender));
-    }
-
-    public void setHostSyncRender(long sync){
-        this.OthersyncRender = sync;
+        if(MacroHardv2.actionResolver.getmyidint() == 0){
+            MacroHardv2.actionResolver.sendPing(wrapSyncRender(SyncRender[0]));
+        }
+//        else if(MacroHardv2.actionResolver.getmyidint() == 1){
+//            MacroHardv2.actionResolver.sendPing(wrapSyncRender(SyncRender[1]));
+//        }
+//        else if(MacroHardv2.actionResolver.getmyidint() == 2){
+//            MacroHardv2.actionResolver.sendPing(wrapSyncRender(SyncRender[2]));
+//        }
     }
 
     private byte[] wrapSyncRender(long syncrender){
         String SyncRenderString = Long.toString(syncrender);
         byte[] SyncRenderBytes = SyncRenderString.getBytes();
-        byte[] result = new byte[SyncRenderBytes.length + 1];
+        byte[] result = new byte[SyncRenderBytes.length + 2];
         result[0] = MessageCode.SyncRender;
+        result[1] = (byte)MacroHardv2.actionResolver.getmyidint();
         for (int i = 0; i < SyncRenderBytes.length; i++) {
-            result[i+1] = SyncRenderBytes[i];
+            result[i+2] = SyncRenderBytes[i];
         }
         return result;
     }
 
     public void sync(){
         if(MacroHardv2.actionResolver.getmyidint()==0){
-            byte[] temp = new byte[4];
+            byte[] temp = new byte[5];
             //Message ID
             temp[0] = MessageCode.SYNCING;
             //Origin of message
@@ -66,7 +86,7 @@ public class MapSynchronizer extends Movable{
             temp[2] = 0;
             //Sleep duration
             temp[3] = 0;
-            long start = System.currentTimeMillis();
+            starttime = System.currentTimeMillis();
             MacroHardv2.actionResolver.sendReliable(temp);
             System.out.println("HEHE: HOST SENT PING IS WAITING");
             try {
@@ -74,15 +94,23 @@ public class MapSynchronizer extends Movable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            latency[1] = (System.currentTimeMillis() - start)/2;
+            if(latency[1] > latency [2]){
+                largestsleep = latency[1];
+            }
+            else{
+                largestsleep = latency[2];
+            }
             //0 for ping, 1 for sleep
             temp[2] = 1;
             //Sleep duration
-            temp[3] = (byte)latency[1];
-            System.out.println("HEHE: HOST SENDING PLAYER TO START");
+            temp[3] = (byte)(largestsleep - latency[1]);
+            temp[4] = (byte)(largestsleep - latency[2]);
+            System.out.println("time to sleep:" + temp[3]);
+            System.out.println("time to sleep:" + temp[4]);
+            System.out.println("HEHE: HOST SENDING PLAYERS TO START");
             MacroHardv2.actionResolver.sendReliable(temp);
             try {
-                sleep(latency[1]);
+                sleep(largestsleep);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -94,6 +122,14 @@ public class MapSynchronizer extends Movable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+        }
+        else if (MacroHardv2.actionResolver.getmyidint() == 2){
+            try {
+                PlayerL2.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
     public CountDownLatch gethost(){
@@ -101,6 +137,9 @@ public class MapSynchronizer extends Movable{
     }
     public CountDownLatch getplayer1(){
         return this.PlayerL1;
+    }
+    public CountDownLatch getplayer2(){
+        return this.PlayerL2;
     }
     public float getLatency(int player){
         return latency[player]/1000;
@@ -113,6 +152,12 @@ public class MapSynchronizer extends Movable{
         message[3] = (byte) (y/10);
         message[4] = (byte)((y*10)%100);
         MacroHardv2.actionResolver.sendReliable(message);
+    }
+    public long getstarttime(){
+        return this.starttime;
+    }
+    public void setlatency(long lag,int player){
+        this.latency[player] = lag;
     }
 
 }
