@@ -26,29 +26,15 @@ public class MapSynchronizer extends Movable{
     }
 
     public void updateSyncRender(){
-        if(MacroHardv2.actionResolver.getmyidint() == 0){
-            this.SyncRender[0] += 1;
-        }
-        else if(MacroHardv2.actionResolver.getmyidint() == 1){
-            this.SyncRender[1] += 1;
-        }
-        else if(MacroHardv2.actionResolver.getmyidint() == 2){
-            this.SyncRender[2] += 1;
-        }
+        this.SyncRender[MacroHardv2.actionResolver.getmyidint()] += 1;
     }
 
     public long[] getRenderList(){
         return this.SyncRender;
     }
 
-    public void setPlayer0SyncRender(long x){
-        SyncRender[0] = x;
-    }
-    public void setPlayer1SyncRender(long x){
-        SyncRender[1] = x;
-    }
-    public void setPlayer2SyncRender(long x){
-        SyncRender[2] = x;
+    public void setPlayerSyncRender(long x, int player){
+        SyncRender[player] = x;
     }
 
     public void sendSyncRender(){

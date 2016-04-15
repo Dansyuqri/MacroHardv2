@@ -963,9 +963,7 @@ public abstract class PlayState extends State{
                     }
                     String syncRenderString = new String(syncRenderBytes);
                     long render = Long.decode(syncRenderString);
-                    if(message[1] == 0){
-                        mapSynchronizer.setPlayer0SyncRender(render);
-                    }
+                    mapSynchronizer.setPlayerSyncRender(render, message[1]);
 //                    else if(message[1] == 1){
 //                        mapSynchronizer.setPlayer1SyncRender(render);
 //                    }
