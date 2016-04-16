@@ -11,9 +11,9 @@ import com.badlogic.gdx.math.Vector3;
  * Created by Syuqri on 3/19/2016.
  */
 public class InstructionState extends State{
-    private static String[] instructionPages = {"pageOne.png","pageTwo.png","pageThree.png"};
+    private static String[] instructionPages = {"pageOne.png","pageTwo.png","pageThree.png","pageFour.png"};
     private int pageIndex = 0;
-    private final int maxIndex = 2;
+    private final int maxIndex = instructionPages.length-1;
     private float graphicsX, graphicsY;
     private Texture page;
     private Vector3 touchPos = new Vector3(0,0,0);

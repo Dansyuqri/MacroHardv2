@@ -30,7 +30,8 @@ public class MenuState extends State{
             graphicsX, graphicsY,
             sendInviteBtnX, sendInviteBtnY,
             invitationBtnX, invitationBtnY,
-            signInBtnX, signInBtnY
+            signInBtnX, signInBtnY,
+            resizeFactor
             ;
     public MenuState(GameStateManager gsm) {
         super(gsm);
@@ -40,20 +41,22 @@ public class MenuState extends State{
         graphicsY = Gdx.graphics.getHeight();
         generateTextures();
 
-        gsm.startMusicLoop("MainMenuSound.mp3",(float)0.15);
+        gsm.startMusicLoop("MainMenuSound.mp3", (float) 0.15);
 
-        playBtnX = playBtnImage.getWidth()*3;
-        playBtnY = playBtnImage.getHeight()*3;
-        quickGameBtnX = quickGameBtnImage.getWidth()*3;
-        quickGameBtnY = quickGameBtnImage.getHeight()*3;
-        instructionBtnX = instructionBtnImage.getWidth()*3;
-        instructionBtnY = instructionBtnImage.getHeight()*3;
-        sendInviteBtnX = sendInviteBtnImage.getWidth()*3;
-        sendInviteBtnY = sendInviteBtnImage.getHeight()*3;
-        invitationBtnX = invitationBtnImage.getWidth()*3;
-        invitationBtnY = invitationBtnImage.getHeight()*3;
-        signInBtnX = signInBtnImage.getWidth()*3;
-        signInBtnY = signInBtnImage.getHeight()*3;
+        resizeFactor = resizeFactor(playBtnImage.getWidth());
+
+        playBtnX = playBtnImage.getWidth()*resizeFactor;
+        playBtnY = playBtnImage.getHeight()*resizeFactor;
+        quickGameBtnX = quickGameBtnImage.getWidth()*resizeFactor;
+        quickGameBtnY = quickGameBtnImage.getHeight()*resizeFactor;
+        instructionBtnX = instructionBtnImage.getWidth()*resizeFactor;
+        instructionBtnY = instructionBtnImage.getHeight()*resizeFactor;
+        sendInviteBtnX = sendInviteBtnImage.getWidth()*resizeFactor;
+        sendInviteBtnY = sendInviteBtnImage.getHeight()*resizeFactor;
+        invitationBtnX = invitationBtnImage.getWidth()*resizeFactor;
+        invitationBtnY = invitationBtnImage.getHeight()*resizeFactor;
+        signInBtnX = signInBtnImage.getWidth()*resizeFactor;
+        signInBtnY = signInBtnImage.getHeight()*resizeFactor;
 
         playBtn = new CustomButton((graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
         playBtn.setImage(playBtnImage);
@@ -221,5 +224,9 @@ public class MenuState extends State{
         sendInviteBtnImage = new Texture("sendInviteBtn.png");
         invitationBtnImage = new Texture("invitationBtn.png");
         signInBtnImage = new Texture("signInBtn.png");
+    }
+
+    private float resizeFactor(float x){
+        return (float)0.33*Gdx.graphics.getWidth()/x;
     }
 }
