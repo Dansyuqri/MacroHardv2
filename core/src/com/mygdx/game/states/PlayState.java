@@ -1186,8 +1186,8 @@ public abstract class PlayState extends State{
         }
 
         if (stageCounter % 60 == 0 && stageCounter > 0){
-//            nextStage = Stage.values()[mapRandomizer.nextInt(3)];
-            nextStage = Stage.DESERT;
+            nextStage = Stage.values()[mapRandomizer.nextInt(3)];
+//            nextStage = Stage.DESERT;
             if (stage == Stage.DUNGEON){
                 if (nextStage == Stage.DUNGEON){
                     stage = Stage.DUNGEON;
