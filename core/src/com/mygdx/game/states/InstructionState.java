@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.customEnum.StateType;
 
 /**
  * Created by Syuqri on 3/19/2016.
@@ -47,7 +48,7 @@ public class InstructionState extends State{
                     page = new Texture(instructionPages[pageIndex]);
                 }
                 else if(pageIndex > maxIndex) {
-                    gsm.set(new MenuState(gsm));
+                    gsm.set(new MenuState(gsm), StateType.NON_PLAY);
                     dispose();
                 }
             }
@@ -58,7 +59,7 @@ public class InstructionState extends State{
                     page = new Texture(instructionPages[pageIndex]);
                 }
                 else if(pageIndex < 0) {
-                    gsm.set(new MenuState(gsm));
+                    gsm.set(new MenuState(gsm),StateType.NON_PLAY);
                     dispose();
                 }
             }
@@ -71,7 +72,7 @@ public class InstructionState extends State{
                 page = new Texture(instructionPages[pageIndex]);
             }
             else if(pageIndex < 0) {
-                gsm.set(new MenuState(gsm));
+                gsm.set(new MenuState(gsm),StateType.NON_PLAY);
                 dispose();
             }
             wasBackButton = false;

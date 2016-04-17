@@ -11,6 +11,7 @@ import com.mygdx.game.customEnum.MapTile;
 import com.mygdx.game.customEnum.MessageCode;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.customEnum.Stage;
+import com.mygdx.game.customEnum.StateType;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.Fog;
 import com.mygdx.game.objects.GameObject;
@@ -563,7 +564,6 @@ public abstract class PlayState extends State{
                         mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, obstacle.x + tileLength/2, obstacle.y + tileLength/2);
                     }
                     gsm.startMusic("WallDestroySound.wav", (float) 1);
-                    //gsm.disposeMusic("Howling Wind.mp3");
                 }
                 return true;
             }
@@ -962,7 +962,7 @@ public abstract class PlayState extends State{
         mapMaker.interrupt();
         backgroundTaskExecutor.shutdownNow();
         dispose();
-        gsm.set(new RestartState(gsm, getScore()));
+        gsm.set(new RestartState(gsm, getScore()),StateType.NON_PLAY);
     }
 
     public int getScore() {
