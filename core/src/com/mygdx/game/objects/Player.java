@@ -30,7 +30,17 @@ public class Player extends Movable {
 
     public Player(int id){
         super(480 / 2 - 50 / 2, 450, 40, 40);
-        walkSheet = new Texture(Gdx.files.internal("Player_sprite.png"));
+        switch (id) {
+            case 0:
+                walkSheet = new Texture(Gdx.files.internal("Player_sprite.png"));
+                break;
+            case 1:
+                walkSheet = new Texture(Gdx.files.internal("Player2_sprite.png"));
+                break;
+            case 2:
+                walkSheet = new Texture(Gdx.files.internal("Player3_sprite.png"));
+                break;
+        }
         TextureRegion[][] tmp = TextureRegion.split(walkSheet, walkSheet.getWidth()/FRAME_COLS, walkSheet.getHeight()/FRAME_ROWS);              // #10
         walkFramesNorth = new TextureRegion[4];
         walkFramesSouth = new TextureRegion[4];
