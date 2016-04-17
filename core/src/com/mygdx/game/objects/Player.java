@@ -16,6 +16,7 @@ public class Player extends Movable {
     private PowerType passivePower;
     private PowerType activePower;
     private boolean canDestroy;
+    private boolean isSlowed;
     float prev_x, prev_y;
     
     private static final int        FRAME_COLS = 5;
@@ -91,6 +92,7 @@ public class Player extends Movable {
         }
         this.activePower = this.passivePower = PowerType.NOTHING;
         canDestroy = false;
+        isSlowed = false;
     }
 
     @Override
@@ -182,7 +184,6 @@ public class Player extends Movable {
         }
     }
 
-
     public PowerType getActivePower() {
         return activePower;
     }
@@ -190,7 +191,6 @@ public class Player extends Movable {
     public void setActivePower(PowerType activePower) {
         this.activePower = activePower;
     }
-
 
     public PowerType getPassivePower() {
         return passivePower;
@@ -204,4 +204,11 @@ public class Player extends Movable {
         this.canDestroy = canDestroy;
     }
 
+    public boolean isSlowed() {
+        return isSlowed;
+    }
+
+    public void setIsSlowed(boolean isSlowed) {
+        this.isSlowed = isSlowed;
+    }
 }

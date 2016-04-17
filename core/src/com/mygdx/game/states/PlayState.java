@@ -1,5 +1,6 @@
 package com.mygdx.game.states;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -150,8 +151,8 @@ public abstract class PlayState extends State{
         powerCounter = 0;
         spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
-        stage = Stage.DUNGEON;
-        nextStage = Stage.DUNGEON;
+        stage = Stage.DESERT;
+        nextStage = Stage.DESERT;
         tracker = 800;
         trackerBG = 800;
         score = 0;
@@ -716,6 +717,24 @@ public abstract class PlayState extends State{
                 powerIterator.remove();
             }
         }
+
+        // collides with quicksand
+        Iterator<GameObject> sandIterator = sands.iterator();
+        boolean sandCollide = false;
+        while (sandIterator.hasNext()){
+            Sand quickSand = (Sand) sandIterator.next();
+            if (quickSand.collides(player, this)){
+                if (!player.isSlowed()){
+                    playerSpeed /= 3;
+                    player.setIsSlowed(true);
+                    sandCollide = true;
+                }
+            }
+        }
+        if (!sandCollide && player.isSlowed()){
+            playerSpeed *= 3;
+            player.setIsSlowed(false);
+        }
     }
 
     /**
@@ -996,7 +1015,7 @@ public abstract class PlayState extends State{
         return result;
     }
 
-    /***********************************************
+    /************************************************
      * MAP GENERATION METHODS HERE
      ************************************************
      */
@@ -1167,7 +1186,8 @@ public abstract class PlayState extends State{
         }
 
         if (stageCounter % 60 == 0 && stageCounter > 0){
-            nextStage = Stage.values()[mapRandomizer.nextInt(3)];
+//            nextStage = Stage.values()[mapRandomizer.nextInt(3)];
+            nextStage = Stage.DESERT;
             if (stage == Stage.DUNGEON){
                 if (nextStage == Stage.DUNGEON){
                     stage = Stage.DUNGEON;
