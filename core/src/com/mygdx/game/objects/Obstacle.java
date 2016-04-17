@@ -49,15 +49,15 @@ public class Obstacle extends Movable implements Collidable {
         destroyAnimationIce = new Animation(0.15f, destroyFramesIce);
         destroyAnimationDes = new Animation(0.15f, destroyFramesDes);
 
-        if (stage == Stage.DUNGEON) {
+        if (stage == Stage.DUNGEON || stage == Stage.TRANS_DES_DUN || stage == Stage.TRANS_ICE_DUN) {
 //            this.setImage(new Texture(Gdx.files.internal("wall4.1.png")));
             this.setImage(dunWall);
         }
-        else if (stage == Stage.ICE){
+        else if (stage == Stage.ICE || stage == Stage.TRANS_DES_ICE || stage == Stage.TRANS_DUN_ICE){
 //            this.setImage(new Texture(Gdx.files.internal("wall4.3.png")));
             this.setImage(iceWall);
         }
-        else if (stage == Stage.DESERT){
+        else if (stage == Stage.DESERT || stage == Stage.TRANS_DUN_DES || stage == Stage.TRANS_ICE_DES){
 //            this.setImage(new Texture(Gdx.files.internal("wall4.4.png")));
             this.setImage(desWall);
         }

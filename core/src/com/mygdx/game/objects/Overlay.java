@@ -20,5 +20,23 @@ public class Overlay extends Movable{
         else if (stage == Stage.DESERT){
             this.setImage(new Texture(Gdx.files.internal("effects3.png")));
         }
+        else if (stage == Stage.TRANS_DUN_ICE){
+            this.setImage(new Texture(Gdx.files.internal("effects_trans1.png")));
+        }
+        else if (stage == Stage.TRANS_DUN_DES){
+            this.setImage(new Texture(Gdx.files.internal("effects_trans2.png")));
+        }
+        else if (stage == Stage.TRANS_ICE_DUN){
+            this.setImage(new Texture(Gdx.files.internal("effects_trans3.png")));
+        }
+        else if (stage == Stage.TRANS_ICE_DES){
+            this.setImage(new Texture(Gdx.files.internal("effects_trans4.png")));
+        }
+        else if (stage == Stage.TRANS_DES_DUN){
+            this.setImage(new Texture(Gdx.files.internal("effects_trans5.png")));
+        }
+        else if (stage == Stage.TRANS_DES_ICE){
+            this.setImage(new Texture(Gdx.files.internal("effects_trans6.png")));
+        }
     }
 }

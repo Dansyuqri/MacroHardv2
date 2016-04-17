@@ -22,5 +22,23 @@ public class Background extends Movable{
         else if (stage == Stage.DESERT){
             this.setImage(new Texture(Gdx.files.internal("bg_desert.png")));
         }
+        else if (stage == Stage.TRANS_DUN_ICE){
+            this.setImage(new Texture(Gdx.files.internal("bg_trans1.png")));
+        }
+        else if (stage == Stage.TRANS_DUN_DES){
+            this.setImage(new Texture(Gdx.files.internal("bg_trans2.png")));
+        }
+        else if (stage == Stage.TRANS_ICE_DUN){
+            this.setImage(new Texture(Gdx.files.internal("bg_trans3.png")));
+        }
+        else if (stage == Stage.TRANS_ICE_DES){
+            this.setImage(new Texture(Gdx.files.internal("bg_trans4.png")));
+        }
+        else if (stage == Stage.TRANS_DES_DUN){
+            this.setImage(new Texture(Gdx.files.internal("bg_trans5.png")));
+        }
+        else if (stage == Stage.TRANS_DES_ICE){
+            this.setImage(new Texture(Gdx.files.internal("bg_trans6.png")));
+        }
     }
 }

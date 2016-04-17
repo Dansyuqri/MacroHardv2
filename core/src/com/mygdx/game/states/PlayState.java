@@ -29,6 +29,7 @@ import com.mygdx.game.objects.Switch;
 import com.mygdx.game.objects.JoyStick;
 import com.mygdx.game.objects.Player;
 import com.mygdx.game.objects.UI;
+import com.sun.org.apache.xpath.internal.SourceTree;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ public abstract class PlayState extends State{
     public float trackerBG;
     protected int score;
     BitmapFont yourBitmapFontName;
-    public Stage stage;
+    public Stage stage, nextStage;
     float animateTime;
     float[] angle;
 
@@ -150,6 +151,7 @@ public abstract class PlayState extends State{
         spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
         stage = Stage.DUNGEON;
+        nextStage = Stage.DUNGEON;
         tracker = 800;
         trackerBG = 800;
         score = 0;
@@ -544,7 +546,7 @@ public abstract class PlayState extends State{
 
         if (player.y < 150){
             MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
-            goToRestartState();
+//            goToRestartState();
         }
     }
     private boolean checkObstacleCollision(){
@@ -1160,8 +1162,39 @@ public abstract class PlayState extends State{
 
     void wallCoord() {
         stageCounter++;
-        if (stageCounter % 60 == 0){
-            stage = Stage.values()[mapRandomizer.nextInt(3)];
+        if (stageCounter % 60 == 4) {
+            stage = nextStage;
+        }
+
+        if (stageCounter % 60 == 0 && stageCounter > 0){
+            nextStage = Stage.values()[mapRandomizer.nextInt(3)];
+            if (stage == Stage.DUNGEON){
+                if (nextStage == Stage.DUNGEON){
+                    stage = Stage.DUNGEON;
+                } else if (nextStage == Stage.ICE){
+                    stage = Stage.TRANS_DUN_ICE;
+                } else if (nextStage == Stage.DESERT){
+                    stage = Stage.TRANS_DUN_DES;
+                }
+            }
+            else if (stage == Stage.ICE){
+                if (nextStage == Stage.DUNGEON){
+                    stage = Stage.TRANS_ICE_DUN;
+                } else if (nextStage == Stage.ICE){
+                    stage = Stage.ICE;
+                } else if (nextStage == Stage.DESERT){
+                    stage = Stage.TRANS_ICE_DES;
+                }
+            }
+            else if (stage == Stage.DESERT){
+                if (nextStage == Stage.DUNGEON){
+                    stage = Stage.TRANS_DES_DUN;
+                } else if (nextStage == Stage.ICE){
+                    stage = Stage.TRANS_DES_ICE;
+                } else if (nextStage == Stage.DESERT){
+                    stage = Stage.DESERT;
+                }
+            }
         }
         powerCounter += 1;
         doorCounter = (doorCounter + 1)%30;
