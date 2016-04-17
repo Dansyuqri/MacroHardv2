@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.mygdx.game.customEnum.StateType;
 import com.mygdx.game.objects.CustomButton;
 
 /**
@@ -71,14 +72,14 @@ public class RestartState extends State{
 
         else if(!Gdx.input.isTouched() && touched){
              if(mainMenuBtn.contains(touchPos.x,touchPos.y)){
-                gsm.set(new MenuState(gsm));
-                dispose();
-                touched = false;
+                 gsm.set(new MenuState(gsm), StateType.NON_PLAY);
+                 dispose();
+                 touched = false;
             }
-            else{
-                dispose();
-                generateTextures();
-                touched = false;
+            else {
+                 dispose();
+                 generateTextures();
+                 touched = false;
             }
         }
     }
@@ -96,8 +97,8 @@ public class RestartState extends State{
         sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
         font.setColor(Color.WHITE);
-        font.draw(sb, "Your Score: ", graphicsX/2-layoutScoreText.width/2, graphicsY*3/4);
-        font.draw(sb, ""+score, graphicsX/2-layoutScore.width/2, graphicsY*3/4-layoutScoreText.height-layoutScore.height);
+        font.draw(sb, "Your Score: ", graphicsX / 2 - layoutScoreText.width / 2, graphicsY * 3 / 4);
+        font.draw(sb, "" + score, graphicsX / 2 - layoutScore.width / 2, graphicsY * 3 / 4 - layoutScoreText.height - layoutScore.height);
         sb.draw(mainMenuBtnImage, (graphicsX/ 2) - (mainMenuBtnX/2), graphicsY/2 - mainMenuBtnY/2, mainMenuBtnX, mainMenuBtnY);
         sb.end();
     }
