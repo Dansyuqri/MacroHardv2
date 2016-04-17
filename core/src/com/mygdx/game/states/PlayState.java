@@ -690,11 +690,11 @@ public abstract class PlayState extends State{
                                 }, 5, TimeUnit.SECONDS);
                             break;
                         case SPEED_PLAYER_UP:
-                            playerSpeed *= 0.7;
+                            playerSpeed *= 3;
                             backgroundTaskExecutor.schedule(new Runnable() {
                                 @Override
                                 public void run() {
-                                    playerSpeed /= 0.7;
+                                    playerSpeed /= 3;
                                 }
                             },5, TimeUnit.SECONDS);
                             break;
