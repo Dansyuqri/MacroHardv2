@@ -684,8 +684,10 @@ public abstract class PlayState extends State{
             } else {
                 ((Switch) eachSwitch).setOff();
             }
-            if (((Switch)eachSwitch).isOtherOn()){
-                ((Switch) eachSwitch).setOn();
+            synchronized (Switch.class) {
+                if (((Switch) eachSwitch).isOtherOn()) {
+                    ((Switch) eachSwitch).setOn();
+                }
             }
         }
 
@@ -784,10 +786,12 @@ public abstract class PlayState extends State{
             if (((MagicCircle)eachCircle).collides(player, this)){
                 stepped = true;
             }
-            if (stepped || ((MagicCircle) eachCircle).getOtherOn()) {
-                ((MagicCircle) eachCircle).setOn();
-            } else {
-                ((MagicCircle) eachCircle).setOff();
+            synchronized (MagicCircle.class) {
+                if (stepped || ((MagicCircle) eachCircle).getOtherOn()) {
+                    ((MagicCircle) eachCircle).setOn();
+                } else {
+                    ((MagicCircle) eachCircle).setOff();
+                }
             }
 
             if (stepped && !onCircle){
