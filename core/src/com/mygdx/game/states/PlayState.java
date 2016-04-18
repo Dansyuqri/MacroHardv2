@@ -157,8 +157,8 @@ public abstract class PlayState extends State{
         powerCounter = 0;
         spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
-        stage = Stage.DUNGEON;
-        nextStage = Stage.DUNGEON;
+        stage = Stage.DESERT;
+        nextStage = Stage.DESERT;
         tracker = 800;
         trackerBG = 800;
         score = 0;
@@ -757,9 +757,12 @@ public abstract class PlayState extends State{
         Iterator<GameObject> sandIterator = sands.iterator();
         boolean sandCollide = false;
         while (sandIterator.hasNext()){
+            System.out.println("reached 1");
             Sand quickSand = (Sand) sandIterator.next();
             if (quickSand.collides(player, this)){
+                System.out.println("reached 2");
                 if (!player.isSlowed()){
+                    System.out.println("reached 3");
                     playerSpeed /= 3;
                     player.setIsSlowed(true);
                     sandCollide = true;
@@ -767,6 +770,7 @@ public abstract class PlayState extends State{
             }
         }
         if (!sandCollide && player.isSlowed()){
+            System.out.println("reached 4");
             playerSpeed *= 3;
             player.setIsSlowed(false);
         }
@@ -1196,7 +1200,7 @@ public abstract class PlayState extends State{
         return new_row;
     }
 
-    private MapTile[] genCircle(ArrayList<MapTile[]> memory, boolean[] current, MapTile[] new_row){
+    private MapTile[] genCircle(ArrayList<MapTile[]> memory, boolean[] current, MapTile[] new_row, int number){
         int i;
         for (i = 0; i < current.length; i++) {
             if (current[i]){
@@ -1213,32 +1217,41 @@ public abstract class PlayState extends State{
                     break;
                 }
             }
-            int dir = mapRandomizer.nextInt(4);
-            switch (dir){
-                case 0:
-                    if (i > 0 && memory.get(j)[i - 1] != MapTile.OBSTACLES) {
-                        i--;
-                        counter++;
-                    }
-                    break;
-                case 1:
-                    if (j < 2 && memory.get(j + 1)[i] != MapTile.OBSTACLES) {
-                        j++;
-                        counter++;
-                    }
-                    break;
-                case 2:
-                    if (i < 8 && memory.get(j)[i + 1] != MapTile.OBSTACLES) {
-                        i++;
-                        counter++;
-                    }
-                    break;
-                case 3:
-                    if (j > 0 && memory.get(j - 1)[i] != MapTile.OBSTACLES) {
-                        j--;
-                        counter++;
-                    }
-                    break;
+            if (number == 0){
+                if (i > 0 && memory.get(j)[i - 1] != MapTile.OBSTACLES) {
+                    i--;
+                    counter++;
+                }
+                else if (j < 2 && memory.get(j + 1)[i] != MapTile.OBSTACLES) {
+                    j++;
+                    counter++;
+                }
+                else if (i < 8 && memory.get(j)[i + 1] != MapTile.OBSTACLES) {
+                    i++;
+                    counter++;
+                }
+                else if (j > 0 && memory.get(j - 1)[i] != MapTile.OBSTACLES) {
+                    j--;
+                    counter++;
+                }
+            }
+            else if (number == 1){
+                if (i < 8 && memory.get(j)[i + 1] != MapTile.OBSTACLES) {
+                    i++;
+                    counter++;
+                }
+                else if (j > 0 && memory.get(j - 1)[i] != MapTile.OBSTACLES) {
+                    j--;
+                    counter++;
+                }
+                else if (i > 0 && memory.get(j)[i - 1] != MapTile.OBSTACLES) {
+                    i--;
+                    counter++;
+                }
+                else if (j < 2 && memory.get(j + 1)[i] != MapTile.OBSTACLES) {
+                    j++;
+                    counter++;
+                }
             }
         }
         this.memory.get(j)[i] = MapTile.M_CIRCLE;
@@ -1269,31 +1282,31 @@ public abstract class PlayState extends State{
 
         int counter = 0;
         while (true) {
-            if (counter > 8) {
+            if (counter > 8 && memory.get(j)[i] == MapTile.EMPTY) {
                 break;
             }
             int dir = mapRandomizer.nextInt(4);
             switch (dir){
                 case 0:
-                    if (i > 0 && memory.get(j)[i - 1] == MapTile.EMPTY) {
+                    if (i > 0 && memory.get(j)[i - 1] != MapTile.OBSTACLES) {
                         i--;
                         counter++;
                     }
                     break;
                 case 1:
-                    if (j < 2 && memory.get(j + 1)[i] == MapTile.EMPTY) {
+                    if (j < 2 && memory.get(j + 1)[i] != MapTile.OBSTACLES) {
                         j++;
                         counter++;
                     }
                     break;
                 case 2:
-                    if (i < 8 && memory.get(j)[i + 1] == MapTile.EMPTY) {
+                    if (i < 8 && memory.get(j)[i + 1] != MapTile.OBSTACLES) {
                         i++;
                         counter++;
                     }
                     break;
                 case 3:
-                    if (j > 0 && memory.get(j - 1)[i] == MapTile.EMPTY) {
+                    if (j > 0 && memory.get(j - 1)[i] != MapTile.OBSTACLES) {
                         j--;
                         counter++;
                     }
@@ -1322,8 +1335,8 @@ public abstract class PlayState extends State{
         }
 
         if (stageCounter % 60 == 0 && stageCounter > 0){
-            nextStage = Stage.values()[mapRandomizer.nextInt(3)];
-//            nextStage = Stage.DESERT;
+//            nextStage = Stage.values()[mapRandomizer.nextInt(3)];
+            nextStage = Stage.DESERT;
             if (stage == Stage.DUNGEON){
                 if (nextStage == Stage.DUNGEON){
                     stage = Stage.DUNGEON;
@@ -1393,7 +1406,7 @@ public abstract class PlayState extends State{
         if (stage == Stage.DESERT && doorCounter == 3){
             for (int i = 0; i < 2; i++) {
                 MapTile[] result;
-                if ((result = genCircle(memory, current, new_row)) != null){
+                if ((result = genCircle(memory, current, new_row, i)) != null){
                     new_row = result;
                 }
             }

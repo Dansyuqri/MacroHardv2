@@ -17,6 +17,6 @@ public class Sand extends Movable implements Collidable {
 
     @Override
     public boolean collides(Player player, PlayState playState) {
-        return false;
+        return player.overlaps(this);
     }
 }
