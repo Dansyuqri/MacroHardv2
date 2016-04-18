@@ -70,7 +70,7 @@ public abstract class PlayState extends State{
     protected final int playerID;
     private boolean running;
 
-    private boolean touchHeld, end = false;
+    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
     protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit, slowGameDown, freezeMaze;
     protected int playerSpeed, dangerZone, threadsleep;
     public float tracker;
@@ -677,7 +677,7 @@ public abstract class PlayState extends State{
 
         boolean open = false;
         for (GameObject eachSwitch:switches){
-            if (((Switch) eachSwitch).collides(player, this)){
+            if (((Switch) eachSwitch).collides(player, this) || ((Switch) eachSwitch).isOtherOn()){
                 open = true;
                 ((Switch) eachSwitch).setOn();
             } else {
@@ -685,8 +685,17 @@ public abstract class PlayState extends State{
             }
         }
 
+        if (!open && onSwitch) {
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS});
+        }
+
+        onSwitch = open;
+
         synchronized (Switch.class) {
-            gsm.startMusic("GateSound.wav",(float)1);
+            if (gotSwitch) {
+                open = true;
+                gsm.startMusic("GateSound.wav",(float)1);
+            }
         }
 
         if (open) {
@@ -928,18 +937,22 @@ public abstract class PlayState extends State{
 
                 //open doors
                 case MessageCode.OPEN_DOORS:
-                    for (GameObject gameObj: switches) {
-                        if (((Switch)gameObj).getId() == message[1]){
-                            ((Switch)gameObj).setOn();
+                    synchronized (Switch.class) {
+                        gotSwitch = true;
+                        for (GameObject swi: switches) {
+                            if (((Switch)swi).getId() == message[1]){
+                                ((Switch)swi).setOtherOn();
+                            }
                         }
                     }
                     break;
 
                 //close doors
                 case MessageCode.CLOSE_DOORS:
-                    for (GameObject gameObj: switches) {
-                        if (((Switch)gameObj).getId() == message[1]){
-                            ((Switch)gameObj).setOff();
+                    synchronized (Switch.class) {
+                        gotSwitch = false;
+                        for (GameObject swi: switches) {
+                            ((Switch)swi).setOtherOff();
                         }
                     }
                     break;

@@ -14,7 +14,8 @@ import com.mygdx.game.states.PlayState;
 public class Switch extends Movable implements Collidable{
     private static int nextID;
     private int id;
-    private boolean on = false;
+    private boolean selfOn = false;
+    private boolean otherOn = false;
 
     public Switch(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
@@ -37,19 +38,31 @@ public class Switch extends Movable implements Collidable{
     }
 
     public void setOn(){
-        if (!on) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte) id});
+        if (!selfOn) {
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte)id});
             this.setImage(new Texture(Gdx.files.internal("pressure_plate1_pressed.png")));
-            on = true;
+            selfOn = true;
         }
     }
 
     public void setOff()
     {
-        if (on) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS, (byte) id});
+        if (selfOn) {
             this.setImage(new Texture(Gdx.files.internal("pressure_plate1.png")));
-            on = false;
+            selfOn = false;
         }
+    }
+
+    public void setOtherOn(){
+        otherOn = true;
+    }
+
+    public void setOtherOff()
+    {
+       otherOn = false;
+    }
+
+    public boolean isOtherOn() {
+        return otherOn;
     }
 }
