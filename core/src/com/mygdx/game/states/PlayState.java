@@ -802,6 +802,8 @@ public abstract class PlayState extends State{
 
             onCircle = stepped;
         }
+
+        //checking circles
         boolean desBoulder = true;
         for (GameObject eachCircle: mCircles){
             if (!((MagicCircle)eachCircle).isOn()){
@@ -811,6 +813,7 @@ public abstract class PlayState extends State{
         if (desBoulder){
             for (GameObject eachBoulder: boulders){
                 ((Boulder)eachBoulder).setToDestroy(true);
+                mapSynchronizer.sendMessage(MessageCode.DESTROY_BOULDER, ((Boulder)eachBoulder).getId());
             }
         }
     }
