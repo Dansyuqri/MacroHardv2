@@ -112,7 +112,7 @@ public class MapSynchronizer extends Movable{
         return this.PlayerL1;
     }
     public float getLatency(){
-        return latency/1000;
+        return latency/1000f;
     }
     public void sendMessage(int messageCode, int id){
         byte[] message = new byte[2];

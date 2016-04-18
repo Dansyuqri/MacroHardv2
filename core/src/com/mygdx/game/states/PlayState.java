@@ -791,11 +791,13 @@ public abstract class PlayState extends State{
             }
 
             if (stepped && !onCircle){
-                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.MAGIC_CIRCLE_ON, (byte) ((MagicCircle) eachCircle).getId()});
+                MacroHardv2.actionResolver.sendReliable(
+                        new byte[]{MessageCode.MAGIC_CIRCLE_ON, (byte) ((MagicCircle) eachCircle).getId()});
             }
 
             if (!stepped && onCircle){
-                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.MAGIC_CIRCLE_OFF, (byte) ((MagicCircle)eachCircle).getId()});
+                MacroHardv2.actionResolver.sendReliable(
+                        new byte[]{MessageCode.MAGIC_CIRCLE_OFF, (byte) ((MagicCircle)eachCircle).getId()});
             }
 
             onCircle = stepped;
@@ -935,7 +937,7 @@ public abstract class PlayState extends State{
                 case MessageCode.PLAYER_POSITION:
                     int other = (int) message[1];
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
-                    float y = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency();
+                    float y = (float) message[4] * 10 + (float) message[5] / 10;
                     players.get(other).x = x;
                     players.get(other).y = y;
                     angle[other] = ((float)Math.atan2(y - ((Player)players.get(other)).getPrev_y(), x - ((Player)players.get(other)).getPrev_x()));
