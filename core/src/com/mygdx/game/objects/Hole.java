@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
  * Created by Samuel on 3/4/2016.
  */
 public class Hole extends Movable implements Collidable {
+    private static int nextID = 0;
+    private int id;
     private boolean broken = false;
     private boolean breakHole = false;
     public static final int HOLE_BREAK_TIME = 3;
@@ -31,6 +33,8 @@ public class Hole extends Movable implements Collidable {
 
     public Hole(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
+        id = nextID;
+        nextID = (nextID+1)%200;
 
         holeDestroyTime = 0f;
 
@@ -47,6 +51,10 @@ public class Hole extends Movable implements Collidable {
         if (!this.broken){
             this.setImage(holeIn);
         }
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void setImage(TextureRegion image){

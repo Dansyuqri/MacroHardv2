@@ -10,12 +10,20 @@ import com.mygdx.game.states.PlayState;
  * Created by Syuqri on 3/9/2016.
  */
 public class Door extends Movable implements Collidable{
+    private static int nextID = 0;
+    private int id;
     private boolean open = false;
     private boolean destroyed = false;
 
     public Door(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
+        id = nextID;
+        nextID = (nextID+1)%200;
         this.setImage(new Texture(Gdx.files.internal("gate_closed.png")));
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void setOpen(){

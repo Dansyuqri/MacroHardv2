@@ -1,11 +1,9 @@
 package com.mygdx.game.states;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.Direction;
@@ -34,9 +32,7 @@ import com.mygdx.game.objects.Switch;
 import com.mygdx.game.objects.JoyStick;
 import com.mygdx.game.objects.Player;
 import com.mygdx.game.objects.UI;
-import com.sun.org.apache.xpath.internal.SourceTree;
 
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -580,7 +576,7 @@ public abstract class PlayState extends State{
                 if (player.getCanDestroy()) {
                     obstacle.setToDestroy(true);
                     if (!obstacle.isDestroyed()){
-                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, obstacle.x + tileLength/2, obstacle.y + tileLength/2);
+                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, obstacle.getId());
                     }
                     gsm.startMusic("WallDestroySound.wav", (float) 1);
                 }
@@ -595,7 +591,7 @@ public abstract class PlayState extends State{
 //              DESTROY_WALL implementation
                 if (player.getCanDestroy() || door.isDestroyed()) {
                     if (!door.isDestroyed()){
-                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, door.x + tileLength/2, door.y + tileLength/2);
+                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, door.getId());
                     }
                     doorIterator.remove();
                     break;
@@ -650,7 +646,7 @@ public abstract class PlayState extends State{
                 } else if (!hole.isBreakHole()){
                     gsm.startMusic("IceBreak.mp3",(float)1);
                     hole.setBreakHole(true);
-                    mapSynchronizer.sendMessage(MessageCode.BREAK_HOLE, hole.x + tileLength / 2, hole.y + tileLength / 2);
+                    mapSynchronizer.sendMessage(MessageCode.BREAK_HOLE, hole.getId());
                 }
             }
 
@@ -991,10 +987,8 @@ public abstract class PlayState extends State{
                     break;
 
                 case MessageCode.BREAK_HOLE:
-                    x = (float) message[1] * 10 + (float) message[2] / 10;
-                    y = (float) message[3] * 10 + (float) message[4] / 10;
                     for (GameObject hole: holes) {
-                        if (hole.contains(x, y)){
+                        if (((Hole)hole).getId() == message[1]){
                             ((Hole)hole).setBreakHole(true);
                             break;
                         }
@@ -1002,16 +996,14 @@ public abstract class PlayState extends State{
                     break;
 
                 case MessageCode.DESTROY_WALL:
-                    x = (float) message[1] * 10 + (float) message[2] / 10;
-                    y = (float) message[3] * 10 + (float) message[4] / 10;
                     for (GameObject obstacle: obstacles) {
-                        if (obstacle.contains(x, y)){
+                        if (((Obstacle)obstacle).getId() == message[1]){
                             ((Obstacle)obstacle).setToDestroy(true);
                             break;
                         }
                     }
                     for (GameObject door: doors) {
-                        if (door.contains(x, y)){
+                        if (((Door)door).getId() == message[1]){
                             ((Door)door).setDestroyed(true);
                             break;
                         }
@@ -1032,7 +1024,7 @@ public abstract class PlayState extends State{
                     player.x = x1;
                     player.y = y1;
                     break;
-                case MessageCode.SyncRender:
+                case MessageCode.SYNC_RENDER:
                     byte[] syncRenderBytes = new byte[message.length - 1];
                     for (int i = 0; i < message.length - 1; i++) {
                         syncRenderBytes[i] = message[i + 1];
@@ -1049,7 +1041,7 @@ public abstract class PlayState extends State{
         mapMaker.interrupt();
         backgroundTaskExecutor.shutdownNow();
         dispose();
-        gsm.set(new RestartState(gsm, getScore()),StateType.NON_PLAY);
+        gsm.set(new RestartState(gsm, getScore()), StateType.NON_PLAY);
     }
 
     public int getScore() {

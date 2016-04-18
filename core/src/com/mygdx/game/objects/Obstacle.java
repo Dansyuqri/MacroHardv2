@@ -13,6 +13,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
  * Created by Syuqri on 3/9/2016.
  */
 public class Obstacle extends Movable implements Collidable {
+    private static int nextID = 0;
+    private int id;
     private boolean destroyed = false;
     private boolean toDestroy = false;
     private Stage stage;
@@ -29,6 +31,8 @@ public class Obstacle extends Movable implements Collidable {
 
     public Obstacle(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
+        id = nextID;
+        nextID = (nextID+1)%200;
         this.stage = stage;
         wallDestroyTime = 0f;
 
@@ -61,6 +65,10 @@ public class Obstacle extends Movable implements Collidable {
 //            this.setImage(new Texture(Gdx.files.internal("wall4.4.png")));
             this.setImage(desWall);
         }
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void setImage(TextureRegion image){

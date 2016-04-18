@@ -14,7 +14,7 @@ public class MessageCode {
     public static final int BREAK_HOLE = 8;
     public static final int DESTROY_WALL = 9;
     public static final int TELEPORT = 10;
-    public static final int SyncRender = 11;
+    public static final int SYNC_RENDER = 11;
     public static final int FREEZE = 12;
     public static final int SLOWGAME = 13;
 }

@@ -208,7 +208,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         }
     }
 
-    public void sendReliable(byte[] map){
+    public void sendReliable(byte[] message){
         try{
             for (Participant p : invitees) {
                 if (p.getParticipantId().equals(mMyId))
@@ -216,7 +216,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                 if (p.getStatus() != Participant.STATUS_JOINED)
                     continue;
                 // final score notification must be sent via reliable message
-                Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, map,
+                Games.RealTimeMultiplayer.sendReliableMessage(getApiClient(), null, message,
                         mRoomId, p.getParticipantId());
             }
         }

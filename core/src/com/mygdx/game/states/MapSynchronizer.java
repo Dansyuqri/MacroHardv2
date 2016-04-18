@@ -48,7 +48,7 @@ public class MapSynchronizer extends Movable{
         String SyncRenderString = Long.toString(syncrender);
         byte[] SyncRenderBytes = SyncRenderString.getBytes();
         byte[] result = new byte[SyncRenderBytes.length + 1];
-        result[0] = MessageCode.SyncRender;
+        result[0] = MessageCode.SYNC_RENDER;
         for (int i = 0; i < SyncRenderBytes.length; i++) {
             result[i+1] = SyncRenderBytes[i];
         }
@@ -68,7 +68,6 @@ public class MapSynchronizer extends Movable{
             temp[3] = 0;
             long start = System.currentTimeMillis();
             MacroHardv2.actionResolver.sendReliable(temp);
-            System.out.println("HEHE: HOST SENT PING IS WAITING");
             try {
                 HostL.await();
             } catch (InterruptedException e) {
@@ -79,7 +78,6 @@ public class MapSynchronizer extends Movable{
             temp[2] = 1;
             //Sleep duration
             temp[3] = (byte)latency[1];
-            System.out.println("HEHE: HOST SENDING PLAYER TO START");
             MacroHardv2.actionResolver.sendReliable(temp);
             try {
                 sleep(latency[1]);
@@ -105,13 +103,10 @@ public class MapSynchronizer extends Movable{
     public float getLatency(int player){
         return latency[player]/1000;
     }
-    public void sendMessage(int messageCode, float x, float y){
-        byte[] message = new byte[5];
+    public void sendMessage(int messageCode, int id){
+        byte[] message = new byte[2];
         message[0] = (byte) messageCode;
-        message[1] = (byte) (x/10);
-        message[2] = (byte)((x*10)%100);
-        message[3] = (byte) (y/10);
-        message[4] = (byte)((y*10)%100);
+        message[1] = (byte) id;
         MacroHardv2.actionResolver.sendReliable(message);
     }
 
