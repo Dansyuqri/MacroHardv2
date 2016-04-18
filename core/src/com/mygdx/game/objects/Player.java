@@ -83,9 +83,6 @@ public class Player extends Movable {
             case 1:
                 this.setImage(faceNorth);
                 break;
-            case 2:
-                this.setImage(faceNorth);
-                break;
         }
         this.activePower = this.passivePower = PowerType.NOTHING;
         canDestroy = false;

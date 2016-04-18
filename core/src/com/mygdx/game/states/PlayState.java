@@ -273,7 +273,7 @@ public abstract class PlayState extends State{
             backgroundTaskExecutor.scheduleWithFixedDelay(new Runnable() {
                 @Override
                 public void run() {
-                    for (int i = 0; i < 3; i++) {
+                    for (int i = 0; i < 2; i++) {
                         if (((Player)players.get(i)).x != ((Player)players.get(i)).getPrev_x() ||
                                 Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * freezeMaze * slowGameDown * deltaCap)) > 5 ) {
                             if (angle[i] > 3 * (Math.PI) / 8 && angle[i] <= 5 * (Math.PI) / 8) {
