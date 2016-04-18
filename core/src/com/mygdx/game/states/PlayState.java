@@ -58,7 +58,7 @@ public abstract class PlayState extends State{
 
     private JoyStick joystick;
     protected Player player;
-    private Vector3 touchPos = new Vector3();
+    private Vector3[] touchPos = {new Vector3(),new Vector3()};
 
     protected PlayerCoordinateSender coordSender;
     private MapSynchronizer mapSynchronizer;
@@ -207,46 +207,53 @@ public abstract class PlayState extends State{
     }
     @Override
     protected void handleInput() {
-        if(Gdx.input.isTouched()) {
-            touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
-            cam.unproject(touchPos);
-            float relativex = touchPos.x - (joystick.getX());
-            float relativey = touchPos.y - (joystick.getY());
+        boolean hasMoved = false;
+        for (int i = 0; i < 2; i++) {
+            if(Gdx.input.isTouched(i)) {
+                touchPos[i].set(Gdx.input.getX(i), Gdx.input.getY(i), 0);
+                cam.unproject(touchPos[i]);
 
-            if (touchHeld ||
-                    (Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
-                            Math.abs(relativey) < joystick.getJoystickWidth()/2)) {
-                touchHeld = true;
+                float relativex = touchPos[i].x - (joystick.getX());
+                float relativey = touchPos[i].y - (joystick.getY());
 
-                //calculates the relevant numbers needed for omnidirectional movement
-                angle[playerID] = (float) Math.atan2(relativey, relativex);
-                float cos = (float) Math.cos(angle[playerID]);
-                float sin = (float) Math.sin(angle[playerID]);
-                float ratio;
-                //setting joystick centre coordinates
-                if ((Math.abs(relativex) < joystick.getJoystickWidth()/2 &&
-                        Math.abs(relativey) < joystick.getJoystickWidth()/2)){
-                    ratio = (float) ((Math.pow(relativex, 2) + Math.pow(relativey, 2))/Math.pow(joystick.getJoystickWidth()/2,2));
-                    joystick.setCX(touchPos.x - joystick.getJoystickCenterWidth() / 2);
-                    joystick.setCY(touchPos.y - joystick.getJoystickCenterHeight()/2);
-                } else {
-                    ratio = 1;
-                    joystick.setCX(joystick.getX() - joystick.getJoystickCenterWidth()/2 + joystick.getJoystickWidth()/2*cos);
-                    joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight()/2 + joystick.getJoystickWidth()/2*sin);
+                if ((touchHeld ||
+                        (Math.abs(relativex) < joystick.getJoystickWidth() / 2 &&
+                                Math.abs(relativey) < joystick.getJoystickWidth() / 2)) && !hasMoved) {
+                    touchHeld = true;
+                    hasMoved = true;
+
+                    //calculates the relevant numbers needed for omnidirectional movement
+                    angle[playerID] = (float) Math.atan2(relativey, relativex);
+                    float cos = (float) Math.cos(angle[playerID]);
+                    float sin = (float) Math.sin(angle[playerID]);
+                    float ratio;
+                    //setting joystick centre coordinates
+                    if ((Math.abs(relativex) < joystick.getJoystickWidth() / 2 &&
+                            Math.abs(relativey) < joystick.getJoystickWidth() / 2)) {
+                        ratio = (float) ((Math.pow(relativex, 2) + Math.pow(relativey, 2)) / Math.pow(joystick.getJoystickWidth() / 2, 2));
+                        joystick.setCX(touchPos[i].x - joystick.getJoystickCenterWidth() / 2);
+                        joystick.setCY(touchPos[i].y - joystick.getJoystickCenterHeight() / 2);
+                    } else {
+                        ratio = 1;
+                        joystick.setCX(joystick.getX() - joystick.getJoystickCenterWidth() / 2 + joystick.getJoystickWidth() / 2 * cos);
+                        joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight() / 2 + joystick.getJoystickWidth() / 2 * sin);
+                    }
+
+                    movePlayer(cos, sin, (float) Math.pow(ratio, 0.5));
                 }
 
-                movePlayer(cos, sin, (float) Math.pow(ratio, 0.5));
-            } else {
-                if (!icons.isEmpty()){
-                    if (icons.get(0).contains(touchPos.x, touchPos.y)){
+                if (!icons.isEmpty()) {
+                    if (icons.get(0).contains(touchPos[i].x, touchPos[i].y)) {
                         activateActivePower();
                         icons.remove(0);
                     }
                 }
             }
-        } else {
+        }
+
+        if (!Gdx.input.isTouched()){
             touchHeld = false;
-            joystick.setCX(joystick.getX() - joystick.getJoystickCenterWidth()/2);
+            joystick.setCX(joystick.getX() - joystick.getJoystickCenterWidth() / 2);
             joystick.setCY(joystick.getY() - joystick.getJoystickCenterHeight()/2);
         }
     }
