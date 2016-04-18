@@ -37,7 +37,7 @@ public class GameStateManager {
                 break;
             case PLAY:
                 removeMusic("MainMenuSound.mp3");
-                removeMusic("MenuSelectionClick.wav");
+                //removeMusic("MenuSelectionClick.wav");
                 loadMusic("WallDestroySound.wav");
                 loadMusic("TimeSlowSound.mp3");
                 loadMusic("GateSound.wav");

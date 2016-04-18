@@ -1,7 +1,5 @@
 package com.mygdx.game.states;
 
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.mygdx.game.MacroHardv2;
 import com.badlogic.gdx.Gdx;
@@ -82,32 +80,17 @@ public class MenuState extends State{
         cam.unproject(touchPos);
 
         if (startHost) {
-//            gsm.stopMusic("MainMenuSound.mp3");
-//            startHost = false;
-//            dispose();
-//            gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()), StateType.PLAY);
-//            gsm.startMusicLoop("Dance Of Death.mp3", (float) 0.01);
             gsm.startMusic("MenuSelectionClick.wav", (float) 1);
-            gsm.getAssetManager().get("MenuSelectionClick.wav", Music.class).setOnCompletionListener(new Music.OnCompletionListener() {
-                @Override
-                public void onCompletion(Music music) {
-                    startNonHost = false;
-                    dispose();
-                    gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()), StateType.PLAY);
-                }
-            });
+            startNonHost = false;
+            dispose();
+            gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()), StateType.PLAY);
         }
 
         if(startNonHost){
             gsm.startMusic("MenuSelectionClick.wav", (float) 1);
-            gsm.getAssetManager().get("MenuSelectionClick.wav", Music.class).setOnCompletionListener(new Music.OnCompletionListener() {
-                @Override
-                public void onCompletion(Music music) {
-                    startNonHost = false;
-                    dispose();
-                    gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()), StateType.PLAY);
-                }
-            });
+            startNonHost = false;
+            dispose();
+            gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()), StateType.PLAY);
         }
 
         /****************************************************************************************
@@ -150,76 +133,46 @@ public class MenuState extends State{
         else if(!Gdx.input.isTouched() && touched){
             if(playBtn.contains(touchPos.x,touchPos.y)){
                 gsm.startMusic("MenuSelectionClick.wav", (float) 1);
-                gsm.getAssetManager().get("MenuSelectionClick.wav", Music.class).setOnCompletionListener(new Music.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(Music music) {
-                        gsm.set(new PlayStateHost(gsm, 0, true), StateType.PLAY);
-                    }
-                });
+                gsm.set(new PlayStateHost(gsm, 0, true), StateType.PLAY);
                 //dispose();
                 touched = false;
             }
             else if(instructionBtn.contains(touchPos.x,touchPos.y)){
                 gsm.startMusic("MenuSelectionClick.wav", (float) 1);
-                gsm.getAssetManager().get("MenuSelectionClick.wav", Music.class).setOnCompletionListener(new Music.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(Music music) {
-                        gsm.set(new InstructionState(gsm), StateType.NON_PLAY);
-                    }
-                });
+                gsm.set(new InstructionState(gsm), StateType.NON_PLAY);
                 //dispose();
                 touched = false;
             }
             else if(quickGameBtn.contains(touchPos.x,touchPos.y)){
                 gsm.startMusic("MenuSelectionClick.wav",(float)1);
-                gsm.getAssetManager().get("MenuSelectionClick.wav",Music.class).setOnCompletionListener(new Music.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(Music music) {
-                        if(MacroHardv2.actionResolver.isSignedIn()){
-                            MacroHardv2.actionResolver.QuickGame();
+                if(MacroHardv2.actionResolver.isSignedIn()){
+                    MacroHardv2.actionResolver.QuickGame();
 
-                        }
-                        quickGameBtnImage.dispose();
-                        quickGameBtnImage = new Texture("quickGameBtn.png");
-                        touched = false;
-                    }
-                });
+                }
+                quickGameBtnImage.dispose();
+                quickGameBtnImage = new Texture("quickGameBtn.png");
+                touched = false;
             }
             else if(sendInviteBtn.contains(touchPos.x,touchPos.y)){
                 gsm.startMusic("MenuSelectionClick.wav",(float)1);
-                gsm.getAssetManager().get("MenuSelectionClick.wav", Music.class).setOnCompletionListener(new Music.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(Music music) {
-                        MacroHardv2.actionResolver.Inviteplayers();
-                        sendInviteBtnImage.dispose();
-                        sendInviteBtnImage = new Texture("sendInviteBtn.png");
-                        touched = false;
-                    }
-                });
+                MacroHardv2.actionResolver.Inviteplayers();
+                sendInviteBtnImage.dispose();
+                sendInviteBtnImage = new Texture("sendInviteBtn.png");
+                touched = false;
             }
             else if(invitationBtn.contains(touchPos.x,touchPos.y)){
                 gsm.startMusic("MenuSelectionClick.wav",(float)1);
-                gsm.getAssetManager().get("MenuSelectionClick.wav", Music.class).setOnCompletionListener(new Music.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(Music music) {
-                        MacroHardv2.actionResolver.Seeinvites();
-                        invitationBtnImage.dispose();
-                        invitationBtnImage = new Texture("invitationBtn.png");
-                        touched = false;
-                    }
-                });
+                MacroHardv2.actionResolver.Seeinvites();
+                invitationBtnImage.dispose();
+                invitationBtnImage = new Texture("invitationBtn.png");
+                touched = false;
             }
             else if(signInBtn.contains(touchPos.x,touchPos.y)){
                 gsm.startMusic("MenuSelectionClick.wav",(float)1);
-                gsm.getAssetManager().get("MenuSelectionClick.wav", Music.class).setOnCompletionListener(new Music.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(Music music) {
-                        MacroHardv2.actionResolver.SignIn();
-                        signInBtnImage.dispose();
-                        signInBtnImage = new Texture("signInBtn.png");
-                        touched = false;
-                    }
-                });
+                MacroHardv2.actionResolver.SignIn();
+                signInBtnImage.dispose();
+                signInBtnImage = new Texture("signInBtn.png");
+                touched = false;
             }
             else{
                 dispose();

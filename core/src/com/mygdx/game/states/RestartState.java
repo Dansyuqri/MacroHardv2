@@ -72,6 +72,7 @@ public class RestartState extends State{
 
         else if(!Gdx.input.isTouched() && touched){
              if(mainMenuBtn.contains(touchPos.x,touchPos.y)){
+                 gsm.startMusic("MenuSelectionClick.wav", (float) 1);
                  gsm.set(new MenuState(gsm), StateType.NON_PLAY);
                  dispose();
                  touched = false;
