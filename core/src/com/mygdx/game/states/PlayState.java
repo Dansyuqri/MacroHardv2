@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.Direction;
@@ -14,11 +15,13 @@ import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.customEnum.StateType;
 import com.mygdx.game.objects.Background;
+import com.mygdx.game.objects.Boulder;
 import com.mygdx.game.objects.Fog;
 import com.mygdx.game.objects.GameObject;
 import com.mygdx.game.objects.Ghost;
 import com.mygdx.game.objects.Hole;
 import com.mygdx.game.objects.Icon;
+import com.mygdx.game.objects.MagicCircle;
 import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Door;
@@ -108,6 +111,8 @@ public abstract class PlayState extends State{
     protected ArrayList<GameObject> ghosts = new ArrayList<GameObject>();
     private ArrayList<GameObject> fogs = new ArrayList<GameObject>();
     private ArrayList<GameObject> sands = new ArrayList<GameObject>();
+    private ArrayList<GameObject> boulders = new ArrayList<GameObject>();
+    private ArrayList<GameObject> mCircles = new ArrayList<GameObject>();
 
     //final values
     final int tileLength = 50;
@@ -152,8 +157,8 @@ public abstract class PlayState extends State{
         powerCounter = 0;
         spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
-        stage = Stage.DESERT;
-        nextStage = Stage.DESERT;
+        stage = Stage.DUNGEON;
+        nextStage = Stage.DUNGEON;
         tracker = 800;
         trackerBG = 800;
         score = 0;
@@ -170,6 +175,8 @@ public abstract class PlayState extends State{
         gameObjects.add(obstacles);
         gameObjects.add(sideWalls);
         gameObjects.add(switches);
+        gameObjects.add(mCircles);
+        gameObjects.add(boulders);
         gameObjects.add(players);
         gameObjects.add(ghosts);
         gameObjects.add(fogs);
@@ -461,6 +468,17 @@ public abstract class PlayState extends State{
                     if (stage == Stage.DESERT){
                         sands.add(new Sand((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength));
                     }
+                    break;
+                case BOULDER:
+                    if (stage == Stage.DESERT){
+                        boulders.add(new Boulder((tileLength * (i % GAME_WIDTH)) + 10, tracker, 60, 60, stage));
+                    }
+                    break;
+                case M_CIRCLE:
+                    if (stage == Stage.DESERT){
+                        mCircles.add(new MagicCircle((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength, stage));
+                    }
+                    break;
             }
         }
         if (score > 200 && stage == Stage.DUNGEON) {
@@ -581,6 +599,23 @@ public abstract class PlayState extends State{
                     }
                     doorIterator.remove();
                     break;
+                }
+                return true;
+            }
+        }
+
+        // collides with boulders
+        Iterator<GameObject> boulderIterator = boulders.iterator();
+        while (boulderIterator.hasNext()){
+            Boulder boulder = (Boulder)boulderIterator.next();
+            if (boulder.collides(player, this) || boulder.isDestroyed()){
+//              DESTROY_WALL implementation
+                if (player.getCanDestroy()) {
+                    boulder.setToDestroy(true);
+                    if (!boulder.isDestroyed()){
+//                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, boulder.x + tileLength/2, boulder.y + tileLength/2);
+                    }
+                    gsm.startMusic("WallDestroySound.wav", (float) 1);
                 }
                 return true;
             }
@@ -735,6 +770,26 @@ public abstract class PlayState extends State{
             playerSpeed *= 3;
             player.setIsSlowed(false);
         }
+
+        // collides with magic circle
+        for (GameObject eachCircle: mCircles){
+            if (((MagicCircle)eachCircle).collides(player, this)){
+                ((MagicCircle) eachCircle).setOn();
+            } else {
+                ((MagicCircle) eachCircle).setOff();
+            }
+        }
+        boolean desBoulder = true;
+        for (GameObject eachCircle: mCircles){
+            if (!((MagicCircle)eachCircle).isOn()){
+                desBoulder = false;
+            }
+        }
+        if (desBoulder){
+            for (GameObject eachBoulder: boulders){
+                ((Boulder)eachBoulder).setToDestroy(true);
+            }
+        }
     }
 
     /**
@@ -822,6 +877,15 @@ public abstract class PlayState extends State{
                     ((Hole)gameObject).setCurrentFrame(((Hole) gameObject).getHoleDestroyTime(), true);
                     if (((Hole)gameObject).getHoleDestroyTime() > 2.9){
                         ((Hole)gameObject).setBroken();
+                    }
+                }
+
+                else if (gameObject instanceof Boulder && ((Boulder)gameObject).isToDestroy()){
+                    ((Boulder)gameObject).setBoulderDestroyTime(((Boulder) gameObject).getBoulderDestroyTime() + Gdx.graphics.getDeltaTime());
+                    ((Boulder)gameObject).setCurrentFrame(((Boulder) gameObject).getBoulderDestroyTime(), true);
+                    if (((Boulder)gameObject).getBoulderDestroyTime() > 0.4){
+                        ((Boulder)gameObject).setDestroyed(true);
+                        gameObjectIterator.remove();
                     }
                 }
                 gameObject.draw(sb);
@@ -1121,6 +1185,78 @@ public abstract class PlayState extends State{
         return new_row;
     }
 
+    private MapTile[] genBoulder(MapTile[] new_row){
+        int counter = 0;
+        for (int i = 0; i < current.length; i++){
+            if (current[i] && counter < 2){
+                new_row[i] = MapTile.BOULDER;
+                counter++;
+            }
+        }
+        return new_row;
+    }
+
+    private MapTile[] genCircle(ArrayList<MapTile[]> memory, boolean[] current, MapTile[] new_row){
+        int i;
+        for (i = 0; i < current.length; i++) {
+            if (current[i]){
+                break;
+            }
+        }
+
+        int j = 0;
+
+        int counter = 0;
+        while (true) {
+            if (counter > 8) {
+                if (memory.get(j)[i] != MapTile.M_CIRCLE) {
+                    break;
+                }
+            }
+            int dir = mapRandomizer.nextInt(4);
+            switch (dir){
+                case 0:
+                    if (i > 0 && memory.get(j)[i - 1] != MapTile.OBSTACLES) {
+                        i--;
+                        counter++;
+                    }
+                    break;
+                case 1:
+                    if (j < 2 && memory.get(j + 1)[i] != MapTile.OBSTACLES) {
+                        j++;
+                        counter++;
+                    }
+                    break;
+                case 2:
+                    if (i < 8 && memory.get(j)[i + 1] != MapTile.OBSTACLES) {
+                        i++;
+                        counter++;
+                    }
+                    break;
+                case 3:
+                    if (j > 0 && memory.get(j - 1)[i] != MapTile.OBSTACLES) {
+                        j--;
+                        counter++;
+                    }
+                    break;
+            }
+        }
+        this.memory.get(j)[i] = MapTile.M_CIRCLE;
+        if (j == 0){
+            new_row[i] = MapTile.M_CIRCLE;
+            return new_row;
+        } else {
+            try {
+                mapMod.acquire();
+                mapBuffer.get(mapBuffer.size() - j)[i] = MapTile.M_CIRCLE;
+                mapMod.release();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
     private MapTile[] genSwitch(ArrayList<MapTile[]> memory, boolean[] current, MapTile[] new_row){
         int i;
         for (i = 0; i < current.length; i++) {
@@ -1179,7 +1315,7 @@ public abstract class PlayState extends State{
         }
     }
 
-    void wallCoord() {
+    void wallCoord(){
         stageCounter++;
         if (stageCounter % 60 == 4) {
             stage = nextStage;
@@ -1246,6 +1382,21 @@ public abstract class PlayState extends State{
         // spawning door
         if (doorCounter == 15) {
             new_row = genDoor(new_row);
+        }
+
+        // spawning boulder
+        if (stage == Stage.DESERT && doorCounter == 4){
+            new_row = genBoulder(new_row);
+        }
+
+        //spawning magic circles
+        if (stage == Stage.DESERT && doorCounter == 3){
+            for (int i = 0; i < 2; i++) {
+                MapTile[] result;
+                if ((result = genCircle(memory, current, new_row)) != null){
+                    new_row = result;
+                }
+            }
         }
 
         // spawning door switch

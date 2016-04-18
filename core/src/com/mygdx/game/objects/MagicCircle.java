@@ -24,19 +24,22 @@ public class MagicCircle extends Movable implements Collidable {
         return (player.overlaps(this));
     }
 
-    public void setOn(){
+    public void setOn() {
         if (!on) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS});
+//            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS});
             this.setImage(new Texture(Gdx.files.internal("magic_circle(active).png")));
             on = true;
         }
     }
 
-    public void setOff()
-    {
+    public void setOff() {
         if (on) {
             this.setImage(new Texture(Gdx.files.internal("magic_circle.png")));
             on = false;
         }
+    }
+
+    public boolean isOn() {
+        return on;
     }
 }
