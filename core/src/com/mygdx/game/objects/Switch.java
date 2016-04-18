@@ -39,7 +39,6 @@ public class Switch extends Movable implements Collidable{
 
     public void setOn(){
         if (!selfOn) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte)id});
             this.setImage(new Texture(Gdx.files.internal("pressure_plate1_pressed.png")));
             selfOn = true;
         }

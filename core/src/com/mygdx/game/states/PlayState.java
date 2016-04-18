@@ -677,13 +677,15 @@ public abstract class PlayState extends State{
 
         boolean open = false;
         for (GameObject eachSwitch:switches){
-            if (((Switch) eachSwitch).collides(player, this) || ((Switch) eachSwitch).isOtherOn()){
-                if (!((Switch) eachSwitch).isOtherOn()) {
-                    open = true;
-                }
+            if (((Switch) eachSwitch).collides(player, this)){
+                open = true;
+                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte)((Switch)eachSwitch).getId()});
                 ((Switch) eachSwitch).setOn();
             } else {
                 ((Switch) eachSwitch).setOff();
+            }
+            if (((Switch)eachSwitch).isOtherOn()){
+                ((Switch) eachSwitch).setOn();
             }
         }
 
