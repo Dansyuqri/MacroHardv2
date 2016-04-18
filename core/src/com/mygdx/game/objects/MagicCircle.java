@@ -12,11 +12,23 @@ import com.mygdx.game.states.PlayState;
  * Created by Samuel on 14/4/2016.
  */
 public class MagicCircle extends Movable implements Collidable {
+    private static int nextID;
+    private int id;
     private boolean on = false;
 
     public MagicCircle(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
+        id = nextID - 80;
+        nextID = (nextID+1)%200;
         this.setImage(new Texture(Gdx.files.internal("magic_circle.png")));
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public static void reset(){
+        nextID = 0;
     }
 
     @Override

@@ -16,7 +16,7 @@ public class MapSynchronizer extends Movable{
     private CountDownLatch HostL = new CountDownLatch(1);
     private CountDownLatch PlayerL1 = new CountDownLatch(1);
     private long MysyncRender, OthersyncRender;
-    private long[] latency = new long[3];
+    private long latency;
 
     MapSynchronizer(){
         super(0, 450, 0, 0);
@@ -73,14 +73,14 @@ public class MapSynchronizer extends Movable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            latency[1] = (System.currentTimeMillis() - start)/2;
+            latency = (System.currentTimeMillis() - start)/2;
             //0 for ping, 1 for sleep
             temp[2] = 1;
             //Sleep duration
-            temp[3] = (byte)latency[1];
+            temp[3] = (byte)latency;
             MacroHardv2.actionResolver.sendReliable(temp);
             try {
-                sleep(latency[1]);
+                sleep(latency);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -100,8 +100,8 @@ public class MapSynchronizer extends Movable{
     public CountDownLatch getplayer1(){
         return this.PlayerL1;
     }
-    public float getLatency(int player){
-        return latency[player]/1000;
+    public float getLatency(){
+        return latency/1000;
     }
     public void sendMessage(int messageCode, int id){
         byte[] message = new byte[2];

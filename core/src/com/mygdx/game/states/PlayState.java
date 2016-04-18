@@ -91,7 +91,7 @@ public abstract class PlayState extends State{
     protected ArrayList<GameObject> players = new ArrayList<GameObject>(
             Arrays.asList(
                     new Player[]{
-                            new Player(0), new Player(1), new Player(2)
+                            new Player(0), new Player(1)
                     }));
     protected ArrayList<GameObject> obstacles = new ArrayList<GameObject>();
     private ArrayList<GameObject> sideWalls = new ArrayList<GameObject>();
@@ -145,6 +145,9 @@ public abstract class PlayState extends State{
         Door.reset();
         Hole.reset();
         Obstacle.reset();
+        Switch.reset();
+        MagicCircle.reset();
+
         //misc values initialization
 
         threadsleep = 25;
@@ -158,14 +161,13 @@ public abstract class PlayState extends State{
         powerCounter = 0;
         spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
-        stage = Stage.DESERT;
-        nextStage = Stage.DESERT;
+        stage = Stage.DUNGEON;
+        nextStage = Stage.DUNGEON;
         tracker = 800;
         trackerBG = 800;
         score = 0;
         yourBitmapFontName = new BitmapFont();
         animateTime = 0f;
-        angle = new float[3];
 
         gameObjects.add(bg);
         gameObjects.add(spikes);
@@ -726,11 +728,11 @@ public abstract class PlayState extends State{
                                 }, 5, TimeUnit.SECONDS);
                             break;
                         case SPEED_PLAYER_UP:
-                            playerSpeed *= 3;
+                            playerSpeed *= 1.5;
                             backgroundTaskExecutor.schedule(new Runnable() {
                                 @Override
                                 public void run() {
-                                    playerSpeed /= 3;
+                                    playerSpeed /= 1.5;
                                 }
                             },5, TimeUnit.SECONDS);
                             break;
@@ -758,21 +760,17 @@ public abstract class PlayState extends State{
         Iterator<GameObject> sandIterator = sands.iterator();
         boolean sandCollide = false;
         while (sandIterator.hasNext()){
-            System.out.println("reached 1");
             Sand quickSand = (Sand) sandIterator.next();
             if (quickSand.collides(player, this)){
-                System.out.println("reached 2");
                 if (!player.isSlowed()){
-                    System.out.println("reached 3");
-                    playerSpeed /= 3;
+                    playerSpeed /= 5;
                     player.setIsSlowed(true);
                     sandCollide = true;
                 }
             }
         }
         if (!sandCollide && player.isSlowed()){
-            System.out.println("reached 4");
-            playerSpeed *= 3;
+            playerSpeed *= 5;
             player.setIsSlowed(false);
         }
 
@@ -919,7 +917,7 @@ public abstract class PlayState extends State{
                 case MessageCode.PLAYER_POSITION:
                     int other = (int) message[1];
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
-                    float y = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency(other);
+                    float y = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency()*gameSpeed;
                     players.get(other).x = x;
                     players.get(other).y = y;
                     angle[other] = ((float)Math.atan2(y - ((Player)players.get(other)).getPrev_y(), x - ((Player)players.get(other)).getPrev_x()));
@@ -976,17 +974,14 @@ public abstract class PlayState extends State{
                         temp[2] = 0;
                         //Sleep duration
                         temp[3] = 0;
-                        System.out.println("HEHE: PLAYER RECEIVED AND SENT PING");
                         MacroHardv2.actionResolver.sendReliable(temp);
                         break;
                     }
                     else if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() == 0)){
-                        System.out.println("HEHE: HOST RECEIVED PING, COUNTING DOWN");
                         mapSynchronizer.gethost().countDown();
                         break;
                     }
                     else if(message[2] == 1){
-                        System.out.println("HEHE: PLAYER RECEVIED START SEQUENCE");
                         mapSynchronizer.getplayer1().countDown();
                     }
                     break;
@@ -1023,9 +1018,8 @@ public abstract class PlayState extends State{
                     slowGameDown = slow;
                     break;
                 case MessageCode.TELEPORT:
-                    int otherp = (int) message[1];
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
-                    float y1 = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency(otherp);
+                    float y1 = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency()*gameSpeed;
                     player.x = x1;
                     player.y = y1;
                     break;
@@ -1042,10 +1036,15 @@ public abstract class PlayState extends State{
     }
 
     public void goToRestartState(){
-        MacroHardv2.actionResolver.leaveroom();
         mapMaker.interrupt();
         backgroundTaskExecutor.shutdownNow();
         dispose();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        MacroHardv2.actionResolver.leaveroom();
         gsm.set(new RestartState(gsm, getScore()), StateType.NON_PLAY);
     }
 
@@ -1332,8 +1331,7 @@ public abstract class PlayState extends State{
         }
 
         if (stageCounter % 60 == 0 && stageCounter > 0){
-//            nextStage = Stage.values()[mapRandomizer.nextInt(3)];
-            nextStage = Stage.DESERT;
+            nextStage = Stage.values()[mapRandomizer.nextInt(3)];
             if (stage == Stage.DUNGEON){
                 if (nextStage == Stage.DUNGEON){
                     stage = Stage.DUNGEON;
