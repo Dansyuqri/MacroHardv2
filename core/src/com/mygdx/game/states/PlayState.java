@@ -141,7 +141,12 @@ public abstract class PlayState extends State{
         //object initialization
         joystick = new JoyStick();
 
+        //resetting counters
+        Door.reset();
+        Hole.reset();
+        Obstacle.reset();
         //misc values initialization
+
         threadsleep = 25;
         gameSpeed = 60;
         speedIncrease = (float) 0.07;

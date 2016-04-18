@@ -53,6 +53,10 @@ public class Hole extends Movable implements Collidable {
         }
     }
 
+    public static void reset(){
+        nextID = 0;
+    }
+
     public int getId() {
         return id;
     }

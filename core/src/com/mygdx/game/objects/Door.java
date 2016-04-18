@@ -22,6 +22,10 @@ public class Door extends Movable implements Collidable{
         this.setImage(new Texture(Gdx.files.internal("gate_closed.png")));
     }
 
+    public static void reset(){
+        nextID = 0;
+    }
+
     public int getId() {
         return id;
     }
