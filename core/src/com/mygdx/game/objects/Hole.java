@@ -20,7 +20,7 @@ public class Hole extends Movable implements Collidable {
     private int id;
     private boolean broken = false;
     private boolean breakHole = false;
-    public static final int HOLE_BREAK_TIME = 3;
+    public static final int HOLE_BREAK_TIME = 2;
     float holeDestroyTime;
 
     private static final int        FRAME_COLS = 4;

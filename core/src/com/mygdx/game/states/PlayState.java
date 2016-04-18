@@ -70,7 +70,7 @@ public abstract class PlayState extends State{
     protected final int playerID;
     private boolean running;
 
-    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
+    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false, onCircle = false;
     protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit, slowGameDown, freezeMaze;
     protected int playerSpeed, dangerZone, threadsleep;
     public float tracker;
@@ -161,8 +161,8 @@ public abstract class PlayState extends State{
         powerCounter = 0;
         spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
-        stage = Stage.DUNGEON;
-        nextStage = Stage.DUNGEON;
+        stage = Stage.DESERT;
+        nextStage = Stage.DESERT;
         tracker = 800;
         trackerBG = 800;
         score = 0;
@@ -361,14 +361,14 @@ public abstract class PlayState extends State{
         }
 
         long time = System.currentTimeMillis() - start;
-
+        System.out.println("My R: " + mapSynchronizer.getMyRender()+ "      OtherRender:" + mapSynchronizer.getOtherRender());
         if(mapSynchronizer.getMyRender()>mapSynchronizer.getOtherRender()){
-            threadsleep = 35;
+            threadsleep = 40;
 
         }
         else{
 
-            threadsleep = 22;
+            threadsleep = 20;
         }
 
 
@@ -767,24 +767,38 @@ public abstract class PlayState extends State{
             Sand quickSand = (Sand) sandIterator.next();
             if (quickSand.collides(player, this)){
                 if (!player.isSlowed()){
-                    playerSpeed /= 5;
+                    playerSpeed /= 8;
                     player.setIsSlowed(true);
                     sandCollide = true;
                 }
             }
         }
         if (!sandCollide && player.isSlowed()){
-            playerSpeed *= 5;
+            playerSpeed *= 8;
             player.setIsSlowed(false);
         }
 
         // collides with magic circle
         for (GameObject eachCircle: mCircles){
+            boolean stepped = false;
             if (((MagicCircle)eachCircle).collides(player, this)){
+                stepped = true;
+            }
+            if (stepped || ((MagicCircle) eachCircle).getOtherOn()) {
                 ((MagicCircle) eachCircle).setOn();
             } else {
                 ((MagicCircle) eachCircle).setOff();
             }
+
+            if (stepped && !onCircle){
+                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.BARRIER_ON, (byte) ((MagicCircle) eachCircle).getId()});
+            }
+
+            if (!stepped && onCircle){
+                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.BARRIER_OFF, (byte) ((MagicCircle)eachCircle).getId()});
+            }
+
+            onCircle = stepped;
         }
         boolean desBoulder = true;
         for (GameObject eachCircle: mCircles){
@@ -958,6 +972,27 @@ public abstract class PlayState extends State{
                         for (GameObject swi: switches) {
                             ((Switch)swi).setOtherOff();
                         }
+                    }
+                    break;
+
+                case MessageCode.BARRIER_ON:
+                    synchronized (MagicCircle.class) {
+                        for (GameObject magiccircle: mCircles) {
+                            if (((MagicCircle)magiccircle).getId() == message[1]){
+                                ((MagicCircle)magiccircle).OtherOn();
+                            }
+                        }
+                    }
+                    break;
+
+                case MessageCode.BARRIER_OFF:
+                    synchronized (MagicCircle.class) {
+                        for (GameObject magiccircle: mCircles) {
+                            if (((MagicCircle)magiccircle).getId() == message[1]){
+                                ((MagicCircle)magiccircle).OtherOff();
+                            }
+                        }
+
                     }
                     break;
 
