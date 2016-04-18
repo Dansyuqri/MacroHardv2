@@ -32,7 +32,7 @@ public class Obstacle extends Movable implements Collidable {
     public Obstacle(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
         id = nextID;
-        nextID = (nextID+1)%200;
+        nextID = (nextID+1)%127;
         this.stage = stage;
         wallDestroyTime = 0f;
 
