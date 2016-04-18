@@ -678,7 +678,9 @@ public abstract class PlayState extends State{
         boolean open = false;
         for (GameObject eachSwitch:switches){
             if (((Switch) eachSwitch).collides(player, this) || ((Switch) eachSwitch).isOtherOn()){
-                open = true;
+                if (!((Switch) eachSwitch).isOtherOn()) {
+                    open = true;
+                }
                 ((Switch) eachSwitch).setOn();
             } else {
                 ((Switch) eachSwitch).setOff();
