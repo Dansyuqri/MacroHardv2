@@ -27,6 +27,9 @@ public class MapSynchronizer extends Movable{
     public void updateSyncRender(){
         this.MysyncRender += 1;
     }
+    public void setLatency(long lag){
+        latency = lag;
+    }
 
     public long getMyRender(){
         return this.MysyncRender;
@@ -44,6 +47,7 @@ public class MapSynchronizer extends Movable{
         this.OthersyncRender = sync;
     }
 
+
     private byte[] wrapSyncRender(long syncrender){
         String SyncRenderString = Long.toString(syncrender);
         byte[] SyncRenderBytes = SyncRenderString.getBytes();
@@ -51,6 +55,17 @@ public class MapSynchronizer extends Movable{
         result[0] = MessageCode.SYNC_RENDER;
         for (int i = 0; i < SyncRenderBytes.length; i++) {
             result[i+1] = SyncRenderBytes[i];
+        }
+        return result;
+    }
+
+    private byte[] wrapLatency(long latency){
+        String SyncString = Long.toString(latency);
+        byte[] SyncBytes = SyncString.getBytes();
+        byte[] result = new byte[SyncBytes.length + 1];
+        result[0] = MessageCode.PLAYERSTART;
+        for (int i = 0; i < SyncBytes.length; i++) {
+            result[i+1] = SyncBytes[i];
         }
         return result;
     }
@@ -74,11 +89,7 @@ public class MapSynchronizer extends Movable{
                 e.printStackTrace();
             }
             latency = (System.currentTimeMillis() - start)/2;
-            //0 for ping, 1 for sleep
-            temp[2] = 1;
-            //Sleep duration
-            temp[3] = (byte)latency;
-            MacroHardv2.actionResolver.sendReliable(temp);
+            MacroHardv2.actionResolver.sendReliable(wrapLatency(latency));
             try {
                 sleep(latency);
             } catch (InterruptedException e) {

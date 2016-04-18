@@ -52,7 +52,7 @@ public class MagicCircle extends Movable implements Collidable {
 
     public void setOff() {
         if (on) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.BARRIER_OFF, (byte) id});
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.MAGIC_CIRCLE_OFF, (byte) id});
             this.setImage(new Texture(Gdx.files.internal("magic_circle.png")));
             on = false;
         }

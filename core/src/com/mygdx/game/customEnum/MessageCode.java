@@ -17,6 +17,7 @@ public class MessageCode {
     public static final int SYNC_RENDER = 11;
     public static final int FREEZE = 12;
     public static final int SLOWGAME = 13;
-    public static final int BARRIER_ON = 15;
-    public static final int BARRIER_OFF = 14;
+    public static final int MAGIC_CIRCLE_ON = 15;
+    public static final int MAGIC_CIRCLE_OFF  = 14;
+    public static final int PLAYERSTART = 16;
 }

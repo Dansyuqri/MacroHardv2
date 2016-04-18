@@ -791,11 +791,11 @@ public abstract class PlayState extends State{
             }
 
             if (stepped && !onCircle){
-                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.BARRIER_ON, (byte) ((MagicCircle) eachCircle).getId()});
+                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.MAGIC_CIRCLE_ON, (byte) ((MagicCircle) eachCircle).getId()});
             }
 
             if (!stepped && onCircle){
-                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.BARRIER_OFF, (byte) ((MagicCircle)eachCircle).getId()});
+                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.MAGIC_CIRCLE_OFF, (byte) ((MagicCircle)eachCircle).getId()});
             }
 
             onCircle = stepped;
@@ -975,7 +975,7 @@ public abstract class PlayState extends State{
                     }
                     break;
 
-                case MessageCode.BARRIER_ON:
+                case MessageCode.MAGIC_CIRCLE_ON:
                     synchronized (MagicCircle.class) {
                         for (GameObject magiccircle: mCircles) {
                             if (((MagicCircle)magiccircle).getId() == message[1]){
@@ -985,7 +985,7 @@ public abstract class PlayState extends State{
                     }
                     break;
 
-                case MessageCode.BARRIER_OFF:
+                case MessageCode.MAGIC_CIRCLE_OFF:
                     synchronized (MagicCircle.class) {
                         for (GameObject magiccircle: mCircles) {
                             if (((MagicCircle)magiccircle).getId() == message[1]){
@@ -1009,7 +1009,15 @@ public abstract class PlayState extends State{
                         end = true;
                     }
                     break;
-
+                case MessageCode.PLAYERSTART:
+                    byte[] syncBytes = new byte[message.length - 1];
+                    for (int i = 0; i < message.length - 1; i++) {
+                        syncBytes[i] = message[i + 1];
+                    }
+                    String syncString = new String(syncBytes);
+                    mapSynchronizer.setLatency(Long.decode(syncString));
+                    mapSynchronizer.getplayer1().countDown();
+                    break;
                 case MessageCode.SYNCING:
                     if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() != 0)){
                         byte[] temp = new byte[4];
@@ -1027,9 +1035,6 @@ public abstract class PlayState extends State{
                     else if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() == 0)){
                         mapSynchronizer.gethost().countDown();
                         break;
-                    }
-                    else if(message[2] == 1){
-                        mapSynchronizer.getplayer1().countDown();
                     }
                     break;
 
