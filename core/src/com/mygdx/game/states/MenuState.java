@@ -81,7 +81,7 @@ public class MenuState extends State{
 
         if (startHost) {
             gsm.startMusic("MenuSelectionClick.wav", (float) 1);
-            startNonHost = false;
+            startHost = false;
             dispose();
             gsm.set(new PlayStateHost(gsm, MacroHardv2.actionResolver.getmyidint()), StateType.PLAY);
         }
