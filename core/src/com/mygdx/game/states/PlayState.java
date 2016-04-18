@@ -70,7 +70,7 @@ public abstract class PlayState extends State{
     protected final int playerID;
     private boolean running;
 
-    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false;
+    private boolean touchHeld, end = false;
     protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit, slowGameDown, freezeMaze;
     protected int playerSpeed, dangerZone, threadsleep;
     public float tracker;
@@ -79,7 +79,7 @@ public abstract class PlayState extends State{
     BitmapFont yourBitmapFontName;
     public Stage stage, nextStage;
     float animateTime;
-    float[] angle;
+    float[] angle = new float[2];
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -685,17 +685,8 @@ public abstract class PlayState extends State{
             }
         }
 
-        if (!open && onSwitch) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS});
-        }
-
-        onSwitch = open;
-
         synchronized (Switch.class) {
-            if (gotSwitch) {
-                open = true;
-                gsm.startMusic("GateSound.wav",(float)1);
-            }
+            gsm.startMusic("GateSound.wav",(float)1);
         }
 
         if (open) {
@@ -937,15 +928,19 @@ public abstract class PlayState extends State{
 
                 //open doors
                 case MessageCode.OPEN_DOORS:
-                    synchronized (Switch.class) {
-                        gotSwitch = true;
+                    for (GameObject gameObj: switches) {
+                        if (((Switch)gameObj).getId() == message[1]){
+                            ((Switch)gameObj).setOn();
+                        }
                     }
                     break;
 
                 //close doors
                 case MessageCode.CLOSE_DOORS:
-                    synchronized (Switch.class) {
-                        gotSwitch = false;
+                    for (GameObject gameObj: switches) {
+                        if (((Switch)gameObj).getId() == message[1]){
+                            ((Switch)gameObj).setOff();
+                        }
                     }
                     break;
 

@@ -38,7 +38,7 @@ public class Switch extends Movable implements Collidable{
 
     public void setOn(){
         if (!on) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS});
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte) id});
             this.setImage(new Texture(Gdx.files.internal("pressure_plate1_pressed.png")));
             on = true;
         }
@@ -47,6 +47,7 @@ public class Switch extends Movable implements Collidable{
     public void setOff()
     {
         if (on) {
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS, (byte) id});
             this.setImage(new Texture(Gdx.files.internal("pressure_plate1.png")));
             on = false;
         }
