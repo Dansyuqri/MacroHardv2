@@ -20,4 +20,6 @@ public class MessageCode {
     public static final int MAGIC_CIRCLE_ON = 15;
     public static final int MAGIC_CIRCLE_OFF  = 14;
     public static final int PLAYERSTART = 16;
+    public static final int DESTROY_DOOR = 17;
+    public static final int DESTROY_BOULDER = 18;
 }

@@ -147,9 +147,9 @@ public abstract class PlayState extends State{
         Obstacle.reset();
         Switch.reset();
         MagicCircle.reset();
+        Boulder.reset();
 
         //misc values initialization
-
         threadsleep = 25;
         gameSpeed = 60;
         speedIncrease = (float) 0.07;
@@ -598,7 +598,7 @@ public abstract class PlayState extends State{
 //              DESTROY_WALL implementation
                 if (player.getCanDestroy() || door.isDestroyed()) {
                     if (!door.isDestroyed()){
-                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, door.getId());
+                        mapSynchronizer.sendMessage(MessageCode.DESTROY_DOOR, door.getId());
                     }
                     doorIterator.remove();
                     break;
@@ -616,7 +616,7 @@ public abstract class PlayState extends State{
                 if (player.getCanDestroy()) {
                     boulder.setToDestroy(true);
                     if (!boulder.isDestroyed()){
-//                        mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, boulder.x + tileLength/2, boulder.y + tileLength/2);
+                        mapSynchronizer.sendMessage(MessageCode.DESTROY_BOULDER, boulder.getId());
                     }
                     gsm.startMusic("WallDestroySound.wav", (float) 1);
                 }
@@ -946,9 +946,7 @@ public abstract class PlayState extends State{
                 //map
                 case MessageCode.MAP_SEED:
                     byte[] seedStringBytes = new byte[message.length - 1];
-                    for (int i = 0; i < message.length - 1; i++) {
-                        seedStringBytes[i] = message[i + 1];
-                    }
+                    System.arraycopy(message, 1, seedStringBytes, 0, message.length - 1);
                     String seedString = new String(seedStringBytes);
                     seed = Long.decode(seedString);
                     mapRandomizer = new Random(seed);
@@ -1013,9 +1011,7 @@ public abstract class PlayState extends State{
                     break;
                 case MessageCode.PLAYERSTART:
                     byte[] syncBytes = new byte[message.length - 1];
-                    for (int i = 0; i < message.length - 1; i++) {
-                        syncBytes[i] = message[i + 1];
-                    }
+                    System.arraycopy(message, 1, syncBytes, 0, message.length - 1);
                     String syncString = new String(syncBytes);
                     mapSynchronizer.setLatency(Long.decode(syncString));
                     mapSynchronizer.getplayer1().countDown();
@@ -1049,6 +1045,15 @@ public abstract class PlayState extends State{
                     }
                     break;
 
+                case MessageCode.DESTROY_BOULDER:
+                    for (GameObject boulder: boulders) {
+                        if (((Boulder) boulder).getId() == message[1]){
+                            ((Boulder) boulder).setToDestroy(true);
+                            break;
+                        }
+                    }
+                    break;
+
                 case MessageCode.DESTROY_WALL:
                     for (GameObject obstacle: obstacles) {
                         if (((Obstacle)obstacle).getId() == message[1]){
@@ -1056,6 +1061,8 @@ public abstract class PlayState extends State{
                             break;
                         }
                     }
+                    break;
+                case MessageCode.DESTROY_DOOR:
                     for (GameObject door: doors) {
                         if (((Door)door).getId() == message[1]){
                             ((Door)door).setDestroyed(true);
@@ -1064,12 +1071,10 @@ public abstract class PlayState extends State{
                     }
                     break;
                 case MessageCode.FREEZE:
-                    float freeze = (float) message[1] * 10 + (float) message[2] / 10;
-                    freezeMaze = freeze;
+                    freezeMaze = (float) message[1] * 10 + (float) message[2] / 10;
                     break;
                 case MessageCode.SLOWGAME:
-                    float slow = (float) message[1] * 10 + (float) message[2] / 10;
-                    slowGameDown = slow;
+                    slowGameDown = (float) message[1] * 10 + (float) message[2] / 10;
                     break;
                 case MessageCode.TELEPORT:
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
@@ -1079,9 +1084,7 @@ public abstract class PlayState extends State{
                     break;
                 case MessageCode.SYNC_RENDER:
                     byte[] syncRenderBytes = new byte[message.length - 1];
-                    for (int i = 0; i < message.length - 1; i++) {
-                        syncRenderBytes[i] = message[i + 1];
-                    }
+                    System.arraycopy(message, 1, syncRenderBytes, 0, message.length - 1);
                     String syncRenderString = new String(syncRenderBytes);
                     mapSynchronizer.setHostSyncRender(Long.decode(syncRenderString));
                     break;

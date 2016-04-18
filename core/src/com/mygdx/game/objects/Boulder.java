@@ -13,6 +13,8 @@ import com.mygdx.game.states.PlayState;
  * Created by Samuel on 14/4/2016.
  */
 public class Boulder extends Movable implements Collidable {
+    private static int nextID;
+    private int id;
     private boolean destroyed = false;
     private boolean toDestroy = false;
     private Stage stage;
@@ -29,6 +31,8 @@ public class Boulder extends Movable implements Collidable {
 
     public Boulder(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
+        id = nextID - 80;
+        nextID = (nextID+1)%200;
         this.stage = stage;
         boulderDestroyTime = 0f;
 
@@ -43,6 +47,14 @@ public class Boulder extends Movable implements Collidable {
 
         this.setImage(boulder);
 
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public static void reset(){
+        nextID = 0;
     }
 
     public void setImage(TextureRegion image){
