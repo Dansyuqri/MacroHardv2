@@ -25,6 +25,7 @@ import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Overlay;
 import com.mygdx.game.objects.Door;
 import com.mygdx.game.objects.Obstacle;
+import com.mygdx.game.objects.Pointer;
 import com.mygdx.game.objects.Power;
 import com.mygdx.game.objects.Sand;
 import com.mygdx.game.objects.SideWall;
@@ -59,6 +60,7 @@ public abstract class PlayState extends State{
 
     private JoyStick joystick;
     protected Player player;
+    private Pointer pointer;
     private Vector3[] touchPos = {new Vector3(),new Vector3()};
 
     protected PlayerCoordinateSender coordSender;
@@ -127,6 +129,7 @@ public abstract class PlayState extends State{
         Gdx.input.setCatchBackKey(true);
         this.playerID = playerID;
         player = (Player) players.get(playerID);
+        pointer = new Pointer(playerID);
 
         mapPro = new Semaphore(15);
         mapCon = new Semaphore(-4);
@@ -371,6 +374,8 @@ public abstract class PlayState extends State{
                 }
             }
         }
+
+        pointer.set(player);
 
         for (GameObject icon:icons) {
             if (icon instanceof InnatePowerIcon) {
@@ -998,6 +1003,7 @@ public abstract class PlayState extends State{
                 gameObject.draw(sb);
             }
         }
+        pointer.draw(sb);
     }
 
     public void addIcon(GameObject icon) {
