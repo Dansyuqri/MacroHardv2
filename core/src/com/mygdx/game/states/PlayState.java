@@ -42,6 +42,8 @@ import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Syuqri on 3/7/2016.
@@ -74,7 +76,9 @@ public abstract class PlayState extends State{
     private boolean running;
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false, onCircle = false;
-    protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit, slowGameDown, freezeMaze;
+    protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit;
+    protected AtomicLong slowGameDown;
+    protected AtomicInteger freezeMaze;
     protected int playerSpeed, dangerZone, threadsleep;
     public float tracker;
     public float trackerBG;
@@ -159,8 +163,8 @@ public abstract class PlayState extends State{
         speedIncrease = (float) 0.07;
         playerSpeed = 200;
         dangerZone = 300;
-        slowGameDown = 1;
-        freezeMaze = 1;
+        slowGameDown = new AtomicLong(1);
+        freezeMaze = new AtomicInteger(1);
         doorCounter = 0;
         powerCounter = 0;
         spikeCounter = 0;
@@ -296,7 +300,7 @@ public abstract class PlayState extends State{
                 public void run() {
                     for (int i = 0; i < 2; i++) {
                         if (((Player)players.get(i)).x != ((Player)players.get(i)).getPrev_x() ||
-                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * freezeMaze * slowGameDown * deltaCap)) > 5 ) {
+                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * freezeMaze.get() * slowGameDown.get() * deltaCap)) > 5 ) {
                             if (angle[i] > 3 * (Math.PI) / 8 && angle[i] <= 5 * (Math.PI) / 8) {
                                 ((Player) players.get(i)).setOrientation(Direction.NORTH);
                             } else if (angle[i] > 7 * (Math.PI) / 8 || angle[i] <= -7 * (Math.PI) / 8) {
@@ -362,14 +366,14 @@ public abstract class PlayState extends State{
 
         checkDangerZone(player);
 
-        tracker -= gameSpeed * slowGameDown * freezeMaze * deltaCap;
-        trackerBG -= gameSpeed * slowGameDown * freezeMaze  * deltaCap;
+        tracker -= gameSpeed * slowGameDown.get() * freezeMaze.get() * deltaCap;
+        trackerBG -= gameSpeed * slowGameDown.get() * freezeMaze.get()  * deltaCap;
 
         for (ArrayList<GameObject> gameObj: gameObjects){
             for (GameObject gameObject : gameObj) {
                 if (gameObject instanceof Movable) {
                     synchronized ((Object) gameSpeed) {
-                        ((Movable) gameObject).scroll(gameSpeed * slowGameDown * freezeMaze);
+                        ((Movable) gameObject).scroll(gameSpeed * slowGameDown.get() * freezeMaze.get());
                     }
                 }
             }
@@ -383,9 +387,7 @@ public abstract class PlayState extends State{
             }
         }
 
-        synchronized ((Object) gameSpeed) {
-            mapSynchronizer.scroll(gameSpeed * slowGameDown * freezeMaze);
-        }
+        mapSynchronizer.scroll(gameSpeed * slowGameDown.get() * freezeMaze.get());
 
         synchronized (this) {
             if (end) {
@@ -852,14 +854,14 @@ public abstract class PlayState extends State{
     private void activateActivePower(){
         switch (player.getActivePower()) {
             case FREEZE_MAZE:
-                freezeMaze = 0;
-                MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze));
+                freezeMaze.set(0);
+                MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze.get()));
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
                         player.setActivePower(PowerType.NOTHING);
-                        freezeMaze = 1;
-                        MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze));
+                        freezeMaze.set(1);
+                        MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze.get()));
                     }
                 }, 5, TimeUnit.SECONDS);
                 break;
@@ -876,15 +878,15 @@ public abstract class PlayState extends State{
             case SLOW_GAME_DOWN:
                 gsm.pauseMusic("Dance Of Death.mp3");
                 gsm.startMusic("TimeSlowSound.wav", (float) 3);
-                slowGameDown = (float) 0.4;
-                MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
+                slowGameDown.set((long)0.4);
+                MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown.get()));
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
                         gsm.startMusic("Dance Of Death.mp3", (float) 0.1);
                         player.setActivePower(PowerType.NOTHING);
-                        slowGameDown = 1;
-                        MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
+                        slowGameDown.set((long)1);
+                        MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown.get()));
                     }
                 }, 5, TimeUnit.SECONDS);
                 break;
@@ -966,7 +968,7 @@ public abstract class PlayState extends State{
                 if (gameObject instanceof Player){
                     animateTime += Gdx.graphics.getDeltaTime();
                     if (((Player)gameObject).x != ((Player)gameObject).getPrev_x() ||
-                            Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed * slowGameDown * freezeMaze  * deltaCap)) > 5 ){
+                            Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed * slowGameDown.get() * freezeMaze.get()  * deltaCap)) > 5 ){
                         ((Player) gameObject).setCurrentFrame(animateTime, true);
                     }
                     else {
@@ -1168,10 +1170,10 @@ public abstract class PlayState extends State{
                     }
                     break;
                 case MessageCode.FREEZE:
-                    freezeMaze = (float) message[1] * 10 + (float) message[2] / 10;
+                    freezeMaze.set( message[1] * 10 + message[2] / 10);
                     break;
                 case MessageCode.SLOWGAME:
-                    slowGameDown = (float) message[1] * 10 + (float) message[2] / 10;
+                    slowGameDown.set(message[1] * 10 + message[2] / 10);
                     break;
                 case MessageCode.TELEPORT:
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
