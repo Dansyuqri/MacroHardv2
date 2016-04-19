@@ -162,8 +162,8 @@ public abstract class PlayState extends State{
         powerCounter = 0;
         spikeCounter = 0;
         dangerZoneSpeedLimit = 250;
-        stage = Stage.DESERT;
-        nextStage = Stage.DESERT;
+        stage = Stage.DUNGEON;
+        nextStage = Stage.DUNGEON;
         tracker = 800;
         trackerBG = 800;
         score = 0;
