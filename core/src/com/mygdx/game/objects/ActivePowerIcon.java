@@ -11,6 +11,15 @@ public class ActivePowerIcon extends GameObject {
     public ActivePowerIcon(PowerType powerType){
         super(400, 30, 50, 50);
         switch (powerType) {
+            case FREEZE_MAZE:
+                this.setImage(new Texture(Gdx.files.internal("power_freeze.png")));
+                break;
+            case SLOW_GAME_DOWN:
+                this.setImage(new Texture(Gdx.files.internal("power_slow_down.png")));
+                break;
+            case SPEED_PLAYER_UP:
+                this.setImage(new Texture(Gdx.files.internal("power_speed_up.png")));
+                break;
             case TELEPORT:
                 //TODO: change image
                 this.setImage(new Texture(Gdx.files.internal("power_destroy_walls.png")));

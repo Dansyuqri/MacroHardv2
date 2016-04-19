@@ -36,17 +36,6 @@ public class Power extends Movable implements Collidable {
         return player.overlaps(this);
     }
 
-    public boolean isPassive() {
-        int index=0;
-        for (int i=0; i<PowerType.values().length; i++) {
-            if (type.equals(PowerType.values()[i])) {
-                index = i;
-                break;
-            }
-        }
-        return (index<4);
-    }
-
     public PowerType getType() {
         return type;
     }
