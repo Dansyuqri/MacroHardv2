@@ -538,41 +538,43 @@ public abstract class PlayState extends State{
      Method to move the player
      */
     private void movePlayer(float x, float y, float ratio){
-        float prevx = player.x;
-        float prevy = player.y;
-        player.x += ratio * x * playerSpeed * deltaCap;
-        player.y += ratio * y * playerSpeed * deltaCap;
-        if (checkObstacleCollision()){
-            player.x = prevx;
-            player.y = prevy;
-
-            if (x > 0) {
-                player.x += ratio * playerSpeed * deltaCap;
-            } else {
-                player.x -= ratio * playerSpeed * deltaCap;
-            }
-            if (checkObstacleCollision()){
+        synchronized (Player.class) {
+            float prevx = player.x;
+            float prevy = player.y;
+            player.x += ratio * x * playerSpeed * deltaCap;
+            player.y += ratio * y * playerSpeed * deltaCap;
+            if (checkObstacleCollision()) {
                 player.x = prevx;
-            }
-            if (y > 0) {
-                player.y += ratio * playerSpeed * deltaCap;
-            } else {
-                player.y -= ratio * playerSpeed * deltaCap;
-            }
-            if (checkObstacleCollision()){
                 player.y = prevy;
-            }
 
-            if (player.x > 465 - player.width ){
-                player.x = 465 - player.height;
-            }
+                if (x > 0) {
+                    player.x += ratio * playerSpeed * deltaCap;
+                } else {
+                    player.x -= ratio * playerSpeed * deltaCap;
+                }
+                if (checkObstacleCollision()) {
+                    player.x = prevx;
+                }
+                if (y > 0) {
+                    player.y += ratio * playerSpeed * deltaCap;
+                } else {
+                    player.y -= ratio * playerSpeed * deltaCap;
+                }
+                if (checkObstacleCollision()) {
+                    player.y = prevy;
+                }
 
-            if (player.x < 15){
-                player.x = 15;
-            }
+                if (player.x > 465 - player.width) {
+                    player.x = 465 - player.height;
+                }
 
-            if (player.y > 750){
-                player.y = 750;
+                if (player.x < 15) {
+                    player.x = 15;
+                }
+
+                if (player.y > 750) {
+                    player.y = 750;
+                }
             }
         }
     }
@@ -862,18 +864,18 @@ public abstract class PlayState extends State{
                 break;
             case SLOW_GAME_DOWN:
                 gsm.pauseMusic("Dance Of Death.mp3");
-                gsm.startMusic("TimeSlowSound.wav",(float)3);
+                gsm.startMusic("TimeSlowSound.wav", (float) 3);
                 slowGameDown = (float) 0.4;
                 MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        gsm.startMusic("Dance Of Death.mp3",(float)0.1);
+                        gsm.startMusic("Dance Of Death.mp3", (float) 0.1);
                         player.setActivePower(PowerType.NOTHING);
                         slowGameDown = 1;
                         MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
                     }
-                },5, TimeUnit.SECONDS);
+                }, 5, TimeUnit.SECONDS);
                 break;
             case TELEPORT:
                 player.setActivePower(PowerType.NOTHING);
@@ -1162,8 +1164,10 @@ public abstract class PlayState extends State{
                 case MessageCode.TELEPORT:
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
                     float y1 = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency();
-                    player.x = x1;
-                    player.y = y1;
+                    synchronized (Player.class) {
+                        player.x = x1;
+                        player.y = y1;
+                    }
                     break;
                 case MessageCode.SYNC_RENDER:
                     byte[] syncRenderBytes = new byte[message.length - 1];
