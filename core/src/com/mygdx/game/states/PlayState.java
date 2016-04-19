@@ -125,7 +125,7 @@ public abstract class PlayState extends State{
     private boolean[] current = createArray(true);
     protected MapMaker mapMaker;
 
-    protected ScheduledThreadPoolExecutor backgroundTaskExecutor = new ScheduledThreadPoolExecutor(3);
+    protected ScheduledThreadPoolExecutor backgroundTaskExecutor = new ScheduledThreadPoolExecutor(10);
 
     protected PlayState(GameStateManager gsm, int playerID) {
         super(gsm);
@@ -753,6 +753,7 @@ public abstract class PlayState extends State{
         synchronized (Switch.class) {
             if (gotSwitch) {
                 open = true;
+                gsm.startMusic("GateSound.wav",(float)3);
             }
         }
 
@@ -865,7 +866,7 @@ public abstract class PlayState extends State{
                         freezeMaze.set(1);
                         MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze.get()));
                     }
-                }, 5, TimeUnit.SECONDS);
+                }, 3, TimeUnit.SECONDS);
                 break;
             case SPEED_PLAYER_UP:
                 playerSpeed += 50;
@@ -875,7 +876,7 @@ public abstract class PlayState extends State{
                         player.setActivePower(PowerType.NOTHING);
                         playerSpeed -= 50;
                     }
-                },5, TimeUnit.SECONDS);
+                },7, TimeUnit.SECONDS);
                 break;
             case SLOW_GAME_DOWN:
                 gsm.pauseMusic("Dance Of Death.mp3");
