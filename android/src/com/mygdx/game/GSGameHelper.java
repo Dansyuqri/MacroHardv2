@@ -68,23 +68,27 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                 .setMessageReceivedListener((RealTimeMessageReceivedListener) this)
                 .setRoomStatusUpdateListener((RoomStatusUpdateListener) this);
     }
-
     public void onActivityResult(int request,int response, Intent data){
         System.out.println("Room Created");
         if (request == GSGameHelper.RC_WAITING_ROOM){
-            if (response == Activity.RESULT_CANCELED || response == GamesActivityResultCodes.RESULT_LEFT_ROOM ){
-                Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomID);
-                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                BaseGameUtils.showAlert(activity, "Left Room");
-            }else if (response == Activity.RESULT_OK){
-                Participant host = invitees.get(0);
-                this.host = host.getParticipantId();
-                for(int i = 0; i < invitees.size();i++){
-                    if (mMyId.equals(invitees.get(i).getParticipantId())){
-                        this.myidno = i;
+            try {
+                if (response == Activity.RESULT_CANCELED || response == GamesActivityResultCodes.RESULT_LEFT_ROOM) {
+                    Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomID);
+                    activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    BaseGameUtils.showAlert(activity, "Left Room");
+                } else if (response == Activity.RESULT_OK) {
+                    Participant host = invitees.get(0);
+                    this.host = host.getParticipantId();
+                    for (int i = 0; i < invitees.size(); i++) {
+                        if (mMyId.equals(invitees.get(i).getParticipantId())) {
+                            this.myidno = i;
+                        }
                     }
+                    this.game.multiplayerGameReady();
                 }
-                this.game.multiplayerGameReady();
+            }
+            catch (IllegalStateException illegal){
+                BaseGameUtils.showAlert(activity, "Left Room");
             }
 
         }

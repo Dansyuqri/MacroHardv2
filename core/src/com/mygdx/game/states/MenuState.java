@@ -77,7 +77,6 @@ public class MenuState extends State{
         leaderboardBtn.setImage(leaderboardBtnImage);
 
     }
-
     @Override
     public void handleInput() {
         touchPos.x = Gdx.input.getX();
