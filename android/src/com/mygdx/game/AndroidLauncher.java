@@ -172,4 +172,11 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 	public void leaveroom(){
 		_gameHelper.leaveRoom();
 	}
+	public void submitScoreGPGS(int score){
+		_gameHelper.submitScoreGPGS(score);
+		System.out.println("HEHE SUBMMITED");
+	}
+	public void getLeaderboardGPGS(){
+		_gameHelper.getLeaderboardGPGS();
+	}
 }

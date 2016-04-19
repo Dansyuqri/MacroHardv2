@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.StateType;
 import com.mygdx.game.objects.CustomButton;
 
@@ -21,7 +22,7 @@ public class RestartState extends State{
     private CustomButton mainMenuBtn;
 
     private Vector3 touchPos = new Vector3(0,0,0);
-    private boolean touched = false;
+    private boolean touched = false, submitted = false;
     public BitmapFont font;
     //Resize variables
     private float graphicsX, graphicsY,
@@ -97,8 +98,12 @@ public class RestartState extends State{
         font.setColor(Color.WHITE);
         font.draw(sb, "Your Score: ", graphicsX / 2 - layoutScoreText.width / 2, graphicsY * 3 / 4);
         font.draw(sb, "" + score, graphicsX / 2 - layoutScore.width / 2, graphicsY * 3 / 4 - layoutScoreText.height - layoutScore.height);
-        sb.draw(mainMenuBtnImage, (graphicsX/ 2) - (mainMenuBtnX/2), graphicsY/2 - mainMenuBtnY/2, mainMenuBtnX, mainMenuBtnY);
+        sb.draw(mainMenuBtnImage, (graphicsX / 2) - (mainMenuBtnX / 2), graphicsY / 2 - mainMenuBtnY / 2, mainMenuBtnX, mainMenuBtnY);
         sb.end();
+        if(submitted == false){
+            MacroHardv2.actionResolver.submitScoreGPGS(score);
+            submitted = true;
+        }
     }
 
     @Override

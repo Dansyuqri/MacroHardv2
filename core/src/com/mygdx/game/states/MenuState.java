@@ -80,7 +80,6 @@ public class MenuState extends State{
 
     @Override
     public void handleInput() {
-        System.out.println("IN MS");
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.input.getY();
         cam.unproject(touchPos);
@@ -179,7 +178,7 @@ public class MenuState extends State{
                 touched = false;
             }
             else if(signInBtn.contains(touchPos.x,touchPos.y)){
-                gsm.startMusic("MenuSelectionClick.wav",(float)1);
+                gsm.startMusic("MenuSelectionClick.wav", (float) 1);
                 MacroHardv2.actionResolver.SignIn();
                 signInBtnImage.dispose();
                 signInBtnImage = new Texture("signInBtn.png");
@@ -187,7 +186,7 @@ public class MenuState extends State{
             }
             else if(leaderboardBtn.contains(touchPos.x,touchPos.y)){
                 gsm.startMusic("MenuSelectionClick.wav", (float) 1);
-                //TODO: RYAN IMPLEMENT LEADERBOARD HERE
+                MacroHardv2.actionResolver.getLeaderboardGPGS();
                 leaderboardBtnImage.dispose();
                 leaderboardBtnImage = new Texture("leaderboardBtn.png");
                 touched = false;

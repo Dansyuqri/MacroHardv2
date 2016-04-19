@@ -385,7 +385,6 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         // mIncomingInvitationId
         // and show the popup on the screen.
         mIncomingInvitationId = invitation.getInvitationId();
-        BaseGameUtils.showAlert(activity, "Received Invitation");
         seeinvites();
         //try to do popup TO DO
         /*((TextView) findViewById(R.id.incoming_invitation_text)).setText(
@@ -448,5 +447,12 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomId);
             mRoomId = null;
         }
+    }
+    public void submitScoreGPGS(int score){
+        Games.Leaderboards.submitScore(getApiClient(), "CgkIvIDL488DEAIQAQ", score);
+    }
+    public void getLeaderboardGPGS(){
+        this.activity.startActivityForResult(Games.Leaderboards.getLeaderboardIntent(getApiClient(), "CgkIvIDL488DEAIQAQ"), 100);
+
     }
 }

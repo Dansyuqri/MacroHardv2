@@ -23,5 +23,6 @@ public interface ActionResolver {
     void Seeinvites();
     int getmyidint();
     void leaveroom();
-
+    void submitScoreGPGS(int score);
+    void getLeaderboardGPGS();
 }
