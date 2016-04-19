@@ -365,7 +365,9 @@ public abstract class PlayState extends State{
         for (ArrayList<GameObject> gameObj: gameObjects){
             for (GameObject gameObject : gameObj) {
                 if (gameObject instanceof Movable) {
-                    ((Movable) gameObject).scroll(gameSpeed * slowGameDown * freezeMaze );
+                    synchronized ((Object) gameSpeed) {
+                        ((Movable) gameObject).scroll(gameSpeed * slowGameDown * freezeMaze);
+                    }
                 }
             }
         }
@@ -376,7 +378,9 @@ public abstract class PlayState extends State{
             }
         }
 
-        mapSynchronizer.scroll(gameSpeed * slowGameDown * freezeMaze );
+        synchronized ((Object) gameSpeed) {
+            mapSynchronizer.scroll(gameSpeed * slowGameDown * freezeMaze);
+        }
 
         synchronized (this) {
             if (end) {
@@ -834,8 +838,8 @@ public abstract class PlayState extends State{
             if (!(player.getActivePower().equals(PowerType.FREEZE_MAZE) || player.getActivePower().equals(PowerType.SLOW_GAME_DOWN))) {
                 synchronized ((Object) gameSpeed ) {
                     gameSpeed += speedIncrease;
+                    sendGameSpeed();
                 }
-                sendGameSpeed();
             }
         }
     }
