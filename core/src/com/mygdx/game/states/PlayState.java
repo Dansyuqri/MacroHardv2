@@ -349,7 +349,7 @@ public abstract class PlayState extends State{
         draw(sb);
         sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
         yourBitmapFontName.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-        yourBitmapFontName.draw(sb, "score: " + score, 420, 100);
+        yourBitmapFontName.draw(sb, "score: " + score, 350, 20);
 
         sb.end();
 
@@ -387,12 +387,11 @@ public abstract class PlayState extends State{
         long time = System.currentTimeMillis() - start;
         System.out.println("My R: " + mapSynchronizer.getMyRender()+ "      OtherRender:" + mapSynchronizer.getOtherRender());
         if(mapSynchronizer.getMyRender()>mapSynchronizer.getOtherRender()){
-            threadsleep = 40;
+            threadsleep = 45;
 
         }
         else{
-
-            threadsleep = 20;
+            threadsleep = 15;
         }
 
 
@@ -852,12 +851,12 @@ public abstract class PlayState extends State{
                 }, 5, TimeUnit.SECONDS);
                 break;
             case SPEED_PLAYER_UP:
-                playerSpeed *= 1.5;
+                playerSpeed += 50;
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
                         player.setActivePower(PowerType.NOTHING);
-                        playerSpeed /= 1.5;
+                        playerSpeed -= 50;
                     }
                 },5, TimeUnit.SECONDS);
                 break;
