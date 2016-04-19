@@ -299,7 +299,7 @@ public abstract class PlayState extends State{
                 public void run() {
                     for (int i = 0; i < 2; i++) {
                         if (((Player)players.get(i)).x != ((Player)players.get(i)).getPrev_x() ||
-                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed * freezeMaze.get() / slowGameDown.get() * deltaCap)) > 5 ) {
+                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed / slowGameDown.get() * freezeMaze.get() * deltaCap)) > 5 ) {
                             if (angle[i] > 3 * (Math.PI) / 8 && angle[i] <= 5 * (Math.PI) / 8) {
                                 ((Player) players.get(i)).setOrientation(Direction.NORTH);
                             } else if (angle[i] > 7 * (Math.PI) / 8 || angle[i] <= -7 * (Math.PI) / 8) {
@@ -884,7 +884,7 @@ public abstract class PlayState extends State{
                     public void run() {
                         gsm.startMusic("Dance Of Death.mp3", (float) 0.1);
                         player.setActivePower(PowerType.NOTHING);
-                        slowGameDown.set(2);
+                        slowGameDown.set(1);
                         MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown.get()));
                     }
                 }, 5, TimeUnit.SECONDS);
