@@ -14,6 +14,12 @@ public abstract class Movable extends GameObject {
         super(x, y, width, height);
     }
     public void scroll (float gameSpeed){
-        y -= gameSpeed * PlayState.deltaCap;
+        if (this instanceof Player){
+            synchronized (Player.class){
+                y -= gameSpeed * PlayState.deltaCap;
+            }
+        } else {
+            y -= gameSpeed * PlayState.deltaCap;
+        }
     }
 }

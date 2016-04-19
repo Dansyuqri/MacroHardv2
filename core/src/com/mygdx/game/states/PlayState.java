@@ -508,7 +508,7 @@ public abstract class PlayState extends State{
         }
         if (score > 200 && stage == Stage.DUNGEON) {
             if (score % 15 == 0) {
-                ghosts.add(new Ghost((tileLength * 9) + 15, tracker, tileLength, tileLength));
+                ghosts.add(new Ghost((tileLength * 9) + 15, tracker + 2, 46, 46));
             }
         }
     }
@@ -591,16 +591,18 @@ public abstract class PlayState extends State{
 
     private void checkBoundaryCollision(){
         // collision with screen boundaries
-        if (player.x > 465 - player.width ){
-            player.x = 465 - player.height;
-        }
+        synchronized (Player.class) {
+            if (player.x > 465 - player.width) {
+                player.x = 465 - player.height;
+            }
 
-        if (player.x < 15){
-            player.x = 15;
-        }
+            if (player.x < 15) {
+                player.x = 15;
+            }
 
-        if (player.y > 750){
-            player.y = 750;
+            if (player.y > 750) {
+                player.y = 750;
+            }
         }
 
         if (player.y < 150){
