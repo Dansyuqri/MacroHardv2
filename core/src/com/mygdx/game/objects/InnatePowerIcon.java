@@ -39,8 +39,8 @@ public class InnatePowerIcon extends GameObject {
                 else this.setImage(new Texture(Gdx.files.internal("power_destroy_walls_unavailable.png")));
                 break;
             case INVINCIBLE:
-                if (available) this.setImage(new Texture(Gdx.files.internal("power_ghost.png")));
-                else this.setImage(new Texture(Gdx.files.internal("power_ghost_unavailable.png")));
+                if (available) this.setImage(new Texture(Gdx.files.internal("power_invulnerable.png")));
+                else this.setImage(new Texture(Gdx.files.internal("power_invulnerable_unavailable.png")));
                 break;
         }
     }
