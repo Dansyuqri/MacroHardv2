@@ -91,12 +91,7 @@ public class Obstacle extends Movable implements Collidable {
 
     @Override
     public boolean collides(Player player, PlayState playState) {
-        if (player.overlaps(this) && !toDestroy) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return (player.overlaps(this) && !toDestroy);
     }
 
     public void setDestroyed(boolean destroyed) {

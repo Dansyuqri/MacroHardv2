@@ -12,13 +12,14 @@ import com.mygdx.game.customEnum.MessageCode;
 import com.mygdx.game.customEnum.PowerType;
 import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.customEnum.StateType;
+import com.mygdx.game.objects.ActivePowerIcon;
 import com.mygdx.game.objects.Background;
 import com.mygdx.game.objects.Boulder;
 import com.mygdx.game.objects.Fog;
 import com.mygdx.game.objects.GameObject;
 import com.mygdx.game.objects.Ghost;
 import com.mygdx.game.objects.Hole;
-import com.mygdx.game.objects.Icon;
+import com.mygdx.game.objects.InnatePowerIcon;
 import com.mygdx.game.objects.MagicCircle;
 import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Overlay;
@@ -204,6 +205,8 @@ public abstract class PlayState extends State{
 
         coordSender = new PlayerCoordinateSender(this);
         running = false;
+
+        addIcon(new InnatePowerIcon(player.getInnatePower()));
     }
     @Override
     protected void handleInput() {
@@ -242,10 +245,16 @@ public abstract class PlayState extends State{
                     movePlayer(cos, sin, (float) Math.pow(ratio, 0.5));
                 }
 
-                if (!icons.isEmpty()) {
-                    if (icons.get(0).contains(touchPos[i].x, touchPos[i].y)) {
-                        activateActivePower();
-                        icons.remove(0);
+                Iterator<GameObject> iconIterator = icons.iterator();
+                while (iconIterator.hasNext()) {
+                    GameObject tempIcon = iconIterator.next();
+                    if (tempIcon.contains(touchPos[i].x, touchPos[i].y)) {
+                        if (tempIcon instanceof ActivePowerIcon) {
+                            activateActivePower();
+                            iconIterator.remove();
+                        } else if (tempIcon instanceof InnatePowerIcon) {
+                            activateInnatePower();
+                        }
                     }
                 }
             }
@@ -458,8 +467,8 @@ public abstract class PlayState extends State{
                     obstacles.add(new Obstacle((tileLength * (i % GAME_WIDTH) + 15), tracker, tileLength, tileLength, stage));
                     break;
                 case POWER:
-                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-1) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
-                    //powers.add(new Power(PowerType.values()[(int)(Math.random() * 2 + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-3) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
+                    //powers.add(new Power(PowerType.TELEPORT, tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength, stage));
@@ -635,41 +644,42 @@ public abstract class PlayState extends State{
     }
 
     private void checkFatalCollision(){
-        //      collide with spikes
-        for (GameObject spike : spikes) {
-            if (((Spikes) spike).collides(player, this)) {
-                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
-                goToRestartState();
-            }
-        }
-
-        //      collide with ghosts
-        for (GameObject ghost : ghosts) {
-            if (((Ghost) ghost).collides(player, this)) {
-                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
-                goToRestartState();
-            }
-        }
-
-        // collides with holes
-        for (GameObject hole1 : holes) {
-            final Hole hole = ((Hole) hole1);
-            if (hole.collides(player, this)) {
-                if (hole.isBroken()) {
+        if (!player.getIsInvicible()) {
+            //      collide with spikes
+            for (GameObject spike : spikes) {
+                if (((Spikes) spike).collides(player, this)) {
+                    MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
                     goToRestartState();
-                } else if (!hole.isBreakHole()){
-                    gsm.startMusic("IceBreak.mp3",(float)1);
-                    hole.setBreakHole(true);
-                    mapSynchronizer.sendMessage(MessageCode.BREAK_HOLE, hole.getId());
                 }
             }
 
-//            if (hole.isBroken()) {
-//                hole.setBroken();
-//                mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, hole.x + tileLength / 2, hole.y + tileLength / 2);
-//            }
-        }
+            //      collide with ghosts
+            for (GameObject ghost : ghosts) {
+                if (((Ghost) ghost).collides(player, this)) {
+                    MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
+                    goToRestartState();
+                }
+            }
 
+            // collides with holes
+            for (GameObject hole1 : holes) {
+                final Hole hole = ((Hole) hole1);
+                if (hole.collides(player, this)) {
+                    if (hole.isBroken()) {
+                        goToRestartState();
+                    } else if (!hole.isBreakHole()) {
+                        gsm.startMusic("IceBreak.mp3", (float) 1);
+                        hole.setBreakHole(true);
+                        mapSynchronizer.sendMessage(MessageCode.BREAK_HOLE, hole.getId());
+                    }
+                }
+
+                //            if (hole.isBroken()) {
+                //                hole.setBroken();
+                //                mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, hole.x + tileLength / 2, hole.y + tileLength / 2);
+                //            }
+            }
+        }
     }
 
     /**
@@ -726,7 +736,7 @@ public abstract class PlayState extends State{
         while (powerIterator.hasNext()) {
             Power tempPower = (Power) powerIterator.next();
             if (tempPower.collides(player, this)) {
-                gsm.startMusic("PowerUpSound.wav",(float)1);
+                gsm.startMusic("PowerUpSound.wav",(float)0.5);
                 if (tempPower.isPassive()) {
                     switch(tempPower.getType()) {
                         case FREEZE_MAZE:
@@ -735,6 +745,7 @@ public abstract class PlayState extends State{
                             backgroundTaskExecutor.schedule(new Runnable() {
                                  @Override
                                     public void run() {
+                                    player.setPassivePower(PowerType.NOTHING);
                                     freezeMaze = 1;
                                     MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze));
                                     }
@@ -745,16 +756,21 @@ public abstract class PlayState extends State{
                             backgroundTaskExecutor.schedule(new Runnable() {
                                 @Override
                                 public void run() {
+                                    player.setPassivePower(PowerType.NOTHING);
                                     playerSpeed /= 1.5;
                                 }
                             },5, TimeUnit.SECONDS);
                             break;
                         case SLOW_GAME_DOWN:
+                            gsm.pauseMusic("Dance Of Death.mp3");
+                            gsm.startMusic("TimeSlowSound.wav",(float)3);
                             slowGameDown = (float) 0.4;
                             MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
                             backgroundTaskExecutor.schedule(new Runnable() {
                                 @Override
                                 public void run() {
+                                    gsm.startMusic("Dance Of Death.mp3",(float)1);
+                                    player.setPassivePower(PowerType.NOTHING);
                                     slowGameDown = 1;
                                     MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
                                     }
@@ -763,7 +779,7 @@ public abstract class PlayState extends State{
                     }
                 } else {
                     player.setActivePower(tempPower.getType());
-                    this.addIcon(new Icon(tempPower));
+                    this.addIcon(new ActivePowerIcon(tempPower.getType()));
                 }
                 powerIterator.remove();
             }
@@ -824,7 +840,7 @@ public abstract class PlayState extends State{
         if (desBoulder){
             for (GameObject eachBoulder: boulders){
                 ((Boulder)eachBoulder).setToDestroy(true);
-                mapSynchronizer.sendMessage(MessageCode.DESTROY_BOULDER, ((Boulder)eachBoulder).getId());
+                mapSynchronizer.sendMessage(MessageCode.DESTROY_BOULDER, ((Boulder) eachBoulder).getId());
             }
         }
     }
@@ -846,18 +862,51 @@ public abstract class PlayState extends State{
 
     private void activateActivePower(){
         switch (player.getActivePower()) {
+            case TELEPORT:
+                player.setActivePower(PowerType.NOTHING);
+                byte[] message = sendTeleport(playerID, player.x, player.y);
+                MacroHardv2.actionResolver.sendReliable(message);
+        }
+    }
+
+    private void activateInnatePower(){
+        gsm.startMusic("InnatePower.wav",(float)0.5);
+        switch (player.getInnatePower()) {
             case DESTROY_WALL:
+                changeInnatePowerIcon(false);
                 player.setCanDestroy(true);
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
                         player.setCanDestroy(false);
                     }
-                },5,TimeUnit.SECONDS);
+                }, 5, TimeUnit.SECONDS);
+                backgroundTaskExecutor.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        player.setInnatePower(PowerType.DESTROY_WALL);
+                        changeInnatePowerIcon(true);
+                    }
+                }, 20, TimeUnit.SECONDS);
                 break;
-            case PLAYERS_COMBINE:
-                byte[] message = sendTeleport(playerID, player.x, player.y);
-                MacroHardv2.actionResolver.sendReliable(message);
+            case INVINCIBLE:
+                changeInnatePowerIcon(false);
+                player.setIsInvicible(true);
+                player.setInnatePower(PowerType.NOTHING);
+                backgroundTaskExecutor.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        player.setIsInvicible(false);
+                    }
+                }, 5, TimeUnit.SECONDS);
+                backgroundTaskExecutor.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        player.setInnatePower(PowerType.INVINCIBLE);
+                        changeInnatePowerIcon(true);
+                    }
+                }, 20, TimeUnit.SECONDS);
+                break;
         }
     }
 
@@ -930,8 +979,15 @@ public abstract class PlayState extends State{
         }
     }
 
-    public void addIcon(Icon icon) {
+    public void addIcon(GameObject icon) {
         icons.add(icon);
+    }
+    public void changeInnatePowerIcon(boolean available) {
+        for (GameObject icon:icons) {
+            if (icon instanceof InnatePowerIcon) {
+                ((InnatePowerIcon) icon).changeIcon(available);
+            }
+        }
     }
 
     private void sendGameSpeed(){

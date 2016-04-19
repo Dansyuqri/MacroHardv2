@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.badlogic.gdx.Gdx;
 import com.google.android.gms.games.Games;
@@ -17,18 +16,13 @@ import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
-import com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.example.games.basegameutils.GameHelper;
-import com.mygdx.game.states.GameStateManager;
-
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -426,7 +420,6 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                 // retrieve and cache the invitation ID
                 Log.d(TAG,"onConnected: connection hint has a room invite!");
                 acceptInviteToRoom(inv.getInvitationId());
-                return;
             }
         }
 

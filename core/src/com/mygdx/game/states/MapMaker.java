@@ -1,9 +1,5 @@
 package com.mygdx.game.states;
 
-import com.mygdx.game.states.PlayState;
-
-import java.util.Random;
-
 /**
  * Created by Syuqri on 3/18/2016.
  */

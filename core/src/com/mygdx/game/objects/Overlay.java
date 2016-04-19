@@ -3,7 +3,6 @@ package com.mygdx.game.objects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.customEnum.Stage;
-import com.mygdx.game.states.PlayState;
 
 /**
  * Created by Samuel on 21/3/2016.

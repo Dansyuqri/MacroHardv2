@@ -25,24 +25,26 @@ public class GameStateManager {
         switch (stateType) {
             case NON_PLAY:
                 removeMusic("WallDestroySound.wav");
-                removeMusic("TimeSlowSound.mp3");
+                removeMusic("TimeSlowSound.wav");
                 removeMusic("GateSound.wav");
                 removeMusic("Dance Of Death.mp3");
                 removeMusic("Howling Wind.mp3");
                 removeMusic("IceBreak.mp3");
+                removeMusic("PowerUpSound.wav");
+                removeMusic("InnatePower.wav");
                 loadMusic("MainMenuSound.mp3");
-                loadMusic("MenuSelectionClick.wav");
                 assetManager.finishLoading();
                 break;
             case PLAY:
                 removeMusic("MainMenuSound.mp3");
-                //removeMusic("MenuSelectionClick.wav");
                 loadMusic("WallDestroySound.wav");
-                loadMusic("TimeSlowSound.mp3");
+                loadMusic("TimeSlowSound.wav");
                 loadMusic("GateSound.wav");
                 loadMusic("Dance Of Death.mp3");
                 loadMusic("Howling Wind.mp3");
                 loadMusic("IceBreak.mp3");
+                loadMusic("PowerUpSound.wav");
+                loadMusic("InnatePower.wav");
                 assetManager.finishLoading();
                 break;
         }
@@ -96,6 +98,11 @@ public class GameStateManager {
         }
     }
 
+    public void pauseMusic(String path) {
+        Music music = assetManager.get(path, Music.class);
+        music.pause();
+    }
+
     public void removeMusic(String path) {
         if (assetManager.isLoaded(path)) {
             stopMusic(path);
@@ -111,9 +118,5 @@ public class GameStateManager {
     public void stopMusic(String path){
         Music music = assetManager.get(path, Music.class);
         music.stop();
-    }
-
-    public AssetManager getAssetManager() {
-        return assetManager;
     }
 }

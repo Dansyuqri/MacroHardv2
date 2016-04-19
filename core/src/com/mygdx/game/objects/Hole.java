@@ -9,9 +9,6 @@ import com.mygdx.game.Interface.Collidable;
 import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.states.PlayState;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Created by Samuel on 3/4/2016.
  */

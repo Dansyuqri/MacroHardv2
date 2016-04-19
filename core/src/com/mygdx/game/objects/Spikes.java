@@ -18,11 +18,6 @@ public class Spikes extends Movable implements Collidable {
 
     @Override
     public boolean collides(Player player, PlayState playState) {
-        if (player.overlaps(this)) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return (player.overlaps(this));
     }
 }

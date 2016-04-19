@@ -4,7 +4,6 @@ package com.mygdx.game.objects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.customEnum.Stage;
-import com.mygdx.game.states.PlayState;
 
 /**
  * Created by Syuqri on 3/16/2016.

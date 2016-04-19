@@ -46,12 +46,7 @@ public class Door extends Movable implements Collidable{
 
     @Override
     public boolean collides(Player player, PlayState playState) {
-        if (player.overlaps(this) && !open) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return (player.overlaps(this) && !open);
     }
 
     public void setDestroyed(boolean destroyed) {

@@ -13,9 +13,8 @@ import com.mygdx.game.customEnum.PowerType;
  * Created by Syuqri on 3/9/2016.
  */
 public class Player extends Movable {
-    private PowerType passivePower;
-    private PowerType activePower;
-    private boolean canDestroy;
+    private PowerType passivePower, activePower, innatePower;
+    private boolean canDestroy, isInvicible;
     private boolean isSlowed;
     float prev_x, prev_y;
     
@@ -33,9 +32,11 @@ public class Player extends Movable {
         super(480 / 2 - 50 / 2, 450, 40, 40);
         switch (id) {
             case 0:
+                innatePower = PowerType.DESTROY_WALL;
                 walkSheet = new Texture(Gdx.files.internal("Player_sprite.png"));
                 break;
             case 1:
+                innatePower = PowerType.INVINCIBLE;
                 walkSheet = new Texture(Gdx.files.internal("Player2_sprite.png"));
                 break;
         }
@@ -85,8 +86,8 @@ public class Player extends Movable {
                 break;
         }
         this.activePower = this.passivePower = PowerType.NOTHING;
-        canDestroy = false;
-        isSlowed = false;
+        canDestroy = isSlowed = isInvicible = false;
+
     }
 
     @Override
@@ -204,5 +205,25 @@ public class Player extends Movable {
 
     public void setIsSlowed(boolean isSlowed) {
         this.isSlowed = isSlowed;
+    }
+
+    public void setIsInvicible(boolean isInvicible) {
+        this.isInvicible = isInvicible;
+    }
+
+    public boolean getIsInvicible() {
+        return isInvicible;
+    }
+
+    public void setPassivePower(PowerType passivePower) {
+        this.passivePower = passivePower;
+    }
+
+    public PowerType getInnatePower() {
+        return innatePower;
+    }
+
+    public void setInnatePower(PowerType innatePower) {
+        this.innatePower = innatePower;
     }
 }

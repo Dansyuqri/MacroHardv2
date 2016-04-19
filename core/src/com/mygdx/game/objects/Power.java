@@ -7,8 +7,6 @@ import com.mygdx.game.Interface.Collidable;
 import com.mygdx.game.states.PlayState;
 import com.mygdx.game.customEnum.PowerType;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Created by Syuqri on 3/9/2016.
  */
@@ -26,9 +24,6 @@ public class Power extends Movable implements Collidable {
                 break;
             case SLOW_GAME_DOWN:
                 this.setImage(new Texture(Gdx.files.internal("power_slow_down.png")));
-                break;
-            case DESTROY_WALL:
-                this.setImage(new Texture(Gdx.files.internal("power_destroy_walls.png")));
                 break;
             default:
                 this.setImage(new Texture(Gdx.files.internal("power_ghost.png")));
