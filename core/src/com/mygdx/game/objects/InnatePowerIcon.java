@@ -9,7 +9,7 @@ import com.mygdx.game.customEnum.PowerType;
  */
 public class InnatePowerIcon extends GameObject {
     PowerType powerType;
-    private boolean available;
+    private boolean available = true;
     public InnatePowerIcon(PowerType powerType){
         super(340, 30, 50, 50);
         this.powerType = powerType;
