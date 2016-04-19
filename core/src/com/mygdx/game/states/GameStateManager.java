@@ -31,7 +31,6 @@ public class GameStateManager {
                 removeMusic("Howling Wind.mp3");
                 removeMusic("IceBreak.mp3");
                 removeMusic("PowerUpSound.wav");
-                removeMusic("InnatePower.wav");
                 loadMusic("MainMenuSound.mp3");
                 assetManager.finishLoading();
                 break;
@@ -44,7 +43,6 @@ public class GameStateManager {
                 loadMusic("Howling Wind.mp3");
                 loadMusic("IceBreak.mp3");
                 loadMusic("PowerUpSound.wav");
-                loadMusic("InnatePower.wav");
                 assetManager.finishLoading();
                 break;
         }

@@ -474,7 +474,6 @@ public abstract class PlayState extends State{
                     break;
                 case POWER:
                     powers.add(new Power(PowerType.values()[(int)(Math.random() * (PowerType.values().length-3) + 1)], tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
-                    //powers.add(new Power(PowerType.TELEPORT, tileLength * (i % GAME_WIDTH) + 15, tracker, tileLength, tileLength));
                     break;
                 case DOOR:
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength, stage));
@@ -743,50 +742,8 @@ public abstract class PlayState extends State{
             Power tempPower = (Power) powerIterator.next();
             if (tempPower.collides(player, this)) {
                 gsm.startMusic("PowerUpSound.wav",(float)0.5);
-                if (tempPower.isPassive()) {
-                    switch(tempPower.getType()) {
-                        case FREEZE_MAZE:
-                            freezeMaze = 0;
-                            MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze));
-                            backgroundTaskExecutor.schedule(new Runnable() {
-                                 @Override
-                                    public void run() {
-                                    player.setPassivePower(PowerType.NOTHING);
-                                    freezeMaze = 1;
-                                    MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze));
-                                    }
-                                }, 5, TimeUnit.SECONDS);
-                            break;
-                        case SPEED_PLAYER_UP:
-                            playerSpeed *= 1.5;
-                            backgroundTaskExecutor.schedule(new Runnable() {
-                                @Override
-                                public void run() {
-                                    player.setPassivePower(PowerType.NOTHING);
-                                    playerSpeed /= 1.5;
-                                }
-                            },5, TimeUnit.SECONDS);
-                            break;
-                        case SLOW_GAME_DOWN:
-                            gsm.pauseMusic("Dance Of Death.mp3");
-                            gsm.startMusic("TimeSlowSound.wav",(float)3);
-                            slowGameDown = (float) 0.4;
-                            MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
-                            backgroundTaskExecutor.schedule(new Runnable() {
-                                @Override
-                                public void run() {
-                                    gsm.startMusic("Dance Of Death.mp3",(float)1);
-                                    player.setPassivePower(PowerType.NOTHING);
-                                    slowGameDown = 1;
-                                    MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
-                                    }
-                                },5, TimeUnit.SECONDS);
-                            break;
-                    }
-                } else {
-                    player.setActivePower(tempPower.getType());
-                    this.addIcon(new ActivePowerIcon(tempPower.getType()));
-                }
+                player.setActivePower(tempPower.getType());
+                this.addIcon(new ActivePowerIcon(tempPower.getType()));
                 powerIterator.remove();
             }
         }
@@ -857,7 +814,7 @@ public abstract class PlayState extends State{
 
     private void checkDangerZone(Player p) {
         if (p.getY()<=dangerZone && gameSpeed <=dangerZoneSpeedLimit) {
-            if (!(player.getPassivePower().equals(PowerType.FREEZE_MAZE) || player.getPassivePower().equals(PowerType.SLOW_GAME_DOWN))) {
+            if (!(player.getActivePower().equals(PowerType.FREEZE_MAZE) || player.getActivePower().equals(PowerType.SLOW_GAME_DOWN))) {
                 synchronized ((Object) gameSpeed ) {
                     gameSpeed += speedIncrease;
                 }
@@ -868,15 +825,52 @@ public abstract class PlayState extends State{
 
     private void activateActivePower(){
         switch (player.getActivePower()) {
+            case FREEZE_MAZE:
+                freezeMaze = 0;
+                MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze));
+                backgroundTaskExecutor.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        player.setActivePower(PowerType.NOTHING);
+                        freezeMaze = 1;
+                        MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze));
+                    }
+                }, 5, TimeUnit.SECONDS);
+                break;
+            case SPEED_PLAYER_UP:
+                playerSpeed *= 1.5;
+                backgroundTaskExecutor.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        player.setActivePower(PowerType.NOTHING);
+                        playerSpeed /= 1.5;
+                    }
+                },5, TimeUnit.SECONDS);
+                break;
+            case SLOW_GAME_DOWN:
+                gsm.pauseMusic("Dance Of Death.mp3");
+                gsm.startMusic("TimeSlowSound.wav",(float)3);
+                slowGameDown = (float) 0.4;
+                MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
+                backgroundTaskExecutor.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        gsm.startMusic("Dance Of Death.mp3",(float)0.1);
+                        player.setActivePower(PowerType.NOTHING);
+                        slowGameDown = 1;
+                        MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown));
+                    }
+                },5, TimeUnit.SECONDS);
+                break;
             case TELEPORT:
                 player.setActivePower(PowerType.NOTHING);
                 byte[] message = sendTeleport(playerID, player.x, player.y);
                 MacroHardv2.actionResolver.sendReliable(message);
+                break;
         }
     }
 
     private void activateInnatePower(){
-        gsm.startMusic("InnatePower.wav",(float)0.5);
         switch (player.getInnatePower()) {
             case DESTROY_WALL:
                 changeInnatePowerIcon(false);
@@ -893,7 +887,7 @@ public abstract class PlayState extends State{
                         player.setInnatePower(PowerType.DESTROY_WALL);
                         changeInnatePowerIcon(true);
                     }
-                }, 20, TimeUnit.SECONDS);
+                }, 30, TimeUnit.SECONDS);
                 break;
             case INVINCIBLE:
                 changeInnatePowerIcon(false);
@@ -911,7 +905,7 @@ public abstract class PlayState extends State{
                         player.setInnatePower(PowerType.INVINCIBLE);
                         changeInnatePowerIcon(true);
                     }
-                }, 20, TimeUnit.SECONDS);
+                }, 30, TimeUnit.SECONDS);
                 break;
         }
     }

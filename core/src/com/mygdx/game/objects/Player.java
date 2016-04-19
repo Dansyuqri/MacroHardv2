@@ -13,7 +13,7 @@ import com.mygdx.game.customEnum.PowerType;
  * Created by Syuqri on 3/9/2016.
  */
 public class Player extends Movable {
-    private PowerType passivePower, activePower, innatePower;
+    private PowerType activePower, innatePower;
     private boolean canDestroy, isInvicible;
     private boolean isSlowed;
     float prev_x, prev_y;
@@ -85,7 +85,7 @@ public class Player extends Movable {
                 this.setImage(faceNorth);
                 break;
         }
-        this.activePower = this.passivePower = PowerType.NOTHING;
+        this.activePower = PowerType.NOTHING;
         canDestroy = isSlowed = isInvicible = false;
 
     }
@@ -187,10 +187,6 @@ public class Player extends Movable {
         this.activePower = activePower;
     }
 
-    public PowerType getPassivePower() {
-        return passivePower;
-    }
-
     public boolean getCanDestroy() {
         return canDestroy;
     }
@@ -213,10 +209,6 @@ public class Player extends Movable {
 
     public boolean getIsInvicible() {
         return isInvicible;
-    }
-
-    public void setPassivePower(PowerType passivePower) {
-        this.passivePower = passivePower;
     }
 
     public PowerType getInnatePower() {
