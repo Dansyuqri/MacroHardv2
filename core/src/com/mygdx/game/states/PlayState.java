@@ -888,10 +888,15 @@ public abstract class PlayState extends State{
                     }
                 }, 5, TimeUnit.SECONDS);
                 break;
-            case TELEPORT:
+            case INVINCIBLE:
+                player.setIsInvicible(true);
                 player.setActivePower(PowerType.NOTHING);
-                byte[] message = sendTeleport(playerID, player.x, player.y);
-                MacroHardv2.actionResolver.sendReliable(message);
+                backgroundTaskExecutor.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        player.setIsInvicible(false);
+                    }
+                }, 4, TimeUnit.SECONDS);
                 break;
         }
     }
@@ -915,20 +920,15 @@ public abstract class PlayState extends State{
                     }
                 }, player.coolDown, TimeUnit.SECONDS);
                 break;
-            case INVINCIBLE:
+            case TELEPORT:
                 changeInnatePowerIcon(false);
-                player.setIsInvicible(true);
                 player.setInnatePower(PowerType.NOTHING);
+                byte[] message = sendTeleport(playerID, player.x, player.y);
+                MacroHardv2.actionResolver.sendReliable(message);
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        player.setIsInvicible(false);
-                    }
-                }, player.effectTime, TimeUnit.SECONDS);
-                backgroundTaskExecutor.schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        player.setInnatePower(PowerType.INVINCIBLE);
+                        player.setInnatePower(PowerType.TELEPORT);
                         changeInnatePowerIcon(true);
                     }
                 }, player.coolDown, TimeUnit.SECONDS);

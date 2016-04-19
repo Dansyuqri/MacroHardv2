@@ -20,7 +20,7 @@ public class Pointer extends GameObject {
     }
 
     public void set(Player player){
-        this.x = player.x + 10;
+        this.x = player.x;
         this.y = player.y + 60;
     }
 }

@@ -17,9 +17,9 @@ public class InnatePowerIcon extends GameObject {
             case DESTROY_WALL:
                 this.setImage(new Texture(Gdx.files.internal("power_destroy_walls.png")));
                 break;
-            case INVINCIBLE:
+            case TELEPORT:
                 // TODO: change image
-                this.setImage(new Texture(Gdx.files.internal("power_ghost.png")));
+                this.setImage(new Texture(Gdx.files.internal("power_teleport.png")));
                 break;
         }
     }
@@ -38,8 +38,8 @@ public class InnatePowerIcon extends GameObject {
                 if (available) this.setImage(new Texture(Gdx.files.internal("power_destroy_walls.png")));
                 else this.setImage(new Texture(Gdx.files.internal("power_destroy_walls_unavailable.png")));
                 break;
-            case INVINCIBLE:
-                if (available) this.setImage(new Texture(Gdx.files.internal("power_invulnerable.png")));
+            case TELEPORT:
+                if (available) this.setImage(new Texture(Gdx.files.internal("power_teleport.png")));
                 else this.setImage(new Texture(Gdx.files.internal("power_invulnerable_unavailable.png")));
                 break;
         }

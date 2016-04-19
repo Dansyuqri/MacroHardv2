@@ -20,8 +20,8 @@ public class ActivePowerIcon extends GameObject {
             case SPEED_PLAYER_UP:
                 this.setImage(new Texture(Gdx.files.internal("power_speed_up.png")));
                 break;
-            case TELEPORT:
-                this.setImage(new Texture(Gdx.files.internal("power_teleport.png")));
+            case INVINCIBLE:
+                this.setImage(new Texture(Gdx.files.internal("power_invulnerable.png")));
                 break;
         }
     }

@@ -40,7 +40,7 @@ public class Player extends Movable {
                 walkSheet = new Texture(Gdx.files.internal("Player_sprite.png"));
                 break;
             case 1:
-                innatePower = PowerType.INVINCIBLE;
+                innatePower = PowerType.TELEPORT;
                 coolDown = 25;
                 effectTime = 4;
                 walkSheet = new Texture(Gdx.files.internal("Player2_sprite.png"));
