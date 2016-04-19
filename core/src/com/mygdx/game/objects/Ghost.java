@@ -23,7 +23,7 @@ public class Ghost extends Movable implements Collidable {
 
     @Override
     public void scroll (float gameSpeed){
-        y -= gameSpeed * Gdx.graphics.getDeltaTime();
+        y -= gameSpeed * PlayState.deltaCap;
         if (!right){
             x -= 200 * Gdx.graphics.getDeltaTime();
             if (x <= 15){

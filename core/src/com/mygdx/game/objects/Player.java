@@ -41,7 +41,7 @@ public class Player extends Movable {
                 break;
             case 1:
                 innatePower = PowerType.TELEPORT;
-                coolDown = 25;
+                coolDown = 50;
                 effectTime = 4;
                 walkSheet = new Texture(Gdx.files.internal("Player2_sprite.png"));
                 break;
