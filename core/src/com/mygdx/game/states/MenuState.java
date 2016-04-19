@@ -13,9 +13,9 @@ import com.mygdx.game.objects.CustomButton;
  * Created by Syuqri on 3/7/2016.
  */
 public class MenuState extends State{
-    private Texture background,playBtnImage,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, signInBtnImage;
+    private Texture background,playBtnImage,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, signInBtnImage, leaderboardBtnImage;
 
-    private CustomButton playBtn, instructionBtn, invitationBtn, sendInviteBtn, quickGameBtn, signInBtn;
+    private CustomButton playBtn, instructionBtn, invitationBtn, sendInviteBtn, quickGameBtn, signInBtn, leaderboardBtn;
     private Vector3 touchPos = new Vector3(0,0,0);
     private float bufferFromTop = 20;
     private boolean touched = false;
@@ -31,6 +31,7 @@ public class MenuState extends State{
             sendInviteBtnX, sendInviteBtnY,
             invitationBtnX, invitationBtnY,
             signInBtnX, signInBtnY,
+            leaderboardBtnX, leaderboardBtnY,
             resizeFactor
             ;
     public MenuState(GameStateManager gsm) {
@@ -57,19 +58,24 @@ public class MenuState extends State{
         invitationBtnY = invitationBtnImage.getHeight()*resizeFactor;
         signInBtnX = signInBtnImage.getWidth()*resizeFactor;
         signInBtnY = signInBtnImage.getHeight()*resizeFactor;
+        leaderboardBtnX = leaderboardBtnImage.getWidth()*resizeFactor;
+        leaderboardBtnY = leaderboardBtnImage.getHeight()*resizeFactor;
 
-        playBtn = new CustomButton((graphicsX/2)-(playBtnX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
+        playBtn = new CustomButton((graphicsX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
         playBtn.setImage(playBtnImage);
-        quickGameBtn = new CustomButton( (graphicsX/2)-(quickGameBtnX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
+        quickGameBtn = new CustomButton( (graphicsX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
         quickGameBtn.setImage(quickGameBtnImage);
-        instructionBtn = new CustomButton((graphicsX / 2) - (instructionBtnX/2), graphicsY / 2 - instructionBtnY/2, instructionBtnX, instructionBtnY);
+        instructionBtn = new CustomButton((graphicsX / 2), graphicsY / 2 - instructionBtnY/2, instructionBtnX, instructionBtnY);
         instructionBtn.setImage(instructionBtnImage);
-        sendInviteBtn = new CustomButton((graphicsX/2)-(sendInviteBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY- bufferFromTop),sendInviteBtnX,sendInviteBtnY);
+        sendInviteBtn = new CustomButton((graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY- bufferFromTop),sendInviteBtnX,sendInviteBtnY);
         sendInviteBtn.setImage(sendInviteBtnImage);
-        invitationBtn = new CustomButton((graphicsX/2)-(invitationBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY-invitationBtnY- 2*bufferFromTop),invitationBtnX,invitationBtnY);
+        invitationBtn = new CustomButton((graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY-invitationBtnY- 2*bufferFromTop),invitationBtnX,invitationBtnY);
         invitationBtn.setImage(instructionBtnImage);
-        signInBtn = new CustomButton((graphicsX/2)-(signInBtnX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY- 3*bufferFromTop),signInBtnX,signInBtnY);
+        signInBtn = new CustomButton((graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY- 3*bufferFromTop),signInBtnX,signInBtnY);
         signInBtn.setImage(signInBtnImage);
+        leaderboardBtn = new CustomButton((graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY-leaderboardBtnY- 4*bufferFromTop),leaderboardBtnX,leaderboardBtnY);
+        leaderboardBtn.setImage(leaderboardBtnImage);
+
     }
 
     @Override
@@ -128,6 +134,11 @@ public class MenuState extends State{
                 signInBtnImage = new Texture("signInBtn_pressed.png");
                 touched = true;
             }
+            else if(leaderboardBtn.contains(touchPos.x,touchPos.y)){
+                leaderboardBtnImage.dispose();
+                leaderboardBtnImage = new Texture("leaderboardBtn_pressed.png");
+                touched = true;
+            }
         }
 
         else if(!Gdx.input.isTouched() && touched){
@@ -174,6 +185,13 @@ public class MenuState extends State{
                 signInBtnImage = new Texture("signInBtn.png");
                 touched = false;
             }
+            else if(leaderboardBtn.contains(touchPos.x,touchPos.y)){
+                gsm.startMusic("MenuSelectionClick.wav", (float) 1);
+                //TODO: RYAN IMPLEMENT LEADERBOARD HERE
+                leaderboardBtnImage.dispose();
+                leaderboardBtnImage = new Texture("leaderboardBtn.png");
+                touched = false;
+            }
             else{
                 dispose();
                 generateTextures();
@@ -189,12 +207,13 @@ public class MenuState extends State{
         cam.update();
         sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
-        sb.draw(playBtnImage, (graphicsX / 2) - (playBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + quickGameBtnY + 2 * bufferFromTop), playBtnX, playBtnY);
-        sb.draw(quickGameBtnImage, (graphicsX / 2) - (quickGameBtnX / 2), (graphicsY / 2 + instructionBtnY / 2 + bufferFromTop), quickGameBtnX, quickGameBtnY);
-        sb.draw(instructionBtnImage, (graphicsX / 2) - (instructionBtnX / 2), graphicsY / 2 - instructionBtnY / 2, instructionBtnX, instructionBtnY);
-        sb.draw(sendInviteBtnImage, (graphicsX / 2) - (sendInviteBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - bufferFromTop), sendInviteBtnX, sendInviteBtnY);
-        sb.draw(invitationBtnImage, (graphicsX / 2) - (invitationBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - 2 * bufferFromTop), invitationBtnX, invitationBtnY);
-        sb.draw(signInBtnImage, (graphicsX / 2) - (signInBtnX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - signInBtnY - 3 * bufferFromTop), signInBtnX, signInBtnY);
+        sb.draw(playBtnImage, (graphicsX / 2) , (graphicsY / 2 + instructionBtnY / 2 + quickGameBtnY + 2 * bufferFromTop), playBtnX, playBtnY);
+        sb.draw(quickGameBtnImage, (graphicsX / 2), (graphicsY / 2 + instructionBtnY / 2 + bufferFromTop), quickGameBtnX, quickGameBtnY);
+        sb.draw(instructionBtnImage, (graphicsX / 2), graphicsY / 2 - instructionBtnY / 2, instructionBtnX, instructionBtnY);
+        sb.draw(sendInviteBtnImage, (graphicsX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - bufferFromTop), sendInviteBtnX, sendInviteBtnY);
+        sb.draw(invitationBtnImage, (graphicsX / 2) , (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - 2 * bufferFromTop), invitationBtnX, invitationBtnY);
+        sb.draw(signInBtnImage, (graphicsX / 2) , (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - signInBtnY - 3 * bufferFromTop), signInBtnX, signInBtnY);
+        sb.draw(leaderboardBtnImage,(graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY-leaderboardBtnY- 4*bufferFromTop),leaderboardBtnX,leaderboardBtnY);
         sb.end();
     }
 
@@ -207,6 +226,7 @@ public class MenuState extends State{
         sendInviteBtnImage.dispose();
         invitationBtnImage.dispose();
         signInBtnImage.dispose();
+        leaderboardBtnImage.dispose();
     }
 
     @Override
@@ -222,6 +242,7 @@ public class MenuState extends State{
         sendInviteBtnImage = new Texture("sendInviteBtn.png");
         invitationBtnImage = new Texture("invitationBtn.png");
         signInBtnImage = new Texture("signInBtn.png");
+        leaderboardBtnImage = new Texture("leaderboardBtn.png");
     }
 
     private float resizeFactor(float x){
