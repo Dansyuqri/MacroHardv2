@@ -57,7 +57,7 @@ public class GameStateManager {
         loadAssets(stateType);
         switch (stateType) {
             case NON_PLAY:
-                startMusicLoop("MainMenuSound.mp3",(float) 0.15);
+                startMusicLoop("MainMenuSound.mp3",(float) 0.3);
                 break;
             case PLAY:
                 startMusicLoop("Dance Of Death.mp3",(float) 0.1);

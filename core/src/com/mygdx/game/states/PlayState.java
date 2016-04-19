@@ -730,6 +730,8 @@ public abstract class PlayState extends State{
         for (GameObject eachSwitch:switches){
             if (((Switch) eachSwitch).collides(player, this)){
                 open = true;
+                // TODO: check music here
+                gsm.startMusic("GateSound.wav",(float)3);
                 MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte)((Switch)eachSwitch).getId()});
                 ((Switch) eachSwitch).setOn();
             } else {
@@ -751,7 +753,6 @@ public abstract class PlayState extends State{
         synchronized (Switch.class) {
             if (gotSwitch) {
                 open = true;
-                gsm.startMusic("GateSound.wav",(float)1);
             }
         }
 

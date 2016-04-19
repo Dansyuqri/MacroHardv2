@@ -40,7 +40,7 @@ public class InnatePowerIcon extends GameObject {
                 break;
             case TELEPORT:
                 if (available) this.setImage(new Texture(Gdx.files.internal("power_teleport.png")));
-                else this.setImage(new Texture(Gdx.files.internal("power_invulnerable_unavailable.png")));
+                else this.setImage(new Texture(Gdx.files.internal("power_teleport_unavailable.png")));
                 break;
         }
     }

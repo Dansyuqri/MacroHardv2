@@ -100,7 +100,7 @@ public class RestartState extends State{
         font.draw(sb, "" + score, graphicsX / 2 - layoutScore.width / 2, graphicsY * 3 / 4 - layoutScoreText.height - layoutScore.height);
         sb.draw(mainMenuBtnImage, (graphicsX / 2) - (mainMenuBtnX / 2), graphicsY / 2 - mainMenuBtnY / 2, mainMenuBtnX, mainMenuBtnY);
         sb.end();
-        if(submitted == false){
+        if(!submitted){
             MacroHardv2.actionResolver.submitScoreGPGS(score);
             submitted = true;
         }
