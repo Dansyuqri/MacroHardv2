@@ -152,7 +152,7 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         threadsleep = 25;
-        gameSpeed = 60;
+        gameSpeed = 80;
         speedIncrease = (float) 0.07;
         playerSpeed = 200;
         dangerZone = 300;
@@ -387,7 +387,7 @@ public abstract class PlayState extends State{
         long time = System.currentTimeMillis() - start;
         System.out.println("My R: " + mapSynchronizer.getMyRender()+ "      OtherRender:" + mapSynchronizer.getOtherRender());
         if(mapSynchronizer.getMyRender()>mapSynchronizer.getOtherRender()){
-            threadsleep = 45;
+            threadsleep = 50;
 
         }
         else{
@@ -768,14 +768,14 @@ public abstract class PlayState extends State{
             Sand quickSand = (Sand) sandIterator.next();
             if (quickSand.collides(player, this)){
                 if (!player.isSlowed()){
-                    playerSpeed /= 10;
+                    playerSpeed -= 150;
                     player.setIsSlowed(true);
                     sandCollide = true;
                 }
             }
         }
         if (!sandCollide && player.isSlowed()){
-            playerSpeed *= 10;
+            playerSpeed += 150;
             player.setIsSlowed(false);
         }
 

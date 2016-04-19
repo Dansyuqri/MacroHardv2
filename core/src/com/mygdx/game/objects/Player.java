@@ -35,7 +35,7 @@ public class Player extends Movable {
         switch (id) {
             case 0:
                 innatePower = PowerType.DESTROY_WALL;
-                coolDown = 35;
+                coolDown = 50;
                 effectTime = 3;
                 walkSheet = new Texture(Gdx.files.internal("Player_sprite.png"));
                 break;

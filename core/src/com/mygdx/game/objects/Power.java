@@ -25,6 +25,9 @@ public class Power extends Movable implements Collidable {
             case SLOW_GAME_DOWN:
                 this.setImage(new Texture(Gdx.files.internal("power_slow_down.png")));
                 break;
+            case TELEPORT:
+                this.setImage(new Texture(Gdx.files.internal("power_teleport.png")));
+                break;
             default:
                 this.setImage(new Texture(Gdx.files.internal("power_ghost.png")));
                 break;
