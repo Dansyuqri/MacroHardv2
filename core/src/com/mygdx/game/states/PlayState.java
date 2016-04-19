@@ -253,7 +253,9 @@ public abstract class PlayState extends State{
                             activateActivePower();
                             iconIterator.remove();
                         } else if (tempIcon instanceof InnatePowerIcon) {
-                            activateInnatePower();
+                            if (((InnatePowerIcon) tempIcon).isAvailable()) {
+                                activateInnatePower();
+                            }
                         }
                     }
                 }
@@ -561,6 +563,18 @@ public abstract class PlayState extends State{
             if (checkObstacleCollision()){
                 player.y = prevy;
             }
+
+            if (player.x > 465 - player.width ){
+                player.x = 465 - player.height;
+            }
+
+            if (player.x < 15){
+                player.x = 15;
+            }
+
+            if (player.y > 750){
+                player.y = 750;
+            }
         }
     }
 
@@ -755,14 +769,14 @@ public abstract class PlayState extends State{
             Sand quickSand = (Sand) sandIterator.next();
             if (quickSand.collides(player, this)){
                 if (!player.isSlowed()){
-                    playerSpeed /= 8;
+                    playerSpeed /= 10;
                     player.setIsSlowed(true);
                     sandCollide = true;
                 }
             }
         }
         if (!sandCollide && player.isSlowed()){
-            playerSpeed *= 8;
+            playerSpeed *= 10;
             player.setIsSlowed(false);
         }
 
