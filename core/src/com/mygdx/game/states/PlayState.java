@@ -481,7 +481,7 @@ public abstract class PlayState extends State{
                     break;
                 case BOULDER:
                     if (stage == Stage.DESERT){
-                        boulders.add(new Boulder((tileLength * (i % GAME_WIDTH)) + 10, tracker, 60, 60, stage));
+                        boulders.add(new Boulder((tileLength * (i % GAME_WIDTH)) + 15, tracker, 50, 50, stage));
                     }
                     break;
                 case M_CIRCLE:
