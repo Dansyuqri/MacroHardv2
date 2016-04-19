@@ -9,6 +9,6 @@ import com.badlogic.gdx.graphics.Texture;
 public class UI extends GameObject{
     public UI(int y){
         super(0, y, 480, 800);
-        this.setImage(new Texture(Gdx.files.internal("UI.png")));
+        this.setImage(new Texture(Gdx.files.internal("UI_left.png")));
     }
 }

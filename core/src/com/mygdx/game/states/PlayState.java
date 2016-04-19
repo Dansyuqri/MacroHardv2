@@ -347,7 +347,7 @@ public abstract class PlayState extends State{
         draw(sb);
         sb.draw(joystick.getJoystickCentreImage(), joystick.getCX(), joystick.getCY());
         yourBitmapFontName.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-        yourBitmapFontName.draw(sb, "score: " + score, 25, 100);
+        yourBitmapFontName.draw(sb, "score: " + score, 420, 100);
 
         sb.end();
 

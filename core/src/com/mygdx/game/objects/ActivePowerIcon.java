@@ -9,7 +9,7 @@ import com.mygdx.game.customEnum.PowerType;
  */
 public class ActivePowerIcon extends GameObject {
     public ActivePowerIcon(PowerType powerType){
-        super(30, 30, 50, 50);
+        super(400, 30, 50, 50);
         switch (powerType) {
             case TELEPORT:
                 //TODO: change image
