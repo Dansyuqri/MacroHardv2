@@ -14,7 +14,7 @@ public class Pointer extends GameObject {
                 this.setImage(new Texture(Gdx.files.internal("pointer_1.png")));
                 break;
             case 1:
-                this.setImage(new Texture(Gdx.files.internal("pointer_1.png")));
+                this.setImage(new Texture(Gdx.files.internal("pointer_2.png")));
                 break;
         }
     }
