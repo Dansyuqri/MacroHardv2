@@ -368,6 +368,12 @@ public abstract class PlayState extends State{
             }
         }
 
+        for (GameObject icon:icons) {
+            if (icon instanceof InnatePowerIcon) {
+                ((InnatePowerIcon) icon).refreshIcon();
+            }
+        }
+
         mapSynchronizer.scroll(gameSpeed * slowGameDown * freezeMaze );
 
         synchronized (this) {
@@ -880,7 +886,7 @@ public abstract class PlayState extends State{
                     public void run() {
                         player.setCanDestroy(false);
                     }
-                }, 5, TimeUnit.SECONDS);
+                }, 4, TimeUnit.SECONDS);
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
@@ -898,7 +904,7 @@ public abstract class PlayState extends State{
                     public void run() {
                         player.setIsInvicible(false);
                     }
-                }, 5, TimeUnit.SECONDS);
+                }, 4, TimeUnit.SECONDS);
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
@@ -946,7 +952,7 @@ public abstract class PlayState extends State{
                     else {
                         ((Player) gameObject).setDirection();
                     }
-                    ((Player)gameObject).setPrevCoord(((Player)gameObject).x, ((Player)gameObject).y);
+                    ((Player)gameObject).setPrevCoord(((Player) gameObject).x, ((Player) gameObject).y);
                 }
 
                 else if (gameObject instanceof Obstacle && ((Obstacle)gameObject).isToDestroy()){
@@ -985,7 +991,7 @@ public abstract class PlayState extends State{
     public void changeInnatePowerIcon(boolean available) {
         for (GameObject icon:icons) {
             if (icon instanceof InnatePowerIcon) {
-                ((InnatePowerIcon) icon).changeIcon(available);
+                ((InnatePowerIcon) icon).setAvailable(available);
             }
         }
     }

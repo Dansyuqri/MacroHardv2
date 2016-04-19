@@ -9,6 +9,7 @@ import com.mygdx.game.customEnum.PowerType;
  */
 public class InnatePowerIcon extends GameObject {
     PowerType powerType;
+    private boolean available;
     public InnatePowerIcon(PowerType powerType){
         super(90, 30, 50, 50);
         this.powerType = powerType;
@@ -22,7 +23,11 @@ public class InnatePowerIcon extends GameObject {
                 break;
         }
     }
-    public void changeIcon(boolean available) {
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    public void refreshIcon() {
         switch (powerType) {
             case DESTROY_WALL:
                 if (available) this.setImage(new Texture(Gdx.files.internal("power_destroy_walls.png")));
