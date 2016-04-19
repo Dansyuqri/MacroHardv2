@@ -13,7 +13,6 @@ import com.mygdx.game.customEnum.PowerType;
  * Created by Syuqri on 3/9/2016.
  */
 public class Player extends Movable {
-    private PowerType passivePower, activePower, innatePower;
     public final int coolDown;
     public final int effectTime;
     private PowerType activePower, innatePower;
