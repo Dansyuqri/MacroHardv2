@@ -3,6 +3,7 @@ package com.mygdx.game.objects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.mygdx.game.Interface.Collidable;
+import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.states.PlayState;
 
 /**
@@ -10,10 +11,17 @@ import com.mygdx.game.states.PlayState;
  */
 public class Ghost extends Movable implements Collidable {
     private boolean right = false;
+    private Stage stage;
 
-    public Ghost(float x, float y, float width, float height){
+    public Ghost(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
-        this.setImage(new Texture(Gdx.files.internal("ghost.png")));
+        this.stage = stage;
+        if (stage == Stage.DESERT) {
+            this.setImage(new Texture(Gdx.files.internal("mummy.png")));
+        }
+        else if (stage == Stage.DUNGEON){
+            this.setImage(new Texture(Gdx.files.internal("ghost.png")));
+        }
     }
 
     @Override
@@ -28,14 +36,24 @@ public class Ghost extends Movable implements Collidable {
             x -= 200 * Gdx.graphics.getDeltaTime();
             if (x <= 15){
                 right = true;
-                this.setImage(new Texture(Gdx.files.internal("ghost2.png")));
+                if (stage == Stage.DESERT) {
+                    this.setImage(new Texture(Gdx.files.internal("mummy2.png")));
+                }
+                else if (stage == Stage.DUNGEON){
+                    this.setImage(new Texture(Gdx.files.internal("ghost2.png")));
+                }
             }
         }
         else {
             x += 200 * Gdx.graphics.getDeltaTime();
             if (x >= 415){
                 right = false;
-                this.setImage(new Texture(Gdx.files.internal("ghost.png")));
+                if (stage == Stage.DESERT) {
+                    this.setImage(new Texture(Gdx.files.internal("mummy.png")));
+                }
+                else if (stage == Stage.DUNGEON){
+                    this.setImage(new Texture(Gdx.files.internal("ghost.png")));
+                }
             }
         }
     }
