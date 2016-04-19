@@ -1,5 +1,6 @@
 package com.mygdx.game.states;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.mygdx.game.MacroHardv2;
 import com.badlogic.gdx.Gdx;
@@ -8,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.customEnum.StateType;
 import com.mygdx.game.objects.CustomButton;
-
+import com.badlogic.gdx.Input.Keys;
 /**
  * Created by Syuqri on 3/7/2016.
  */
@@ -18,7 +19,7 @@ public class MenuState extends State{
     private CustomButton playBtn, instructionBtn, invitationBtn, sendInviteBtn, quickGameBtn, signInBtn, leaderboardBtn;
     private Vector3 touchPos = new Vector3(0,0,0);
     private float bufferFromTop = 20;
-    private boolean touched = false;
+    private boolean backButtonPressed, touched = false;
     public static volatile boolean startHost = false;
     public static volatile boolean startNonHost = false;
 
@@ -36,6 +37,8 @@ public class MenuState extends State{
             ;
     public MenuState(GameStateManager gsm) {
         super(gsm);
+        Gdx.input.setCatchBackKey(true);
+
         cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         cam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         graphicsX = Gdx.graphics.getWidth();
@@ -96,7 +99,13 @@ public class MenuState extends State{
             dispose();
             gsm.set(new PlayStateNonHost(gsm, MacroHardv2.actionResolver.getmyidint()), StateType.PLAY);
         }
-
+        if(Gdx.input.isKeyPressed(Keys.BACK) && !backButtonPressed){
+            backButtonPressed = true;
+        }
+        if(!Gdx.input.isKeyPressed(Keys.BACK) && backButtonPressed){
+            Gdx.app.exit();
+            System.exit(0);
+        }
         /****************************************************************************************
          * This is a set of conditions to handle the highlighting of the buttons when pressed
          * **************************************************************************************
