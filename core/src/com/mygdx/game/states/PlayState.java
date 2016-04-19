@@ -886,14 +886,14 @@ public abstract class PlayState extends State{
                     public void run() {
                         player.setCanDestroy(false);
                     }
-                }, 4, TimeUnit.SECONDS);
+                }, player.effectTime, TimeUnit.SECONDS);
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
                         player.setInnatePower(PowerType.DESTROY_WALL);
                         changeInnatePowerIcon(true);
                     }
-                }, 20, TimeUnit.SECONDS);
+                }, player.coolDown, TimeUnit.SECONDS);
                 break;
             case INVINCIBLE:
                 changeInnatePowerIcon(false);
@@ -904,14 +904,14 @@ public abstract class PlayState extends State{
                     public void run() {
                         player.setIsInvicible(false);
                     }
-                }, 4, TimeUnit.SECONDS);
+                }, player.effectTime, TimeUnit.SECONDS);
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
                         player.setInnatePower(PowerType.INVINCIBLE);
                         changeInnatePowerIcon(true);
                     }
-                }, 20, TimeUnit.SECONDS);
+                }, player.coolDown, TimeUnit.SECONDS);
                 break;
         }
     }

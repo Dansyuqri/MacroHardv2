@@ -14,6 +14,8 @@ import com.mygdx.game.customEnum.PowerType;
  */
 public class Player extends Movable {
     private PowerType passivePower, activePower, innatePower;
+    public final int coolDown;
+    public final int effectTime;
     private boolean canDestroy, isInvicible;
     private boolean isSlowed;
     float prev_x, prev_y;
@@ -33,12 +35,19 @@ public class Player extends Movable {
         switch (id) {
             case 0:
                 innatePower = PowerType.DESTROY_WALL;
+                coolDown = 35;
+                effectTime = 3;
                 walkSheet = new Texture(Gdx.files.internal("Player_sprite.png"));
                 break;
             case 1:
                 innatePower = PowerType.INVINCIBLE;
+                coolDown = 25;
+                effectTime = 4;
                 walkSheet = new Texture(Gdx.files.internal("Player2_sprite.png"));
                 break;
+            default:
+                coolDown = 0;
+                effectTime = 0;
         }
         TextureRegion[][] tmp = TextureRegion.split(walkSheet, walkSheet.getWidth()/FRAME_COLS, walkSheet.getHeight()/FRAME_ROWS);              // #10
         walkFramesNorth = new TextureRegion[4];
