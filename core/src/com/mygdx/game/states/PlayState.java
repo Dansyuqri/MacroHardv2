@@ -753,6 +753,7 @@ public abstract class PlayState extends State{
         synchronized (Switch.class) {
             if (gotSwitch) {
                 open = true;
+                gsm.startMusic("GateSound.wav",(float)3);
             }
         }
 
