@@ -8,6 +8,8 @@ import com.mygdx.game.customEnum.MessageCode;
 import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.states.PlayState;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.print.attribute.standard.MediaSize;
 
 /**
@@ -17,7 +19,7 @@ public class MagicCircle extends Movable implements Collidable {
     private static int nextID;
     private int id;
     private boolean on = false;
-    private boolean otherOn = false;
+    private AtomicBoolean otherOn = new AtomicBoolean(false);
 
     public MagicCircle(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
@@ -31,7 +33,7 @@ public class MagicCircle extends Movable implements Collidable {
     }
 
     public boolean getOtherOn() {
-        return otherOn;
+        return otherOn.get();
     }
 
     public static void reset(){
@@ -52,7 +54,6 @@ public class MagicCircle extends Movable implements Collidable {
 
     public void setOff() {
         if (on) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.MAGIC_CIRCLE_OFF, (byte) id});
             this.setImage(new Texture(Gdx.files.internal("magic_circle.png")));
             on = false;
         }
@@ -62,9 +63,9 @@ public class MagicCircle extends Movable implements Collidable {
         return on;
     }
     public void OtherOn(){
-        otherOn = true;
+        otherOn.compareAndSet(false, true);
     }
     public void OtherOff(){
-        otherOn = false;
+        otherOn.compareAndSet(true, false);
     }
 }
