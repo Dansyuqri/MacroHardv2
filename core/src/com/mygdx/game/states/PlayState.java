@@ -929,25 +929,25 @@ public abstract class PlayState extends State{
     private void activateActivePower(){
         switch (player.getActivePower()) {
             case FREEZE_MAZE:
+                player.setActivePower(PowerType.NOTHING);
                 freezeMaze.compareAndSet(1, 0);
                 MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze.get()));
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        player.setActivePower(PowerType.NOTHING);
                         freezeMaze.compareAndSet(0, 1);
                         MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze.get()));
                     }
                 }, 3, TimeUnit.SECONDS);
                 break;
             case SPEED_PLAYER_UP:
+                player.setActivePower(PowerType.NOTHING);
                 synchronized (Player.class) {
                     playerSpeed.getAndSet(playerSpeed.get() + 50);
                     backgroundTaskExecutor.schedule(new Runnable() {
                         @Override
                         public void run() {
                             synchronized (Player.class) {
-                                player.setActivePower(PowerType.NOTHING);
                                 playerSpeed.getAndSet(playerSpeed.get() - 50);
                             }
                         }
@@ -955,6 +955,7 @@ public abstract class PlayState extends State{
                 }
                 break;
             case SLOW_GAME_DOWN:
+                player.setActivePower(PowerType.NOTHING);
                 gsm.pauseMusic("Dance Of Death.mp3");
                 gsm.startMusic("TimeSlowSound.wav", (float) 3);
                 slowGameDown.compareAndSet(1, 2);
@@ -963,9 +964,6 @@ public abstract class PlayState extends State{
                     @Override
                     public void run() {
                         gsm.startMusic("Dance Of Death.mp3", (float) 0.1);
-                        synchronized (Player.class) {
-                            player.setActivePower(PowerType.NOTHING);
-                        }
                         slowGameDown.compareAndSet(2, 1);
                         MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown.get()));
                     }
