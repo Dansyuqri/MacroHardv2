@@ -120,23 +120,13 @@ public class MapSynchronizer extends Movable{
         if (normal) {
             float offset = tracker % 50;
             float player_offset = player.y % 50;
-            float shift = offset - player_offset;
-            if (shift > 0){
-                shift += 5;
-            } else {
-                shift -= 5;
-            }
+            float shift = offset - player_offset + 5;
             player.y += shift;
             syncTele.compareAndSet(true, false);
         } else {
             float offset = tracker % 50;
             float player_offset = player.y % 50;
-            float shift = player_offset - offset;
-            if (shift > 0){
-                shift += 5;
-            } else {
-                shift -= 5;
-            }
+            float shift = player_offset - offset + 5;
             player.y += shift;
             syncTele.compareAndSet(true, false);
         }
