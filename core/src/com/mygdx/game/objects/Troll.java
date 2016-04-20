@@ -70,4 +70,9 @@ public class Troll extends Movable implements Collidable {
     public void setCurrentFrame(float stateTime, boolean check) {
         this.setImage(trollWalkAnimation.getKeyFrame(stateTime, check));
     }
+
+    @Override
+    public void scroll (float gameSpeed) {
+        y -= 200 * PlayState.deltaCap;
+    }
 }

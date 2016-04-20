@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class PlayState extends State{
 
     //Synchronising
-    public static final float deltaCap = 0.04f;
+    public static final float deltaCap = 0.025f;
     protected boolean sync = false;
 
     //objects
@@ -71,7 +71,7 @@ public abstract class PlayState extends State{
     protected Random mapRandomizer;
 
     //values
-    protected long seed;
+    protected long seed, threadsleep;
     protected final int GAME_WIDTH = 9;
     protected final int playerID;
     private boolean running;
@@ -79,7 +79,7 @@ public abstract class PlayState extends State{
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false, onCircle = false;
     protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit;
     protected AtomicInteger slowGameDown, freezeMaze;
-    protected int playerSpeed, dangerZone, threadsleep;
+    protected int playerSpeed, dangerZone;
     public float tracker;
     public float trackerBG;
     protected int score;
@@ -160,10 +160,10 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         threadsleep = 25;
-        gameSpeed = 80;
+        gameSpeed = 70;
         speedIncrease = (float) 0.07;
         playerSpeed = 200;
-        dangerZone = 300;
+        dangerZone = 350;
         slowGameDown = new AtomicInteger(1);
         freezeMaze = new AtomicInteger(1);
         doorCounter = 0;
@@ -376,14 +376,8 @@ public abstract class PlayState extends State{
         for (ArrayList<GameObject> gameObj: gameObjects){
             for (GameObject gameObject : gameObj) {
                 if (gameObject instanceof Movable) {
-                    if (gameObject instanceof Troll){
-                        synchronized ((Object) gameSpeed) {
-                            ((Movable) gameObject).scroll((gameSpeed * (float)2.5) / slowGameDown.get() * freezeMaze.get());
-                            }
-                        } else {
-                        synchronized ((Object) gameSpeed) {
-                            ((Movable) gameObject).scroll(gameSpeed / slowGameDown.get() * freezeMaze.get());
-                        }
+                    synchronized ((Object) gameSpeed) {
+                        ((Movable) gameObject).scroll(gameSpeed / slowGameDown.get() * freezeMaze.get());
                     }
                 }
             }
@@ -397,7 +391,7 @@ public abstract class PlayState extends State{
             }
         }
 
-        mapSynchronizer.scroll(gameSpeed / slowGameDown.get() * freezeMaze.get());
+        mapSynchronizer.scroll(gameSpeed / slowGameDown.get() * freezeMaze.get() * deltaCap);
 
         synchronized (this) {
             if (end) {
@@ -408,11 +402,10 @@ public abstract class PlayState extends State{
         long time = System.currentTimeMillis() - start;
         System.out.println("My R: " + mapSynchronizer.getMyRender()+ "      OtherRender:" + mapSynchronizer.getOtherRender());
         if(mapSynchronizer.getMyRender()>mapSynchronizer.getOtherRender()){
-            threadsleep = 50;
-
+            threadsleep = 25 + 3*(mapSynchronizer.getMyRender()-mapSynchronizer.getOtherRender());
         }
         else{
-            threadsleep = 15;
+            threadsleep = 25;
         }
 
 
@@ -752,7 +745,6 @@ public abstract class PlayState extends State{
             if (((Switch) eachSwitch).collides(player, this)){
                 open = true;
                 // TODO: check music here
-                gsm.startMusic("GateSound.wav",(float)3);
                 MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte)((Switch)eachSwitch).getId()});
                 ((Switch) eachSwitch).setOn();
             } else {
@@ -1009,15 +1001,15 @@ public abstract class PlayState extends State{
                     }
                 }
 
-                if (gameObject instanceof Troll){
+                if (gameObject instanceof Troll) {
                     ((Troll) gameObject).setCurrentFrame(animateTime, true);
                     if (((Troll) gameObject).collides(obstacles, this)){
                         gsm.startMusic("WallDestroySound.wav", (float) 1);
                     }
                 }
 
-                else if (gameObject instanceof Hole && ((Hole)gameObject).isBreakHole() && !((Hole)gameObject).isBroken()){
-                    ((Hole)gameObject).setHoleDestroyTime(((Hole) gameObject).getHoleDestroyTime() + Gdx.graphics.getDeltaTime());
+                else if (gameObject instanceof Hole && ((Hole)gameObject).isBreakHole() && !((Hole)gameObject).isBroken()) {
+                    ((Hole) gameObject).setHoleDestroyTime(((Hole) gameObject).getHoleDestroyTime() + Gdx.graphics.getDeltaTime());
                     ((Hole)gameObject).setCurrentFrame(((Hole) gameObject).getHoleDestroyTime(), true);
                     if (((Hole)gameObject).getHoleDestroyTime() > 2.9){
                         ((Hole)gameObject).setBroken();
