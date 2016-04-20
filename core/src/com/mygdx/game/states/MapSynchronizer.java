@@ -3,6 +3,7 @@ package com.mygdx.game.states;
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MessageCode;
 import com.mygdx.game.objects.Movable;
+import com.mygdx.game.objects.Player;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -17,6 +18,7 @@ public class MapSynchronizer extends Movable{
     private CountDownLatch PlayerL1 = new CountDownLatch(1);
     private long MysyncRender, OthersyncRender;
     private long latency;
+    private boolean teleSync = false;
 
     MapSynchronizer(){
         super(0, 450, 0, 0);
@@ -103,6 +105,18 @@ public class MapSynchronizer extends Movable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+    public void setTeleSync(){
+        teleSync = true;
+    }
+
+    public void syncTele(float tracker, Player player) {
+        if (teleSync) {
+            float offset = tracker%50;
+            float player_offset = player.y%50;
+            player.y += offset - player_offset;
+            teleSync = false;
         }
     }
     public CountDownLatch gethost(){

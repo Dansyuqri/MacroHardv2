@@ -282,6 +282,9 @@ public abstract class PlayState extends State{
     @Override
     public void render(SpriteBatch sb) {
         mapSynchronizer.updateSyncRender();
+        synchronized (Player.class) {
+            mapSynchronizer.syncTele(tracker, player);
+        }
         long start = System.currentTimeMillis();
         //Host
         if(!sync){
@@ -937,6 +940,7 @@ public abstract class PlayState extends State{
                 }, player.coolDown, TimeUnit.SECONDS);
                 break;
             case TELEPORT:
+                mapSynchronizer.setTeleSync();
                 changeInnatePowerIcon(false);
                 player.setInnatePower(PowerType.NOTHING);
                 byte[] message = sendTeleport(playerID, player.x, player.y);
