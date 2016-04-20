@@ -739,7 +739,7 @@ public abstract class PlayState extends State{
 
         boolean open = false;
         for (GameObject eachSwitch:switches){
-            if (((Switch) eachSwitch).collides(player, this) || ((Switch) eachSwitch).isOtherOn()){
+            if (((Switch) eachSwitch).collides(player, this)){
                 open = true;
                 MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte)((Switch)eachSwitch).getId()});
                 ((Switch) eachSwitch).setOn();
@@ -747,13 +747,14 @@ public abstract class PlayState extends State{
                 ((Switch) eachSwitch).setOff();
             }
 
+            if (!open && onSwitch) {
+                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS});
+            }
+
             if (((Switch) eachSwitch).isOtherOn()) {
                 ((Switch) eachSwitch).setOn();
+                open = true;
             }
-        }
-
-        if (!open && onSwitch) {
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS});
         }
 
         if (open && !onSwitch) {
@@ -1082,9 +1083,7 @@ public abstract class PlayState extends State{
                 //close doors
                 case MessageCode.CLOSE_DOORS:
                     for (GameObject swi: switches) {
-                        if (((Switch)swi).getId() == message[1]){
-                            ((Switch)swi).setOtherOff();
-                        }
+                        ((Switch)swi).setOtherOff();
                     }
                     break;
 
