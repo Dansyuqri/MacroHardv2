@@ -405,6 +405,9 @@ public abstract class PlayState extends State{
         System.out.println("My R: " + mapSynchronizer.getMyRender()+ "      OtherRender:" + mapSynchronizer.getOtherRender());
         if(mapSynchronizer.getMyRender()>mapSynchronizer.getOtherRender()){
             threadsleep = 25 + 3*(mapSynchronizer.getMyRender()-mapSynchronizer.getOtherRender());
+            if (threadsleep > 200){
+                threadsleep = 200;
+            }
         }
         else{
             threadsleep = 25;
