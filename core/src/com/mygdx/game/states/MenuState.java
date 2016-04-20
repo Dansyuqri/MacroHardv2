@@ -14,24 +14,23 @@ import com.badlogic.gdx.Input.Keys;
  * Created by Syuqri on 3/7/2016.
  */
 public class MenuState extends State{
-    private Texture background,playBtnImage,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, signInBtnImage, leaderboardBtnImage;
+    private Texture background,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, leaderboardBtnImage;
 
-    private CustomButton playBtn, instructionBtn, invitationBtn, sendInviteBtn, quickGameBtn, signInBtn, leaderboardBtn;
+    private CustomButton instructionBtn, invitationBtn, sendInviteBtn, quickGameBtn, leaderboardBtn;
     private Vector3 touchPos = new Vector3(0,0,0);
-    private float bufferFromTop = 20;
+    private float bufferFromTop = 40;
     private boolean backButtonPressed, touched = false;
     public static volatile boolean startHost = false;
     public static volatile boolean startNonHost = false;
 
 
     //Resize variables
-    private float playBtnX, playBtnY,
+    private float
             instructionBtnX, instructionBtnY,
             quickGameBtnX, quickGameBtnY,
             graphicsX, graphicsY,
             sendInviteBtnX, sendInviteBtnY,
             invitationBtnX, invitationBtnY,
-            signInBtnX, signInBtnY,
             leaderboardBtnX, leaderboardBtnY,
             resizeFactor
             ;
@@ -47,10 +46,8 @@ public class MenuState extends State{
 
         gsm.startMusicLoop("MainMenuSound.mp3", (float) 0.15);
 
-        resizeFactor = resizeFactor(playBtnImage.getWidth());
+        resizeFactor = resizeFactor(quickGameBtnImage.getWidth());
 
-        playBtnX = playBtnImage.getWidth()*resizeFactor;
-        playBtnY = playBtnImage.getHeight()*resizeFactor;
         quickGameBtnX = quickGameBtnImage.getWidth()*resizeFactor;
         quickGameBtnY = quickGameBtnImage.getHeight()*resizeFactor;
         instructionBtnX = instructionBtnImage.getWidth()*resizeFactor;
@@ -59,13 +56,9 @@ public class MenuState extends State{
         sendInviteBtnY = sendInviteBtnImage.getHeight()*resizeFactor;
         invitationBtnX = invitationBtnImage.getWidth()*resizeFactor;
         invitationBtnY = invitationBtnImage.getHeight()*resizeFactor;
-        signInBtnX = signInBtnImage.getWidth()*resizeFactor;
-        signInBtnY = signInBtnImage.getHeight()*resizeFactor;
         leaderboardBtnX = leaderboardBtnImage.getWidth()*resizeFactor;
         leaderboardBtnY = leaderboardBtnImage.getHeight()*resizeFactor;
 
-        playBtn = new CustomButton((graphicsX/2),(graphicsY/2+instructionBtnY/2 + quickGameBtnY + 2*bufferFromTop),playBtnX,playBtnY);
-        playBtn.setImage(playBtnImage);
         quickGameBtn = new CustomButton( (graphicsX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
         quickGameBtn.setImage(quickGameBtnImage);
         instructionBtn = new CustomButton((graphicsX / 2), graphicsY / 2 - instructionBtnY/2, instructionBtnX, instructionBtnY);
@@ -74,9 +67,7 @@ public class MenuState extends State{
         sendInviteBtn.setImage(sendInviteBtnImage);
         invitationBtn = new CustomButton((graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY-invitationBtnY- 2*bufferFromTop),invitationBtnX,invitationBtnY);
         invitationBtn.setImage(instructionBtnImage);
-        signInBtn = new CustomButton((graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY- 3*bufferFromTop),signInBtnX,signInBtnY);
-        signInBtn.setImage(signInBtnImage);
-        leaderboardBtn = new CustomButton((graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY-leaderboardBtnY- 4*bufferFromTop),leaderboardBtnX,leaderboardBtnY);
+        leaderboardBtn = new CustomButton((graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY -leaderboardBtnY- 3*bufferFromTop),leaderboardBtnX,leaderboardBtnY);
         leaderboardBtn.setImage(leaderboardBtnImage);
 
     }
@@ -111,12 +102,7 @@ public class MenuState extends State{
          * **************************************************************************************
          */
         if(Gdx.input.isTouched() && !touched){
-            if(playBtn.contains(touchPos.x,touchPos.y)){
-                playBtnImage.dispose();
-                playBtnImage = new Texture("playBtn_pressed.png");
-                touched = true;
-            }
-            else if(instructionBtn.contains(touchPos.x,touchPos.y)){
+            if(instructionBtn.contains(touchPos.x,touchPos.y)){
                 instructionBtnImage.dispose();
                 instructionBtnImage = new Texture("instructionBtn_pressed.png");
                 touched = true;
@@ -136,11 +122,6 @@ public class MenuState extends State{
                 invitationBtnImage = new Texture("invitationBtn_pressed.png");
                 touched = true;
             }
-            else if(signInBtn.contains(touchPos.x,touchPos.y)){
-                signInBtnImage.dispose();
-                signInBtnImage = new Texture("signInBtn_pressed.png");
-                touched = true;
-            }
             else if(leaderboardBtn.contains(touchPos.x,touchPos.y)){
                 leaderboardBtnImage.dispose();
                 leaderboardBtnImage = new Texture("leaderboardBtn_pressed.png");
@@ -149,13 +130,7 @@ public class MenuState extends State{
         }
 
         else if(!Gdx.input.isTouched() && touched){
-            if(playBtn.contains(touchPos.x,touchPos.y)){
-                gsm.startMusic("MenuSelectionClick.wav", (float) 1);
-                gsm.set(new PlayStateHost(gsm, 0, true), StateType.PLAY);
-                //dispose();
-                touched = false;
-            }
-            else if(instructionBtn.contains(touchPos.x,touchPos.y)){
+            if(instructionBtn.contains(touchPos.x,touchPos.y)){
                 gsm.startMusic("MenuSelectionClick.wav", (float) 1);
                 gsm.set(new InstructionState(gsm), StateType.NON_PLAY);
                 //dispose();
@@ -185,13 +160,6 @@ public class MenuState extends State{
                 invitationBtnImage = new Texture("invitationBtn.png");
                 touched = false;
             }
-            else if(signInBtn.contains(touchPos.x,touchPos.y)){
-                gsm.startMusic("MenuSelectionClick.wav", (float) 1);
-                MacroHardv2.actionResolver.SignIn();
-                signInBtnImage.dispose();
-                signInBtnImage = new Texture("signInBtn.png");
-                touched = false;
-            }
             else if(leaderboardBtn.contains(touchPos.x,touchPos.y)){
                 gsm.startMusic("MenuSelectionClick.wav", (float) 1);
                 MacroHardv2.actionResolver.getLeaderboardGPGS();
@@ -214,25 +182,21 @@ public class MenuState extends State{
         cam.update();
         sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
-        sb.draw(playBtnImage, (graphicsX / 2) , (graphicsY / 2 + instructionBtnY / 2 + quickGameBtnY + 2 * bufferFromTop), playBtnX, playBtnY);
         sb.draw(quickGameBtnImage, (graphicsX / 2), (graphicsY / 2 + instructionBtnY / 2 + bufferFromTop), quickGameBtnX, quickGameBtnY);
         sb.draw(instructionBtnImage, (graphicsX / 2), graphicsY / 2 - instructionBtnY / 2, instructionBtnX, instructionBtnY);
         sb.draw(sendInviteBtnImage, (graphicsX / 2), (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - bufferFromTop), sendInviteBtnX, sendInviteBtnY);
         sb.draw(invitationBtnImage, (graphicsX / 2) , (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - 2 * bufferFromTop), invitationBtnX, invitationBtnY);
-        sb.draw(signInBtnImage, (graphicsX / 2) , (graphicsY / 2 - quickGameBtnY / 2 - sendInviteBtnY - invitationBtnY - signInBtnY - 3 * bufferFromTop), signInBtnX, signInBtnY);
-        sb.draw(leaderboardBtnImage,(graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY - signInBtnY-leaderboardBtnY- 4*bufferFromTop),leaderboardBtnX,leaderboardBtnY);
+        sb.draw(leaderboardBtnImage,(graphicsX/2),(graphicsY/2 - quickGameBtnY/2 - sendInviteBtnY - invitationBtnY-leaderboardBtnY- 3*bufferFromTop),leaderboardBtnX,leaderboardBtnY);
         sb.end();
     }
 
     @Override
     public void dispose() {
         background.dispose();
-        playBtnImage.dispose();
         instructionBtnImage.dispose();
         quickGameBtnImage.dispose();
         sendInviteBtnImage.dispose();
         invitationBtnImage.dispose();
-        signInBtnImage.dispose();
         leaderboardBtnImage.dispose();
     }
 
@@ -243,12 +207,10 @@ public class MenuState extends State{
 
     public void generateTextures(){
         background = new Texture("Main_menu.png");
-        playBtnImage = new Texture("playBtn.png");
         instructionBtnImage = new Texture("instructionBtn.png");
         quickGameBtnImage = new Texture("quickGameBtn.png");
         sendInviteBtnImage = new Texture("sendInviteBtn.png");
         invitationBtnImage = new Texture("invitationBtn.png");
-        signInBtnImage = new Texture("signInBtn.png");
         leaderboardBtnImage = new Texture("leaderboardBtn.png");
     }
 
