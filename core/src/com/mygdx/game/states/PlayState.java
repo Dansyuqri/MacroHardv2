@@ -746,22 +746,24 @@ public abstract class PlayState extends State{
             } else {
                 ((Switch) eachSwitch).setOff();
             }
-
-            if (!open && onSwitch) {
-                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS});
-            }
-
-            if (((Switch) eachSwitch).isOtherOn()) {
-                ((Switch) eachSwitch).setOn();
-                open = true;
-            }
         }
 
         if (open && !onSwitch) {
             gsm.startMusic("GateSound.wav", (float) 3);
         }
 
+        if (!open && onSwitch) {
+            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS});
+        }
+
         onSwitch = open;
+
+        for (GameObject eachSwitch:switches) {
+            if (((Switch) eachSwitch).isOtherOn()) {
+                ((Switch) eachSwitch).setOn();
+                open = true;
+            }
+        }
 
         if (open) {
             for (GameObject door : doors) {
@@ -1073,6 +1075,7 @@ public abstract class PlayState extends State{
 
                 //open doors
                 case MessageCode.OPEN_DOORS:
+                    gsm.startMusic("GateSound.wav", (float) 3);
                     for (GameObject swi: switches) {
                         if (((Switch)swi).getId() == message[1]){
                             ((Switch)swi).setOtherOn();
