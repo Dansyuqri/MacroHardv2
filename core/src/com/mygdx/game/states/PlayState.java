@@ -406,7 +406,6 @@ public abstract class PlayState extends State{
         }
 
         long time = System.currentTimeMillis() - start;
-        System.out.println("My R: " + mapSynchronizer.getMyRender()+ "      OtherRender:" + mapSynchronizer.getOtherRender());
         if(mapSynchronizer.getMyRender()>mapSynchronizer.getOtherRender()){
             threadsleep = 25 + 3*(mapSynchronizer.getMyRender()-mapSynchronizer.getOtherRender());
             if (threadsleep > 200){
@@ -947,7 +946,6 @@ public abstract class PlayState extends State{
                 }, player.coolDown, TimeUnit.SECONDS);
                 break;
             case TELEPORT:
-                mapSynchronizer.setTeleSync();
                 changeInnatePowerIcon(false);
                 player.setInnatePower(PowerType.NOTHING);
                 byte[] message = sendTeleport(playerID, player.x, player.y);
@@ -1207,6 +1205,7 @@ public abstract class PlayState extends State{
                     slowGameDown.set(message[1] * 10 + message[2] / 10);
                     break;
                 case MessageCode.TELEPORT:
+                    mapSynchronizer.setTeleSync();
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
                     float y1 = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency();
                     synchronized (Player.class) {
