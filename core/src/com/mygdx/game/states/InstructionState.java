@@ -12,7 +12,7 @@ import com.mygdx.game.customEnum.StateType;
  * Created by Syuqri on 3/19/2016.
  */
 public class InstructionState extends State{
-    private static String[] instructionPages = {"pageOne.png","pageTwo.png","pageThree.png","pageFour.png"};
+    private static String[] instructionPages = {"pageOne.png","pageTwo.png","pageThree.png","pageFour.png","pageFive.png"};
     private int pageIndex = 0;
     private final int maxIndex = instructionPages.length-1;
     private float graphicsX, graphicsY;
