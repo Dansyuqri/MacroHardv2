@@ -73,6 +73,6 @@ public class Troll extends Movable implements Collidable {
 
     @Override
     public void scroll (float gameSpeed) {
-        y -= 200 * PlayState.deltaCap;
+        y -= 300 * PlayState.deltaCap;
     }
 }

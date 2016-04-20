@@ -160,7 +160,7 @@ public abstract class PlayState extends State{
 
         //misc values initialization
         threadsleep = 25;
-        gameSpeed = 70;
+        gameSpeed = 75;
         speedIncrease = (float) 0.07;
         playerSpeed = 200;
         dangerZone = 350;
@@ -526,7 +526,7 @@ public abstract class PlayState extends State{
             }
         }
         if (score > 200 &&(stage == Stage.ICE)) {
-            if (score % 15 == 0) {
+            if (score % 10 == 0) {
                 trolls.add(new Troll((tileLength * mapRandomizer.nextInt(9)) + 15, tracker, tileLength, tileLength));
             }
         }
@@ -761,12 +761,15 @@ public abstract class PlayState extends State{
             MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.CLOSE_DOORS});
         }
 
+        if (open && !onSwitch) {
+            gsm.startMusic("GateSound.wav", (float) 3);
+        }
+
         onSwitch = open;
 
         synchronized (Switch.class) {
             if (gotSwitch) {
                 open = true;
-                gsm.startMusic("GateSound.wav",(float)3);
             }
         }
 
