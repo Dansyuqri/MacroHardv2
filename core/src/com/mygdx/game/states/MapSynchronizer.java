@@ -27,8 +27,12 @@ public class MapSynchronizer extends Movable{
         this.OthersyncRender=0;
     }
 
-    public void setSyncTele() {
-        syncTele.compareAndSet(false, true);
+    public void setSyncTele(boolean b) {
+        if (b) {
+            syncTele.compareAndSet(false, true);
+        } else {
+            syncTele.compareAndSet(true, false);
+        }
     }
 
     public boolean getSyncTele(){
