@@ -80,7 +80,7 @@ public abstract class PlayState extends State{
     private boolean running;
 
     private AtomicBoolean end = new AtomicBoolean(false);
-    private boolean touchHeld, gotSwitch = false, onSwitch = false, onCircle = false;
+    private boolean touchHeld, gotSwitch = false, onSwitch = false, onCircle = false, disconnectboolean = false;
     protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit;
     protected AtomicInteger slowGameDown, freezeMaze, playerSpeed, score;
     protected final int dangerZone;
@@ -90,6 +90,7 @@ public abstract class PlayState extends State{
     public Stage stage, nextStage;
     float animateTime;
     float[] angle = new float[2];
+    private int disconnectThreshold;
 
     //boolean arrays
     public MapTile[] path = createArray(MapTile.EMPTY);
@@ -306,6 +307,7 @@ public abstract class PlayState extends State{
             mapSynchronizer.sync();
         }
 
+
         if (!running){
             running = true;
             backgroundTaskExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -319,8 +321,8 @@ public abstract class PlayState extends State{
                 @Override
                 public void run() {
                     for (int i = 0; i < 2; i++) {
-                        if (((Player)players.get(i)).x != ((Player)players.get(i)).getPrev_x() ||
-                                Math.abs(((Player)players.get(i)).y - (((Player)players.get(i)).getPrev_y() - gameSpeed / slowGameDown.get() * freezeMaze.get() * deltaCap)) > 5 ) {
+                        if (((Player) players.get(i)).x != ((Player) players.get(i)).getPrev_x() ||
+                                Math.abs(((Player) players.get(i)).y - (((Player) players.get(i)).getPrev_y() - gameSpeed / slowGameDown.get() * freezeMaze.get() * deltaCap)) > 5) {
                             if (angle[i] > 3 * (Math.PI) / 8 && angle[i] <= 5 * (Math.PI) / 8) {
                                 ((Player) players.get(i)).setOrientation(Direction.NORTH);
                             } else if (angle[i] > 7 * (Math.PI) / 8 || angle[i] <= -7 * (Math.PI) / 8) {
@@ -342,6 +344,7 @@ public abstract class PlayState extends State{
                     }
                 }
             }, 0, 30, TimeUnit.MILLISECONDS);
+
         }
 
         handleInput();
@@ -435,6 +438,17 @@ public abstract class PlayState extends State{
                 e.printStackTrace();
             }
         }
+        if(disconnectboolean == false){
+            disconnectThreshold++;
+            if (disconnectThreshold > 40){
+                goToRestartState();
+            }
+        }
+        else{
+            disconnectThreshold = 0;
+        }
+        disconnectboolean = false;
+
     }
 
     @Override
@@ -1071,6 +1085,7 @@ public abstract class PlayState extends State{
 
                 //other player's coordinates
                 case MessageCode.PLAYER_POSITION:
+                    disconnectboolean=true;
                     int other = (int) message[1];
                     float x = (float) message[2] * 10 + (float) message[3] / 10;
                     float y = (float) message[4] * 10 + (float) message[5] / 10;
