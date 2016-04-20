@@ -830,16 +830,12 @@ public abstract class PlayState extends State{
             if (((MagicCircle)eachCircle).collides(player, this) && !onOneCircle){
                 stepped = true;
                 onOneCircle = true;
-            } else {
-                MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.MAGIC_CIRCLE_OFF, (byte) ((MagicCircle)eachCircle).getId()});
             }
 
-            synchronized (MagicCircle.class) {
-                if (stepped || ((MagicCircle) eachCircle).getOtherOn()) {
-                    ((MagicCircle) eachCircle).setOn();
-                } else {
-                    ((MagicCircle) eachCircle).setOff();
-                }
+            if (stepped || ((MagicCircle) eachCircle).getOtherOn()) {
+                ((MagicCircle) eachCircle).setOn();
+            } else {
+                ((MagicCircle) eachCircle).setOff();
             }
 
             if (stepped && !onCircle){
