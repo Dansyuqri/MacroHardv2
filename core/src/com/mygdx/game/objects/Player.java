@@ -9,13 +9,16 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.customEnum.Direction;
 import com.mygdx.game.customEnum.PowerType;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Created by Syuqri on 3/9/2016.
  */
 public class Player extends Movable {
     public final int coolDown;
     public final int effectTime;
-    private PowerType activePower, innatePower;
+    private PowerType innatePower;
+    private AtomicReference<PowerType> activePower;
     private boolean canDestroy, isInvicible;
     private boolean isSlowed;
     float prev_x, prev_y;
@@ -94,7 +97,7 @@ public class Player extends Movable {
                 this.setImage(faceNorth);
                 break;
         }
-        this.activePower = PowerType.NOTHING;
+        this.activePower = new AtomicReference<PowerType>(PowerType.NOTHING);
         canDestroy = isSlowed = isInvicible = false;
 
     }
@@ -189,11 +192,11 @@ public class Player extends Movable {
     }
 
     public PowerType getActivePower() {
-        return activePower;
+        return activePower.get();
     }
 
     public void setActivePower(PowerType activePower) {
-        this.activePower = activePower;
+        this.activePower = new AtomicReference<PowerType>(activePower);
     }
 
     public boolean getCanDestroy() {

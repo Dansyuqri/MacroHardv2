@@ -78,8 +78,8 @@ public abstract class PlayState extends State{
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false, onCircle = false;
     protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit;
-    protected AtomicInteger slowGameDown, freezeMaze;
-    protected int playerSpeed, dangerZone;
+    protected AtomicInteger slowGameDown, freezeMaze, playerSpeed;
+    protected final int dangerZone;
     public float tracker;
     public float trackerBG;
     protected int score;
@@ -162,7 +162,7 @@ public abstract class PlayState extends State{
         threadsleep = 25;
         gameSpeed = 75;
         speedIncrease = (float) 0.07;
-        playerSpeed = 200;
+        playerSpeed = new AtomicInteger(200);
         dangerZone = 350;
         slowGameDown = new AtomicInteger(1);
         freezeMaze = new AtomicInteger(1);
@@ -560,24 +560,24 @@ public abstract class PlayState extends State{
         synchronized (Player.class) {
             float prevx = player.x;
             float prevy = player.y;
-            player.x += ratio * x * playerSpeed * deltaCap;
-            player.y += ratio * y * playerSpeed * deltaCap;
+            player.x += ratio * x * playerSpeed.get() * deltaCap;
+            player.y += ratio * y * playerSpeed.get() * deltaCap;
             if (checkObstacleCollision()) {
                 player.x = prevx;
                 player.y = prevy;
 
                 if (x > 0) {
-                    player.x += ratio * playerSpeed * deltaCap;
+                    player.x += ratio * playerSpeed.get() * deltaCap;
                 } else {
-                    player.x -= ratio * playerSpeed * deltaCap;
+                    player.x -= ratio * playerSpeed.get() * deltaCap;
                 }
                 if (checkObstacleCollision()) {
                     player.x = prevx;
                 }
                 if (y > 0) {
-                    player.y += ratio * playerSpeed * deltaCap;
+                    player.y += ratio * playerSpeed.get() * deltaCap;
                 } else {
-                    player.y -= ratio * playerSpeed * deltaCap;
+                    player.y -= ratio * playerSpeed.get() * deltaCap;
                 }
                 if (checkObstacleCollision()) {
                     player.y = prevy;
@@ -802,14 +802,14 @@ public abstract class PlayState extends State{
             Sand quickSand = (Sand) sandIterator.next();
             if (quickSand.collides(player, this)){
                 if (!player.isSlowed()){
-                    playerSpeed -= 150;
+                    playerSpeed.getAndSet(playerSpeed.get() - 150);
                     player.setIsSlowed(true);
                     sandCollide = true;
                 }
             }
         }
         if (!sandCollide && player.isSlowed()){
-            playerSpeed += 150;
+            playerSpeed.getAndSet(playerSpeed.get() + 150);
             player.setIsSlowed(false);
         }
 
@@ -873,38 +873,38 @@ public abstract class PlayState extends State{
     private void activateActivePower(){
         switch (player.getActivePower()) {
             case FREEZE_MAZE:
-                freezeMaze.set(0);
+                freezeMaze.compareAndSet(1, 0);
                 MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze.get()));
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
                         player.setActivePower(PowerType.NOTHING);
-                        freezeMaze.set(1);
+                        freezeMaze.compareAndSet(0, 1);
                         MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze.get()));
                     }
                 }, 3, TimeUnit.SECONDS);
                 break;
             case SPEED_PLAYER_UP:
-                playerSpeed += 50;
+                playerSpeed.getAndSet(playerSpeed.get() + 50);
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
                         player.setActivePower(PowerType.NOTHING);
-                        playerSpeed -= 50;
+                        playerSpeed.getAndSet(playerSpeed.get() - 50);
                     }
                 },7, TimeUnit.SECONDS);
                 break;
             case SLOW_GAME_DOWN:
                 gsm.pauseMusic("Dance Of Death.mp3");
                 gsm.startMusic("TimeSlowSound.wav", (float) 3);
-                slowGameDown.set(2);
+                slowGameDown.compareAndSet(1, 2);
                 MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown.get()));
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
                         gsm.startMusic("Dance Of Death.mp3", (float) 0.1);
                         player.setActivePower(PowerType.NOTHING);
-                        slowGameDown.set(1);
+                        slowGameDown.compareAndSet(2, 1);
                         MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown.get()));
                     }
                 }, 5, TimeUnit.SECONDS);
