@@ -78,11 +78,10 @@ public abstract class PlayState extends State{
 
     private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false, onCircle = false;
     protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit;
-    protected AtomicInteger slowGameDown, freezeMaze, playerSpeed;
+    protected AtomicInteger slowGameDown, freezeMaze, playerSpeed, score;
     protected final int dangerZone;
     public float tracker;
     public float trackerBG;
-    protected int score;
     BitmapFont yourBitmapFontName;
     public Stage stage, nextStage;
     float animateTime;
@@ -174,7 +173,7 @@ public abstract class PlayState extends State{
         nextStage = Stage.DUNGEON;
         tracker = 800;
         trackerBG = 800;
-        score = 0;
+        score = new AtomicInteger(0);
         yourBitmapFontName = new BitmapFont();
         animateTime = 0f;
 
@@ -338,7 +337,7 @@ public abstract class PlayState extends State{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            score++;
+            score.getAndIncrement();
             spawnObjects();
             spawnSides(tracker + tileLength);
             tracker += tileLength;
@@ -494,7 +493,7 @@ public abstract class PlayState extends State{
                     doors.add(new Door((tileLength * (i % GAME_WIDTH)) + 15, tracker, tileLength, tileLength, stage));
                     break;
                 case SPIKES:
-                    if (score > 100 && stage == Stage.DUNGEON) {
+                    if (score.get() > 100 && stage == Stage.DUNGEON) {
                         spikes.add(new Spikes((tileLength * (i % GAME_WIDTH)) + 20, tracker + 5, 40, 40));
                     }
                     break;
@@ -520,14 +519,15 @@ public abstract class PlayState extends State{
                     break;
             }
         }
-        if (score > 200 && (stage == Stage.DUNGEON|| stage == Stage.DESERT)) {
-            if (score % 15 == 0) {
-                ghosts.add(new Ghost((tileLength * 9) + 15, tracker + 2, 46, 46,stage));
-            }
-        }
-        if (score > 200 &&(stage == Stage.ICE)) {
-            if (score % 10 == 0) {
-                trolls.add(new Troll((tileLength * mapRandomizer.nextInt(9)) + 15, tracker, tileLength, tileLength));
+        if (score.get() > 150) {
+            if (stage == Stage.DUNGEON || stage == Stage.DESERT) {
+                if (score.get() % 15 == 0) {
+                    ghosts.add(new Ghost((tileLength * 9) + 15, tracker + 2, 46, 46, stage));
+                }
+            } else {
+                if (score.get() % 10 == 0) {
+                    trolls.add(new Troll((tileLength * mapRandomizer.nextInt(9)) + 15, tracker, tileLength, tileLength));
+                }
             }
         }
     }
@@ -625,7 +625,6 @@ public abstract class PlayState extends State{
         }
 
         if (player.y < 150){
-            MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
             goToRestartState();
         }
     }
@@ -689,7 +688,6 @@ public abstract class PlayState extends State{
             //      collide with spikes
             for (GameObject spike : spikes) {
                 if (((Spikes) spike).collides(player, this)) {
-                    MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
                     goToRestartState();
                 }
             }
@@ -697,7 +695,6 @@ public abstract class PlayState extends State{
             //      collide with ghosts/mummies
             for (GameObject ghost : ghosts) {
                 if (((Ghost) ghost).collides(player, this)) {
-                    MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
                     goToRestartState();
                 }
             }
@@ -723,7 +720,6 @@ public abstract class PlayState extends State{
             // collide with trolls
             for (GameObject troll: trolls){
                 if (((Troll) troll).collides(player, this)){
-                    MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
                     goToRestartState();
                 }
             }
@@ -1131,6 +1127,10 @@ public abstract class PlayState extends State{
                 case MessageCode.END_GAME:
                     synchronized (this){
                         end = true;
+                        MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
+                        byte[] scoreBytes = new byte[message.length - 1];
+                        System.arraycopy(message, 1, scoreBytes, 0, scoreBytes.length);
+                        score = new AtomicInteger(Integer.decode(new String(scoreBytes)));
                     }
                     break;
                 case MessageCode.PLAYERSTART:
@@ -1219,20 +1219,26 @@ public abstract class PlayState extends State{
     }
 
     public void goToRestartState(){
+        if (!end) {
+            MacroHardv2.actionResolver.sendReliable(wrapEndScore(score.get()));
+        }
+        while (!end);
         mapMaker.interrupt();
         backgroundTaskExecutor.shutdownNow();
-        dispose();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         MacroHardv2.actionResolver.leaveroom();
         gsm.set(new RestartState(gsm, getScore()), StateType.NON_PLAY);
     }
 
+    private byte[] wrapEndScore(int score){
+        byte[] scoreBytes = Integer.toString(score).getBytes();
+        byte[] retVal = new byte[scoreBytes.length + 1];
+        retVal[0] = MessageCode.END_GAME;
+        System.arraycopy(scoreBytes, 0, retVal, 1, scoreBytes.length);
+        return retVal;
+    }
+
     public int getScore() {
-        return score;
+        return score.get();
     }
 
     private static byte[] sendTeleport(int id, float x, float y){
