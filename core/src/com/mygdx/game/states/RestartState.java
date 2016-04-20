@@ -18,7 +18,7 @@ import com.mygdx.game.objects.CustomButton;
  * Created by Syuqri on 3/23/2016.
  */
 public class RestartState extends State{
-    private Texture background, playAgainBtnImage, mainMenuBtnImage;
+    private Texture background,  mainMenuBtnImage;
     private CustomButton mainMenuBtn;
 
     private Vector3 touchPos = new Vector3(0,0,0);
@@ -39,7 +39,8 @@ public class RestartState extends State{
         graphicsY = Gdx.graphics.getHeight();
         FreeTypeFontGenerator fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("SF Atarian System.ttf"));
         FreeTypeFontParameter parameter = new FreeTypeFontParameter();
-        parameter.size = 200;
+        int factor = Gdx.graphics.getWidth()/480;
+        parameter.size = factor*60;
         font = fontGenerator.generateFont(parameter); // font size 12 pixels
         generateTextures();
 
@@ -97,7 +98,7 @@ public class RestartState extends State{
         sb.draw(background, 0, 0, graphicsX, graphicsY);
         font.setColor(Color.WHITE);
         font.draw(sb, "Your Score: ", graphicsX / 2 - layoutScoreText.width / 2, graphicsY * 3 / 4);
-        font.draw(sb, "" + score, graphicsX / 2 - layoutScore.width / 2, graphicsY * 3 / 4 - layoutScoreText.height - layoutScore.height);
+        font.draw(sb, "" + score, graphicsX / 2 - layoutScore.width / 2, graphicsY * 3 / 4 - layoutScoreText.height - layoutScore.height/2);
         sb.draw(mainMenuBtnImage, (graphicsX / 2) - (mainMenuBtnX / 2), graphicsY / 2 - mainMenuBtnY / 2, mainMenuBtnX, mainMenuBtnY);
         sb.end();
         if(!submitted){
@@ -110,11 +111,9 @@ public class RestartState extends State{
     public void dispose() {
         background.dispose();
         mainMenuBtnImage.dispose();
-        playAgainBtnImage.dispose();
     }
     public void generateTextures(){
-        background = new Texture("menu_bg.png");
-        playAgainBtnImage = new Texture("playAgainBtn.png");
+        background = new Texture("restartScreen.png");
         mainMenuBtnImage = new Texture("mainMenuBtn.png");
     }
 }
