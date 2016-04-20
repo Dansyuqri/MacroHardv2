@@ -285,17 +285,15 @@ public abstract class PlayState extends State{
     @Override
     public void render(SpriteBatch sb) {
         mapSynchronizer.updateSyncRender();
-        if (checkObstacleCollision()){
-            float x = player.x;
-            float y = player.y;
-            synchronized (Player.class) {
-                mapSynchronizer.syncTele(tracker, player, true);
-            }
-            if (checkObstacleCollision()){
-                player.x = x;
-                player.y = y;
+        if (mapSynchronizer.getSyncTele()) {
+            if (checkObstacleCollision()) {
                 synchronized (Player.class) {
-                    mapSynchronizer.syncTele(tracker, player, false);
+                    float y = player.y;
+                    mapSynchronizer.syncTele(tracker, player, true);
+                    if (checkObstacleCollision()) {
+                        player.y = y;
+                        mapSynchronizer.syncTele(tracker, player, false);
+                    }
                 }
             }
         }
@@ -1224,6 +1222,7 @@ public abstract class PlayState extends State{
                         player.x = x1;
                         player.y = y1;
                     }
+                    mapSynchronizer.setSyncTele();
                     break;
                 case MessageCode.SYNC_RENDER:
                     byte[] syncRenderBytes = new byte[message.length - 1];

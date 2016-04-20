@@ -6,6 +6,7 @@ import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Player;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Thread.sleep;
 
@@ -18,11 +19,20 @@ public class MapSynchronizer extends Movable{
     private CountDownLatch PlayerL1 = new CountDownLatch(1);
     private long MysyncRender, OthersyncRender;
     private long latency;
+    private AtomicBoolean syncTele = new AtomicBoolean(false);
 
     MapSynchronizer(){
         super(0, 450, 0, 0);
         this.MysyncRender = 0;
         this.OthersyncRender=0;
+    }
+
+    public void setSyncTele() {
+        syncTele.compareAndSet(false, true);
+    }
+
+    public boolean getSyncTele(){
+        return syncTele.get();
     }
 
     public void updateSyncRender(){
@@ -110,11 +120,25 @@ public class MapSynchronizer extends Movable{
         if (normal) {
             float offset = tracker % 50;
             float player_offset = player.y % 50;
-            player.y += offset - player_offset;
+            float shift = offset - player_offset;
+            if (shift > 0){
+                shift += 5;
+            } else {
+                shift -= 5;
+            }
+            player.y += shift;
+            syncTele.compareAndSet(true, false);
         } else {
             float offset = tracker % 50;
             float player_offset = player.y % 50;
-            player.y -= offset - player_offset;
+            float shift = player_offset - offset;
+            if (shift > 0){
+                shift += 5;
+            } else {
+                shift -= 5;
+            }
+            player.y += shift;
+            syncTele.compareAndSet(true, false);
         }
     }
     public CountDownLatch gethost(){
