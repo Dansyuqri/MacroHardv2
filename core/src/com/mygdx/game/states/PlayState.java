@@ -285,8 +285,19 @@ public abstract class PlayState extends State{
     @Override
     public void render(SpriteBatch sb) {
         mapSynchronizer.updateSyncRender();
-        synchronized (Player.class) {
-            mapSynchronizer.syncTele(tracker, player);
+        if (checkObstacleCollision()){
+            float x = player.x;
+            float y = player.y;
+            synchronized (Player.class) {
+                mapSynchronizer.syncTele(tracker, player, true);
+            }
+            if (checkObstacleCollision()){
+                player.x = x;
+                player.y = y;
+                synchronized (Player.class) {
+                    mapSynchronizer.syncTele(tracker, player, false);
+                }
+            }
         }
         long start = System.currentTimeMillis();
         //Host
@@ -1205,7 +1216,6 @@ public abstract class PlayState extends State{
                     slowGameDown.set(message[1] * 10 + message[2] / 10);
                     break;
                 case MessageCode.TELEPORT:
-                    mapSynchronizer.setTeleSync();
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
                     float y1 = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency();
                     synchronized (Player.class) {

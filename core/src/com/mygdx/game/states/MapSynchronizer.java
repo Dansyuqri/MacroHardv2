@@ -18,7 +18,6 @@ public class MapSynchronizer extends Movable{
     private CountDownLatch PlayerL1 = new CountDownLatch(1);
     private long MysyncRender, OthersyncRender;
     private long latency;
-    private boolean teleSync = false;
 
     MapSynchronizer(){
         super(0, 450, 0, 0);
@@ -107,16 +106,15 @@ public class MapSynchronizer extends Movable{
             }
         }
     }
-    public void setTeleSync(){
-        teleSync = true;
-    }
-
-    public void syncTele(float tracker, Player player) {
-        if (teleSync) {
-            float offset = tracker%50;
-            float player_offset = player.y%50;
+    public void syncTele(float tracker, Player player, boolean normal) {
+        if (normal) {
+            float offset = tracker % 50;
+            float player_offset = player.y % 50;
             player.y += offset - player_offset;
-            teleSync = false;
+        } else {
+            float offset = tracker % 50;
+            float player_offset = player.y % 50;
+            player.y -= offset - player_offset;
         }
     }
     public CountDownLatch gethost(){
