@@ -877,14 +877,16 @@ public abstract class PlayState extends State{
                 onOneCircle = true;
             }
 
-            if (stepped && !((MagicCircle)eachCircle).isOn()){
+            if (stepped && !((MagicCircle)eachCircle).isSent()){
                 MacroHardv2.actionResolver.sendReliable(
                         new byte[]{MessageCode.MAGIC_CIRCLE_ON, (byte) ((MagicCircle) eachCircle).getId()});
+                ((MagicCircle)eachCircle).setSent(true);
             }
 
-            if (!stepped && ((MagicCircle)eachCircle).isOn() && !((MagicCircle)eachCircle).getOtherOn()){
+            if (!stepped && ((MagicCircle)eachCircle).isSent()){
                 MacroHardv2.actionResolver.sendReliable(
                         new byte[]{MessageCode.MAGIC_CIRCLE_OFF, (byte) ((MagicCircle)eachCircle).getId()});
+                ((MagicCircle)eachCircle).setSent(false);
             }
 
             if (stepped || ((MagicCircle) eachCircle).getOtherOn()) {
@@ -1191,7 +1193,6 @@ public abstract class PlayState extends State{
                                 ((MagicCircle)magiccircle).OtherOff();
                             }
                         }
-
                     }
                     break;
 

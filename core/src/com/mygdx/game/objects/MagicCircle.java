@@ -19,6 +19,7 @@ public class MagicCircle extends Movable implements Collidable {
     private static int nextID;
     private int id;
     private boolean on = false;
+    private boolean sent = false;
     private AtomicBoolean otherOn = new AtomicBoolean(false);
 
     public MagicCircle(float x, float y, float width, float height, Stage stage){
@@ -26,6 +27,14 @@ public class MagicCircle extends Movable implements Collidable {
         id = nextID - 80;
         nextID = (nextID+1)%200;
         this.setImage(new Texture(Gdx.files.internal("magic_circle.png")));
+    }
+
+    public boolean isSent() {
+        return sent;
+    }
+
+    public void setSent(boolean sent) {
+        this.sent = sent;
     }
 
     public int getId() {
