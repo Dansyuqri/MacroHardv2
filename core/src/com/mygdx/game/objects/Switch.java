@@ -6,6 +6,8 @@ import com.mygdx.game.Interface.Collidable;
 import com.mygdx.game.customEnum.Stage;
 import com.mygdx.game.states.PlayState;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Created by Syuqri on 3/9/2016.
  */
@@ -13,7 +15,7 @@ public class Switch extends Movable implements Collidable{
     private static int nextID;
     private int id;
     private boolean selfOn = false;
-    private boolean otherOn = false;
+    private AtomicBoolean otherOn = new AtomicBoolean(false);
 
     public Switch(float x, float y, float width, float height, Stage stage){
         super(x, y, width, height);
@@ -51,15 +53,15 @@ public class Switch extends Movable implements Collidable{
     }
 
     public void setOtherOn(){
-        otherOn = true;
+        otherOn.compareAndSet(false, true);
     }
 
     public void setOtherOff()
     {
-       otherOn = false;
+       otherOn.compareAndSet(true, false);
     }
 
     public boolean isOtherOn() {
-        return otherOn;
+        return otherOn.get();
     }
 }

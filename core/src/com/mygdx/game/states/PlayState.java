@@ -739,17 +739,16 @@ public abstract class PlayState extends State{
 
         boolean open = false;
         for (GameObject eachSwitch:switches){
-            if (((Switch) eachSwitch).collides(player, this)){
+            if (((Switch) eachSwitch).collides(player, this) || ((Switch) eachSwitch).isOtherOn()){
                 open = true;
                 MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte)((Switch)eachSwitch).getId()});
                 ((Switch) eachSwitch).setOn();
             } else {
                 ((Switch) eachSwitch).setOff();
             }
-            synchronized (Switch.class) {
-                if (((Switch) eachSwitch).isOtherOn()) {
-                    ((Switch) eachSwitch).setOn();
-                }
+
+            if (((Switch) eachSwitch).isOtherOn()) {
+                ((Switch) eachSwitch).setOn();
             }
         }
 
@@ -762,12 +761,6 @@ public abstract class PlayState extends State{
         }
 
         onSwitch = open;
-
-        synchronized (Switch.class) {
-            if (gotSwitch) {
-                open = true;
-            }
-        }
 
         if (open) {
             for (GameObject door : doors) {
@@ -1079,21 +1072,17 @@ public abstract class PlayState extends State{
 
                 //open doors
                 case MessageCode.OPEN_DOORS:
-                    synchronized (Switch.class) {
-                        gotSwitch = true;
-                        for (GameObject swi: switches) {
-                            if (((Switch)swi).getId() == message[1]){
-                                ((Switch)swi).setOtherOn();
-                            }
+                    for (GameObject swi: switches) {
+                        if (((Switch)swi).getId() == message[1]){
+                            ((Switch)swi).setOtherOn();
                         }
                     }
                     break;
 
                 //close doors
                 case MessageCode.CLOSE_DOORS:
-                    synchronized (Switch.class) {
-                        gotSwitch = false;
-                        for (GameObject swi: switches) {
+                    for (GameObject swi: switches) {
+                        if (((Switch)swi).getId() == message[1]){
                             ((Switch)swi).setOtherOff();
                         }
                     }
@@ -1478,7 +1467,7 @@ public abstract class PlayState extends State{
 
         int counter = 0;
         while (true) {
-            if (counter > 8 && memory.get(j)[i] == MapTile.EMPTY) {
+            if (counter > 4 && memory.get(j)[i] == MapTile.EMPTY) {
                 break;
             }
             int dir = mapRandomizer.nextInt(4);
