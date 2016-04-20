@@ -33,6 +33,7 @@ import com.mygdx.game.objects.Spikes;
 import com.mygdx.game.objects.Switch;
 import com.mygdx.game.objects.JoyStick;
 import com.mygdx.game.objects.Player;
+import com.mygdx.game.objects.Troll;
 import com.mygdx.game.objects.UI;
 
 import java.util.ArrayList;
@@ -115,6 +116,7 @@ public abstract class PlayState extends State{
     private ArrayList<GameObject> sands = new ArrayList<GameObject>();
     private ArrayList<GameObject> boulders = new ArrayList<GameObject>();
     private ArrayList<GameObject> mCircles = new ArrayList<GameObject>();
+    private ArrayList<GameObject> trolls = new ArrayList<GameObject>();
 
     //final values
     final int tileLength = 50;
@@ -189,6 +191,7 @@ public abstract class PlayState extends State{
         gameObjects.add(boulders);
         gameObjects.add(players);
         gameObjects.add(ghosts);
+        gameObjects.add(trolls);
         gameObjects.add(fogs);
         gameObjects.add(effects);
         gameObjects.add(ui);
@@ -373,8 +376,14 @@ public abstract class PlayState extends State{
         for (ArrayList<GameObject> gameObj: gameObjects){
             for (GameObject gameObject : gameObj) {
                 if (gameObject instanceof Movable) {
-                    synchronized ((Object) gameSpeed) {
-                        ((Movable) gameObject).scroll(gameSpeed / slowGameDown.get() * freezeMaze.get());
+                    if (gameObject instanceof Troll){
+                        synchronized ((Object) gameSpeed) {
+                            ((Movable) gameObject).scroll((gameSpeed * (float)2.5) / slowGameDown.get() * freezeMaze.get());
+                            }
+                        } else {
+                        synchronized ((Object) gameSpeed) {
+                            ((Movable) gameObject).scroll(gameSpeed / slowGameDown.get() * freezeMaze.get());
+                        }
                     }
                 }
             }
@@ -518,9 +527,14 @@ public abstract class PlayState extends State{
                     break;
             }
         }
-        if (score > 200 && stage == Stage.DUNGEON) {
+        if (score > 200 && (stage == Stage.DUNGEON|| stage == Stage.DESERT)) {
             if (score % 15 == 0) {
                 ghosts.add(new Ghost((tileLength * 9) + 15, tracker + 2, 46, 46,stage));
+            }
+        }
+        if (score > 200 &&(stage == Stage.ICE)) {
+            if (score % 15 == 0) {
+                trolls.add(new Troll((tileLength * mapRandomizer.nextInt(9)) + 15, tracker, tileLength, tileLength));
             }
         }
     }
@@ -687,7 +701,7 @@ public abstract class PlayState extends State{
                 }
             }
 
-            //      collide with ghosts
+            //      collide with ghosts/mummies
             for (GameObject ghost : ghosts) {
                 if (((Ghost) ghost).collides(player, this)) {
                     MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
@@ -712,6 +726,13 @@ public abstract class PlayState extends State{
                 //                hole.setBroken();
                 //                mapSynchronizer.sendMessage(MessageCode.DESTROY_WALL, hole.x + tileLength / 2, hole.y + tileLength / 2);
                 //            }
+            }
+            // collide with trolls
+            for (GameObject troll: trolls){
+                if (((Troll) troll).collides(player, this)){
+                    MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
+                    goToRestartState();
+                }
             }
         }
     }
@@ -958,6 +979,7 @@ public abstract class PlayState extends State{
     }
 
     public void draw(SpriteBatch sb){
+        animateTime += Gdx.graphics.getDeltaTime();
         for (ArrayList<GameObject> gameObjList: gameObjects) {
             Iterator<GameObject> gameObjectIterator = gameObjList.iterator();
             while (gameObjectIterator.hasNext()){
@@ -969,12 +991,10 @@ public abstract class PlayState extends State{
                     }
                 }
                 if (gameObject instanceof Player){
-                    animateTime += Gdx.graphics.getDeltaTime();
                     if (((Player)gameObject).x != ((Player)gameObject).getPrev_x() ||
                             Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed / slowGameDown.get() * freezeMaze.get()  * deltaCap)) > 5 ){
                         ((Player) gameObject).setCurrentFrame(animateTime, true);
-                    }
-                    else {
+                    } else {
                         ((Player) gameObject).setDirection();
                     }
                     ((Player)gameObject).setPrevCoord(((Player) gameObject).x, ((Player) gameObject).y);
@@ -986,6 +1006,13 @@ public abstract class PlayState extends State{
                     if (((Obstacle)gameObject).getWallDestroyTime() > 0.4){
                         ((Obstacle)gameObject).setDestroyed(true);
                         gameObjectIterator.remove();
+                    }
+                }
+
+                if (gameObject instanceof Troll){
+                    ((Troll) gameObject).setCurrentFrame(animateTime, true);
+                    if (((Troll) gameObject).collides(obstacles, this)){
+                        gsm.startMusic("WallDestroySound.wav", (float) 1);
                     }
                 }
 
