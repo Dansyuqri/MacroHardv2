@@ -287,16 +287,7 @@ public abstract class PlayState extends State{
     public void render(SpriteBatch sb) {
         mapSynchronizer.updateSyncRender();
         if (mapSynchronizer.getSyncTele()) {
-            if (checkObstacleCollision()) {
-                synchronized (Player.class) {
-                    float y = player.y;
-                    mapSynchronizer.syncTele(tracker, player, true);
-                    if (checkObstacleCollision()) {
-                        player.y = y;
-                        mapSynchronizer.syncTele(tracker, player, false);
-                    }
-                }
-            } else {
+            if (!checkObstacleCollisionTeleport()) {
                 mapSynchronizer.setSyncTele(false);
             }
         }
@@ -718,6 +709,38 @@ public abstract class PlayState extends State{
         return false;
     }
 
+    private boolean checkObstacleCollisionTeleport(){
+
+//    		collides with normal wall obstacle
+        synchronized (Player.class) {
+            for (GameObject obstacle1 : obstacles) {
+                Obstacle obstacle = (Obstacle) obstacle1;
+                if (obstacle.collides(player, this)) {
+                    mapSynchronizer.syncTele(player, obstacle);
+                    return true;
+                }
+            }
+            //		collides with doors
+            for (GameObject door1 : doors) {
+                Door door = (Door) door1;
+                if (door.collides(player, this)) {
+                    mapSynchronizer.syncTele(player, door);
+                    return true;
+                }
+            }
+
+            // collides with boulders
+            for (GameObject boulder1 : boulders) {
+                Boulder boulder = (Boulder) boulder1;
+                if (boulder.collides(player, this)) {
+                    mapSynchronizer.syncTele(player, boulder);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void checkFatalCollision(){
         if (!player.getIsInvicible()) {
             //      collide with spikes
@@ -814,7 +837,9 @@ public abstract class PlayState extends State{
             Power tempPower = (Power) powerIterator.next();
             if (tempPower.collides(player, this)) {
                 gsm.startMusic("PowerUpSound.wav",(float)0.5);
-                player.setActivePower(tempPower.getType());
+                synchronized (Player.class) {
+                    player.setActivePower(tempPower.getType());
+                }
                 this.addIcon(new ActivePowerIcon(tempPower.getType()));
                 powerIterator.remove();
             }
@@ -827,15 +852,19 @@ public abstract class PlayState extends State{
             Sand quickSand = (Sand) sandIterator.next();
             if (quickSand.collides(player, this)){
                 if (!player.isSlowed()){
-                    playerSpeed.getAndSet(playerSpeed.get() - 150);
-                    player.setIsSlowed(true);
+                    synchronized (Player.class) {
+                        playerSpeed.getAndSet(playerSpeed.get() - 150);
+                        player.setIsSlowed(true);
+                    }
                     sandCollide = true;
                 }
             }
         }
         if (!sandCollide && player.isSlowed()){
-            playerSpeed.getAndSet(playerSpeed.get() + 150);
-            player.setIsSlowed(false);
+            synchronized (Player.class) {
+                playerSpeed.getAndSet(playerSpeed.get() + 150);
+                player.setIsSlowed(false);
+            }
         }
 
         // collides with magic circle
@@ -910,14 +939,18 @@ public abstract class PlayState extends State{
                 }, 3, TimeUnit.SECONDS);
                 break;
             case SPEED_PLAYER_UP:
-                playerSpeed.getAndSet(playerSpeed.get() + 50);
-                backgroundTaskExecutor.schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        player.setActivePower(PowerType.NOTHING);
-                        playerSpeed.getAndSet(playerSpeed.get() - 50);
-                    }
-                },7, TimeUnit.SECONDS);
+                synchronized (Player.class) {
+                    playerSpeed.getAndSet(playerSpeed.get() + 50);
+                    backgroundTaskExecutor.schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            synchronized (Player.class) {
+                                player.setActivePower(PowerType.NOTHING);
+                                playerSpeed.getAndSet(playerSpeed.get() - 50);
+                            }
+                        }
+                    }, 7, TimeUnit.SECONDS);
+                }
                 break;
             case SLOW_GAME_DOWN:
                 gsm.pauseMusic("Dance Of Death.mp3");
@@ -928,19 +961,25 @@ public abstract class PlayState extends State{
                     @Override
                     public void run() {
                         gsm.startMusic("Dance Of Death.mp3", (float) 0.1);
-                        player.setActivePower(PowerType.NOTHING);
+                        synchronized (Player.class) {
+                            player.setActivePower(PowerType.NOTHING);
+                        }
                         slowGameDown.compareAndSet(2, 1);
                         MacroHardv2.actionResolver.sendReliable(sendSlow(slowGameDown.get()));
                     }
                 }, 5, TimeUnit.SECONDS);
                 break;
             case INVINCIBLE:
-                player.setIsInvicible(true);
-                player.setActivePower(PowerType.NOTHING);
+                synchronized (Player.class) {
+                    player.setIsInvicible(true);
+                    player.setActivePower(PowerType.NOTHING);
+                }
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        player.setIsInvicible(false);
+                        synchronized (Player.class) {
+                            player.setIsInvicible(false);
+                        }
                     }
                 }, 4, TimeUnit.SECONDS);
                 break;
@@ -951,30 +990,40 @@ public abstract class PlayState extends State{
         switch (player.getInnatePower()) {
             case DESTROY_WALL:
                 changeInnatePowerIcon(false);
-                player.setCanDestroy(true);
+                synchronized (Player.class) {
+                    player.setCanDestroy(true);
+                }
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        player.setCanDestroy(false);
+                        synchronized (Player.class) {
+                            player.setCanDestroy(false);
+                        }
                     }
                 }, player.effectTime, TimeUnit.SECONDS);
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        player.setInnatePower(PowerType.DESTROY_WALL);
+                        synchronized (Player.class) {
+                            player.setInnatePower(PowerType.DESTROY_WALL);
+                        }
                         changeInnatePowerIcon(true);
                     }
                 }, player.coolDown, TimeUnit.SECONDS);
                 break;
             case TELEPORT:
                 changeInnatePowerIcon(false);
-                player.setInnatePower(PowerType.NOTHING);
+                synchronized (Player.class) {
+                    player.setInnatePower(PowerType.NOTHING);
+                }
                 byte[] message = sendTeleport(playerID, player.x, player.y);
                 MacroHardv2.actionResolver.sendReliable(message);
                 backgroundTaskExecutor.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        player.setInnatePower(PowerType.TELEPORT);
+                        synchronized (Player.class) {
+                            player.setInnatePower(PowerType.TELEPORT);
+                        }
                         changeInnatePowerIcon(true);
                     }
                 }, player.coolDown, TimeUnit.SECONDS);
@@ -1015,9 +1064,13 @@ public abstract class PlayState extends State{
                             Math.abs(((Player)gameObject).y - (((Player)gameObject).getPrev_y() - gameSpeed / slowGameDown.get() * freezeMaze.get()  * deltaCap)) > 5 ){
                         ((Player) gameObject).setCurrentFrame(animateTime, true);
                     } else {
-                        ((Player) gameObject).setDirection();
+                        synchronized (Player.class) {
+                            ((Player) gameObject).setDirection();
+                        }
                     }
-                    ((Player)gameObject).setPrevCoord(((Player) gameObject).x, ((Player) gameObject).y);
+                    synchronized (Player.class) {
+                        ((Player) gameObject).setPrevCoord(((Player) gameObject).x, ((Player) gameObject).y);
+                    }
                 }
 
                 else if (gameObject instanceof Obstacle && ((Obstacle)gameObject).isToDestroy()){

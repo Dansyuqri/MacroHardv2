@@ -196,7 +196,7 @@ public class Player extends Movable {
     }
 
     public void setActivePower(PowerType activePower) {
-        this.activePower = new AtomicReference<PowerType>(activePower);
+        this.activePower.getAndSet(activePower);
     }
 
     public boolean getCanDestroy() {

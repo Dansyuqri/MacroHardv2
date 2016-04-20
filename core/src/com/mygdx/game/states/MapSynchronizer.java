@@ -2,6 +2,7 @@ package com.mygdx.game.states;
 
 import com.mygdx.game.MacroHardv2;
 import com.mygdx.game.customEnum.MessageCode;
+import com.mygdx.game.objects.GameObject;
 import com.mygdx.game.objects.Movable;
 import com.mygdx.game.objects.Player;
 
@@ -120,20 +121,14 @@ public class MapSynchronizer extends Movable{
             }
         }
     }
-    public void syncTele(float tracker, Player player, boolean normal) {
-        if (normal) {
-            float offset = tracker % 50;
-            float player_offset = player.y % 50;
-            float shift = offset - player_offset + 5;
-            player.y += shift;
-            syncTele.compareAndSet(true, false);
+    public void syncTele(Player player, GameObject obstacle) {
+        float offset = player.y - obstacle.y;
+        if (offset > 0) {
+            player.y = obstacle.y + 55;
         } else {
-            float offset = tracker % 50;
-            float player_offset = player.y % 50;
-            float shift = player_offset - offset + 5;
-            player.y += shift;
-            syncTele.compareAndSet(true, false);
+            player.y = obstacle.y - 45;
         }
+        syncTele.compareAndSet(true, false);
     }
     public CountDownLatch gethost(){
         return this.HostL;
