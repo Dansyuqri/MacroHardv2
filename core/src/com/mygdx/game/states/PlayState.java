@@ -834,23 +834,21 @@ public abstract class PlayState extends State{
                 onOneCircle = true;
             }
 
+            if (stepped && !((MagicCircle)eachCircle).isOn()){
+                MacroHardv2.actionResolver.sendReliable(
+                        new byte[]{MessageCode.MAGIC_CIRCLE_ON, (byte) ((MagicCircle) eachCircle).getId()});
+            }
+
+            if (!stepped && ((MagicCircle)eachCircle).isOn() && !((MagicCircle)eachCircle).getOtherOn()){
+                MacroHardv2.actionResolver.sendReliable(
+                        new byte[]{MessageCode.MAGIC_CIRCLE_OFF, (byte) ((MagicCircle)eachCircle).getId()});
+            }
+
             if (stepped || ((MagicCircle) eachCircle).getOtherOn()) {
                 ((MagicCircle) eachCircle).setOn();
             } else {
                 ((MagicCircle) eachCircle).setOff();
             }
-
-            if (stepped && !onCircle){
-                MacroHardv2.actionResolver.sendReliable(
-                        new byte[]{MessageCode.MAGIC_CIRCLE_ON, (byte) ((MagicCircle) eachCircle).getId()});
-            }
-
-            if (!stepped && onCircle){
-                MacroHardv2.actionResolver.sendReliable(
-                        new byte[]{MessageCode.MAGIC_CIRCLE_OFF, (byte) ((MagicCircle)eachCircle).getId()});
-            }
-
-            onCircle = stepped;
         }
 
         //checking circles
