@@ -43,6 +43,7 @@ import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -76,7 +77,8 @@ public abstract class PlayState extends State{
     protected final int playerID;
     private boolean running;
 
-    private boolean touchHeld, gotSwitch = false, onSwitch = false, end = false, onCircle = false;
+    private AtomicBoolean end = new AtomicBoolean(false);
+    private boolean touchHeld, gotSwitch = false, onSwitch = false, onCircle = false;
     protected float gameSpeed, speedIncrease, dangerZoneSpeedLimit;
     protected AtomicInteger slowGameDown, freezeMaze, playerSpeed, score;
     protected final int dangerZone;
@@ -392,10 +394,8 @@ public abstract class PlayState extends State{
 
         mapSynchronizer.scroll(gameSpeed / slowGameDown.get() * freezeMaze.get() * deltaCap);
 
-        synchronized (this) {
-            if (end) {
-                goToRestartState();
-            }
+        if (end.get()) {
+            goToRestartState();
         }
 
         long time = System.currentTimeMillis() - start;
@@ -524,7 +524,8 @@ public abstract class PlayState extends State{
                 if (score.get() % 15 == 0) {
                     ghosts.add(new Ghost((tileLength * 9) + 15, tracker + 2, 46, 46, stage));
                 }
-            } else {
+            }
+            if (stage == Stage.ICE){
                 if (score.get() % 10 == 0) {
                     trolls.add(new Troll((tileLength * mapRandomizer.nextInt(9)) + 15, tracker, tileLength, tileLength));
                 }
@@ -740,7 +741,6 @@ public abstract class PlayState extends State{
         for (GameObject eachSwitch:switches){
             if (((Switch) eachSwitch).collides(player, this)){
                 open = true;
-                // TODO: check music here
                 MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.OPEN_DOORS, (byte)((Switch)eachSwitch).getId()});
                 ((Switch) eachSwitch).setOn();
             } else {
@@ -810,11 +810,15 @@ public abstract class PlayState extends State{
         }
 
         // collides with magic circle
+
+        boolean onOneCircle = false;
         for (GameObject eachCircle: mCircles){
             boolean stepped = false;
-            if (((MagicCircle)eachCircle).collides(player, this)){
+            if (((MagicCircle)eachCircle).collides(player, this) && !onOneCircle){
                 stepped = true;
+                onOneCircle = true;
             }
+
             synchronized (MagicCircle.class) {
                 if (stepped || ((MagicCircle) eachCircle).getOtherOn()) {
                     ((MagicCircle) eachCircle).setOn();
@@ -1125,9 +1129,9 @@ public abstract class PlayState extends State{
 
                 //end game
                 case MessageCode.END_GAME:
-                    synchronized (this){
-                        end = true;
-                        MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
+                    end = new AtomicBoolean(true);
+                    MacroHardv2.actionResolver.sendReliable(new byte[]{MessageCode.END_GAME});
+                    if (message.length > 1) {
                         byte[] scoreBytes = new byte[message.length - 1];
                         System.arraycopy(message, 1, scoreBytes, 0, scoreBytes.length);
                         score = new AtomicInteger(Integer.decode(new String(scoreBytes)));
@@ -1218,11 +1222,18 @@ public abstract class PlayState extends State{
         }
     }
 
-    public void goToRestartState(){
-        if (!end) {
+    public void goToRestartState() {
+        if (!end.get()) {
             MacroHardv2.actionResolver.sendReliable(wrapEndScore(score.get()));
         }
-        while (!end);
+
+        long time = System.currentTimeMillis();
+        while (!end.get()){
+            if(System.currentTimeMillis() - time > 2000){
+                break;
+            }
+        }
+
         mapMaker.interrupt();
         backgroundTaskExecutor.shutdownNow();
         MacroHardv2.actionResolver.leaveroom();
@@ -1397,7 +1408,7 @@ public abstract class PlayState extends State{
 
         int counter = 0;
         while (true) {
-            if (counter > 8) {
+            if (counter > 5) {
                 if (memory.get(j)[i] != MapTile.M_CIRCLE) {
                     break;
                 }
@@ -1425,16 +1436,16 @@ public abstract class PlayState extends State{
                     i++;
                     counter++;
                 }
-                else if (j > 0 && memory.get(j - 1)[i] != MapTile.OBSTACLES) {
-                    j--;
+                else if (j < 2 && memory.get(j + 1)[i] != MapTile.OBSTACLES) {
+                    j++;
                     counter++;
                 }
                 else if (i > 0 && memory.get(j)[i - 1] != MapTile.OBSTACLES) {
                     i--;
                     counter++;
                 }
-                else if (j < 2 && memory.get(j + 1)[i] != MapTile.OBSTACLES) {
-                    j++;
+                else if (j > 0 && memory.get(j - 1)[i] != MapTile.OBSTACLES) {
+                    j--;
                     counter++;
                 }
             }
@@ -1605,7 +1616,7 @@ public abstract class PlayState extends State{
         }
 
         // spawning power ups after a certain time. 2 is for testing. 8 is used
-        if (powerCounter > 8) {
+        if (powerCounter > (mapRandomizer.nextInt(10) + 10)) {
             new_row = genPower(new_row);
         }
 
