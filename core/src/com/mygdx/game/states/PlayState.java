@@ -929,7 +929,9 @@ public abstract class PlayState extends State{
     private void activateActivePower(){
         switch (player.getActivePower()) {
             case FREEZE_MAZE:
-                player.setActivePower(PowerType.NOTHING);
+                synchronized (Player.class) {
+                    player.setActivePower(PowerType.NOTHING);
+                }
                 freezeMaze.compareAndSet(1, 0);
                 MacroHardv2.actionResolver.sendReliable(sendFreeze(freezeMaze.get()));
                 backgroundTaskExecutor.schedule(new Runnable() {
@@ -941,8 +943,8 @@ public abstract class PlayState extends State{
                 }, 3, TimeUnit.SECONDS);
                 break;
             case SPEED_PLAYER_UP:
-                player.setActivePower(PowerType.NOTHING);
                 synchronized (Player.class) {
+                    player.setActivePower(PowerType.NOTHING);
                     playerSpeed.getAndSet(playerSpeed.get() + 50);
                     backgroundTaskExecutor.schedule(new Runnable() {
                         @Override
@@ -955,7 +957,9 @@ public abstract class PlayState extends State{
                 }
                 break;
             case SLOW_GAME_DOWN:
-                player.setActivePower(PowerType.NOTHING);
+                synchronized (Player.class) {
+                    player.setActivePower(PowerType.NOTHING);
+                }
                 gsm.pauseMusic("Dance Of Death.mp3");
                 gsm.startMusic("TimeSlowSound.wav", (float) 3);
                 slowGameDown.compareAndSet(1, 2);
