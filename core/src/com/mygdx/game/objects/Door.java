@@ -49,6 +49,10 @@ public class Door extends Movable implements Collidable{
         return (player.overlaps(this) && !open);
     }
 
+    public boolean collides(Troll troll) {
+        return (troll.overlaps(this) && !open);
+    }
+
     public void setDestroyed(boolean destroyed) {
         this.destroyed = destroyed;
     }

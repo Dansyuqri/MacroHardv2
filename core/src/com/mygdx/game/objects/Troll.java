@@ -53,7 +53,7 @@ public class Troll extends Movable implements Collidable {
         }
 
         for (GameObject door: doors) {
-            if (door.overlaps(this)){
+            if (((Door)door).collides(this)){
                 ((Door)door).setDestroyed(true);
                 mapSynchronizer.sendMessage(MessageCode.DESTROY_DOOR, ((Door) door).getId());
                 return true;
