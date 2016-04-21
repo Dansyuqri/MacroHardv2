@@ -88,8 +88,9 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                             this.myidno = i;
                         }
                     }
-                    this.game.multiplayerGameReady();
                     this.game.getGsm().pop();
+                    this.game.multiplayerGameReady();
+
                 }
             }
             catch (IllegalStateException illegal){
