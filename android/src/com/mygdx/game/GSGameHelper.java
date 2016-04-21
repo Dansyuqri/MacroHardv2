@@ -22,6 +22,9 @@ import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListene
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.google.example.games.basegameutils.GameHelper;
+import com.mygdx.game.states.MenuState;
+import com.mygdx.game.customEnum.StateType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,6 +79,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                     Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomID);
                     activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     BaseGameUtils.showAlert(activity, "Left Room");
+                    this.game.getGsm().pop();
                 } else if (response == Activity.RESULT_OK) {
                     Participant host = invitees.get(0);
                     this.host = host.getParticipantId();
@@ -85,10 +89,12 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
                         }
                     }
                     this.game.multiplayerGameReady();
+                    this.game.getGsm().pop();
                 }
             }
             catch (IllegalStateException illegal){
                 BaseGameUtils.showAlert(activity, "Left Room");
+                this.game.getGsm().pop();
             }
 
         }
@@ -159,6 +165,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     public void onLeftRoom(int arg0, String arg1) {
         BaseGameUtils.makeSimpleDialog(activity, "Abandoned Game");
         Gdx.app.log("LEAVE", "Left Room");
+
 
     }
 
@@ -449,6 +456,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         if (mRoomId != null) {
             System.out.println("HEHE: LEFT ROOM" + mRoomID);
             Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomId);
+            this.game.getGsm().pop();
             mRoomId = null;
         }
     }

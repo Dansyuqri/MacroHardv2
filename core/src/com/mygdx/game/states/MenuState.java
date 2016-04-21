@@ -14,7 +14,7 @@ import com.badlogic.gdx.Input.Keys;
  * Created by Syuqri on 3/7/2016.
  */
 public class MenuState extends State{
-    private Texture background,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, leaderboardBtnImage;
+    private Texture background,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, leaderboardBtnImage, loadingScreenImage;
 
     private CustomButton instructionBtn, invitationBtn, sendInviteBtn, quickGameBtn, leaderboardBtn;
     private Vector3 touchPos = new Vector3(0,0,0);
@@ -22,7 +22,6 @@ public class MenuState extends State{
     private boolean backButtonPressed, touched = false;
     public static volatile boolean startHost = false;
     public static volatile boolean startNonHost = false;
-
 
     //Resize variables
     private float
@@ -76,6 +75,7 @@ public class MenuState extends State{
         touchPos.x = Gdx.input.getX();
         touchPos.y = Gdx.input.getY();
         cam.unproject(touchPos);
+
 
         if (startHost) {
             gsm.startMusic("MenuSelectionClick.wav", (float) 1);
@@ -140,6 +140,7 @@ public class MenuState extends State{
                 gsm.startMusic("MenuSelectionClick.wav",(float)1);
                 if(MacroHardv2.actionResolver.isSignedIn()){
                     MacroHardv2.actionResolver.QuickGame();
+                    gsm.push(new LoadingState(gsm));
 
                 }
                 quickGameBtnImage.dispose();
