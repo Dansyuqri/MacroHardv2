@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.Interface.Collidable;
 import com.mygdx.game.customEnum.*;
+import com.mygdx.game.states.MapSynchronizer;
 import com.mygdx.game.states.PlayState;
 
 import java.util.ArrayList;
@@ -43,13 +44,22 @@ public class Troll extends Movable implements Collidable {
         return player.overlaps(this);
     }
 
-    public boolean collides(ArrayList<GameObject> obstacles, PlayState playState) {
+    public boolean collides(ArrayList<GameObject> obstacles, ArrayList<GameObject> doors, MapSynchronizer mapSynchronizer) {
         for (GameObject obstacle: obstacles) {
             if (obstacle.overlaps(this)){
                 ((Obstacle)obstacle).setToDestroy(true);
                 return true;
             }
         }
+
+        for (GameObject door: doors) {
+            if (door.overlaps(this)){
+                ((Door)door).setDestroyed(true);
+                mapSynchronizer.sendMessage(MessageCode.DESTROY_DOOR, ((Door) door).getId());
+                return true;
+            }
+        }
+
         return false;
     }
 

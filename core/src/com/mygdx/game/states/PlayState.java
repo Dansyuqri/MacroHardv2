@@ -46,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Syuqri on 3/7/2016.
@@ -1088,7 +1087,7 @@ public abstract class PlayState extends State{
 
                 if (gameObject instanceof Troll) {
                     ((Troll) gameObject).setCurrentFrame(animateTime, true);
-                    if (((Troll) gameObject).collides(obstacles, this)){
+                    if (((Troll) gameObject).collides(obstacles, doors, mapSynchronizer)){
                         gsm.startMusic("WallDestroySound.wav", (float) 1);
                     }
                 }
