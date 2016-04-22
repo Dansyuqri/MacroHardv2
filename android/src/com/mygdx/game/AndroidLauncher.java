@@ -42,6 +42,11 @@ public class AndroidLauncher extends AndroidApplication implements ActionResolve
 		Gdx.graphics.requestRendering();
 	}
 
+	//***
+	//All the methods below are just general methods which use methods in GSGameHelper.java,
+	//the main methods are implemented in GSGameHelper.java
+	//This is to ensure as little code in this class to make it clean
+	//***
 	@Override
 	public void SignIn() {
 		try{

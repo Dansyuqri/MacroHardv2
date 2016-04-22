@@ -291,7 +291,7 @@ public abstract class PlayState extends State{
             }
         }
         long start = System.currentTimeMillis();
-        //Host
+        //Host, Used to sync both phone to start at the same time.
         if(!sync){
             sync = true;
             mapSynchronizer.sync();
@@ -420,7 +420,7 @@ public abstract class PlayState extends State{
             threadsleep = 25;
         }
 
-
+        //Used for syncing both maps by broadcasting the sync render(a variable used to track how far a player has travelled)
         if (time < threadsleep){
             try {
                 Thread.currentThread().sleep(threadsleep - time);
@@ -428,6 +428,7 @@ public abstract class PlayState extends State{
                 e.printStackTrace();
             }
         }
+        //Used to restart the game is a disconnect from a player has been detected
         if(disconnectboolean == false){
             disconnectThreshold++;
             if (disconnectThreshold > 40){
@@ -1134,6 +1135,7 @@ public abstract class PlayState extends State{
         MacroHardv2.actionResolver.sendReliable(message);
     }
 
+    //This is where all the messages are being received, they are sorted by their header.
     public void update(byte[] message) {
         //update player coordinates
         if(message != null){
@@ -1177,6 +1179,7 @@ public abstract class PlayState extends State{
                     }
                     break;
 
+                //turning the magic circle on
                 case MessageCode.MAGIC_CIRCLE_ON:
                     synchronized (MagicCircle.class) {
                         for (GameObject magiccircle: mCircles) {
@@ -1187,6 +1190,7 @@ public abstract class PlayState extends State{
                     }
                     break;
 
+                //turning the magic circle off
                 case MessageCode.MAGIC_CIRCLE_OFF:
                     synchronized (MagicCircle.class) {
                         for (GameObject magiccircle: mCircles) {
@@ -1214,6 +1218,8 @@ public abstract class PlayState extends State{
                         score = new AtomicInteger(Integer.decode(new String(scoreBytes)));
                     }
                     break;
+
+                //to start the player and countdown his latch
                 case MessageCode.PLAYERSTART:
                     byte[] syncBytes = new byte[message.length - 1];
                     System.arraycopy(message, 1, syncBytes, 0, message.length - 1);
@@ -1221,6 +1227,7 @@ public abstract class PlayState extends State{
                     mapSynchronizer.setLatency(Long.decode(syncString));
                     mapSynchronizer.getplayer1().countDown();
                     break;
+                //used for syncing and starting both players at the same timing
                 case MessageCode.SYNCING:
                     if(message[2] == 0 && (MacroHardv2.actionResolver.getmyidint() != 0)){
                         byte[] temp = new byte[4];
@@ -1240,7 +1247,7 @@ public abstract class PlayState extends State{
                         break;
                     }
                     break;
-
+                //used to send breaking of holes on your phone to other peers so that they too have broken ice
                 case MessageCode.BREAK_HOLE:
                     for (GameObject hole: holes) {
                         if (((Hole)hole).getId() == message[1]){
@@ -1249,7 +1256,7 @@ public abstract class PlayState extends State{
                         }
                     }
                     break;
-
+                //used to destory the other sides boulder
                 case MessageCode.DESTROY_BOULDER:
                     for (GameObject boulder: boulders) {
                         if (((Boulder) boulder).getId() == message[1]){
@@ -1258,7 +1265,7 @@ public abstract class PlayState extends State{
                         }
                     }
                     break;
-
+                //used to destroy the walls so that when one player destroys the other will notice
                 case MessageCode.DESTROY_WALL:
                     for (GameObject obstacle: obstacles) {
                         if (((Obstacle)obstacle).getId() == message[1]){
@@ -1267,6 +1274,7 @@ public abstract class PlayState extends State{
                         }
                     }
                     break;
+                //used to destroy door
                 case MessageCode.DESTROY_DOOR:
                     for (GameObject door: doors) {
                         if (((Door)door).getId() == message[1]){
@@ -1275,12 +1283,15 @@ public abstract class PlayState extends State{
                         }
                     }
                     break;
+                //used to freeze the time for both players
                 case MessageCode.FREEZE:
                     freezeMaze.set( message[1] * 10 + message[2] / 10);
                     break;
+                //used to slow the game down for both players
                 case MessageCode.SLOWGAME:
                     slowGameDown.set(message[1] * 10 + message[2] / 10);
                     break;
+                //used to teleport the players to the person who pressed it
                 case MessageCode.TELEPORT:
                     float x1 = (float) message[2] * 10 + (float) message[3] / 10;
                     float y1 = (float) message[4] * 10 + (float) message[5] / 10 - gameSpeed*mapSynchronizer.getLatency();
@@ -1290,6 +1301,7 @@ public abstract class PlayState extends State{
                     }
                     mapSynchronizer.setSyncTele(true);
                     break;
+                //used to synchronise the map
                 case MessageCode.SYNC_RENDER:
                     byte[] syncRenderBytes = new byte[message.length - 1];
                     System.arraycopy(message, 1, syncRenderBytes, 0, message.length - 1);

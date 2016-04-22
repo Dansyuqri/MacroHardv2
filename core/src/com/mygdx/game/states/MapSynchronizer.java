@@ -14,6 +14,7 @@ import static java.lang.Thread.sleep;
 /**
  * Created by hj on 5/4/16.
  */
+//The main purpose of this class is to syncrhonised the maps on both phones using various methods.
 public class MapSynchronizer extends Movable{
 
     private CountDownLatch HostL = new CountDownLatch(1);
@@ -27,7 +28,7 @@ public class MapSynchronizer extends Movable{
         this.MysyncRender = 0;
         this.OthersyncRender=0;
     }
-
+    //Syncchronising of the teleport
     public void setSyncTele(boolean b) {
         if (b) {
             syncTele.compareAndSet(false, true);
@@ -54,7 +55,7 @@ public class MapSynchronizer extends Movable{
     public long getOtherRender(){
         return this.OthersyncRender;
     }
-
+    //sending syncrender to every other player in the room
     public void sendSyncRender(){
         MacroHardv2.actionResolver.sendPing(wrapSyncRender(MysyncRender));
     }
@@ -63,7 +64,7 @@ public class MapSynchronizer extends Movable{
         this.OthersyncRender = sync;
     }
 
-
+    //method to convert a long value into byte[] to prepare it for sending
     private byte[] wrapSyncRender(long syncrender){
         String SyncRenderString = Long.toString(syncrender);
         byte[] SyncRenderBytes = SyncRenderString.getBytes();
@@ -74,7 +75,7 @@ public class MapSynchronizer extends Movable{
         }
         return result;
     }
-
+    //method to convert a long value into byte[] to prepare it for sending
     private byte[] wrapLatency(long latency){
         String SyncString = Long.toString(latency);
         byte[] SyncBytes = SyncString.getBytes();
@@ -85,7 +86,8 @@ public class MapSynchronizer extends Movable{
         }
         return result;
     }
-
+    //Used to estimate the latency and at the same time also ensure both players start the map at the same time
+    //Used countdown latches
     public void sync(){
         if(MacroHardv2.actionResolver.getmyidint()==0){
             byte[] temp = new byte[4];

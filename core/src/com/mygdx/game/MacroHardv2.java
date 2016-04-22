@@ -38,6 +38,7 @@ public class MacroHardv2 extends ApplicationAdapter{
 		actionResolver.setGame(this);
 	}
 
+	//This function is ran when all players have joined the room
 	public void multiplayerGameReady(){
 
 		if(!this.actionResolver.gethostid().equals(this.actionResolver.getyourid())){

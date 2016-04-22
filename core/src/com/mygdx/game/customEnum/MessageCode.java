@@ -3,6 +3,7 @@ package com.mygdx.game.customEnum;
 /**
  * Created by hj on 4/4/16.
  */
+//Message Enums for message headers to be inituitive and user-friendly
 public class MessageCode {
     public static final int PLAYER_POSITION = 1;
     public static final int MAP_SEED = 2;

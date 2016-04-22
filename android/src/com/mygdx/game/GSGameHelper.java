@@ -32,10 +32,13 @@ import java.util.List;
  * Created by Nayr on 10/3/2016.
  */
 public class GSGameHelper extends GameHelper implements RoomUpdateListener, RealTimeMessageReceivedListener,RoomStatusUpdateListener,OnInvitationReceivedListener {
+    //Constants
     final static String TAG = "MacroHard";
     static final int RC_SELECT_PLAYERS = 10000;
     static final int RC_WAITING_ROOM = 10002;
     final static int RC_INVITATION_INBOX = 10001;
+
+    //Global Variables
     private Activity activity;
     private String mRoomID;
     private MacroHardv2 game;
@@ -46,12 +49,13 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
     public int myidno;
     String mIncomingInvitationId = null;
 
-
+    //Initialisation of Gamehelper, a class in basegameutils
     public GSGameHelper(Activity activity, int clientsToUse) {
         super(activity, clientsToUse);
         this.activity = activity;
     }
 
+    //Creation of a room through auto matching
     public void quickGame(){
         Bundle am = RoomConfig.createAutoMatchCriteria(1, 1, 0);
         RoomConfig.Builder roomConfigBuilder = makeBasicRoomConfigBuilder();
@@ -60,27 +64,35 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         Games.RealTimeMultiplayer.create(getApiClient(), roomConfig);
     }
 
+    //Initiailisation of Match
     public void initMatch(){
         Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1);
         this.activity.startActivityForResult(intent, RC_SELECT_PLAYERS);
 
     }
 
+    //Creation of Room
     private RoomConfig.Builder makeBasicRoomConfigBuilder() {
         return RoomConfig.builder((RoomUpdateListener) this)
                 .setMessageReceivedListener((RealTimeMessageReceivedListener) this)
                 .setRoomStatusUpdateListener((RoomStatusUpdateListener) this);
     }
+
+    //Call back for any activity with the response,request and intent, Used for all functions callbacks
     public void onActivityResult(int request,int response, Intent data){
         System.out.println("Room Created");
+        //If in waiting room
         if (request == GSGameHelper.RC_WAITING_ROOM){
             try {
+                //If anyone leave the room, notify the room so that the no of participants can be re updated
                 if (response == Activity.RESULT_CANCELED || response == GamesActivityResultCodes.RESULT_LEFT_ROOM) {
                     Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomID);
                     activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     BaseGameUtils.showAlert(activity, "Left Room");
                     this.game.getGsm().pop();
-                } else if (response == Activity.RESULT_OK) {
+                }
+                //If everyone has joined the room, start the game
+                else if (response == Activity.RESULT_OK) {
                     Participant host = invitees.get(0);
                     this.host = host.getParticipantId();
                     for (int i = 0; i < invitees.size(); i++) {
@@ -99,6 +111,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             }
 
         }
+        //if intent is to send invitations
         else if (request == GSGameHelper.RC_SELECT_PLAYERS){
             if (response != Activity.RESULT_OK) {
                 // user canceled
@@ -140,6 +153,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         }
+        //if intent is to see the invitation box
         else if(request == GSGameHelper.RC_INVITATION_INBOX){
             handleInvitationInboxResult(response, data);
         }
@@ -148,6 +162,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         }
     }
 
+    //*** BELOW are Methods implemented by the listeners, such as when a player joins, onJoinedRoom will be called.**//
     @Override
     public void onJoinedRoom(int arg0, Room arg1) {
         if (arg0 != GamesStatusCodes.STATUS_OK) {
@@ -181,16 +196,19 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     }
 
+    //Used to update the room whenever a new event occurs
     void updateRoom(Room room) {
         if (room != null) {
             invitees = room.getParticipants();
         }
     }
 
+    //Used to link instance of Macrohard game to GSGameHelper so that relevant functions can be called
     public void setGame(MacroHardv2 game){
         this.game = game;
     }
 
+    //When a room is created this method is called
     @Override
     public void onRoomCreated(int arg0, Room arg1) {
         if (arg0 != GamesStatusCodes.STATUS_OK) {
@@ -205,6 +223,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         }
     }
 
+    //Used to send unreliable/UDP messages to all other peers in the room
     public void sendPing(byte[] message){
         try{
             Games.RealTimeMultiplayer.sendUnreliableMessageToOthers(getApiClient(), message, mRoomID);
@@ -214,6 +233,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         }
     }
 
+    //Used to send reliable/TCP messages to all other peers in the room
     public void sendReliable(byte[] message){
         try{
             for (Participant p : invitees) {
@@ -231,12 +251,18 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         }
     }
 
+    //When a message is received by realtimemessage listener, it will be processed here
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage rtm) {
         byte[] message = rtm.getMessageData();
         game.getGsm().update(message);
     }
 
+    //***
+    //Below are methods that have to be implemented together with the listener, you can modify them to your needs
+    //such as if you want to perform an action when a player connects to the room, add it to
+    //onConnectedToRoom function call below
+    //***
     @Override
     public void onConnectedToRoom(Room arg0) {
         // TODO Auto-generated method stub
@@ -329,6 +355,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         // TODO Auto-generated method stub
 
     }
+
     private void handleSelectPlayersResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
             Log.w(TAG, "*** select players UI cancelled, " + response);
@@ -405,6 +432,7 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         switchToScreen(mCurScreen); // This will show the invitation popup*/
     }
 
+    //When the host stops sending you the invite, remove the invitation ID
     @Override
     public void onInvitationRemoved(String invitationId) {
 
@@ -436,22 +464,25 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
 
     }
 
+    //Function to be used in core game to invite players
     public void inviteplayers(){
         Intent intent;
         intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1);
         activity.startActivityForResult(intent, RC_SELECT_PLAYERS);
     }
+    //Function to be used in core game to see player invites
     public void seeinvites(){
         Intent intent;
         intent = Games.Invitations.getInvitationInboxIntent(getApiClient());
         activity.startActivityForResult(intent, RC_INVITATION_INBOX);
     }
+    //Function to be used in core game to accept invites
     public void acceptinvites(){
         System.out.println("I am invite " + mIncomingInvitationId);
         acceptInviteToRoom(mIncomingInvitationId);
         mIncomingInvitationId = null;
     }
-
+    //Function to be used in core game ensure when the game ends, the room is destroyed and P2P connections are terminated
     void leaveRoom() {
         Log.d(TAG, "Leaving room.");
         if (mRoomId != null) {
@@ -460,9 +491,11 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
             mRoomId = null;
         }
     }
+    //Function to be used in core game to submit score to leaderboards
     public void submitScoreGPGS(int score){
         Games.Leaderboards.submitScore(getApiClient(), "CgkIvIDL488DEAIQAQ", score);
     }
+    //Function to be used in core game to get the leaderboard intent
     public void getLeaderboardGPGS(){
         this.activity.startActivityForResult(Games.Leaderboards.getLeaderboardIntent(getApiClient(), "CgkIvIDL488DEAIQAQ"), 100);
 
