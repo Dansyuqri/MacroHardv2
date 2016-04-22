@@ -40,9 +40,11 @@ public class RestartState extends State{
         graphicsY = Gdx.graphics.getHeight();
         FreeTypeFontGenerator fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("SF Atarian System.ttf"));
         FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+
+        //resizes font according to screen size
         int factor = Gdx.graphics.getWidth()/480;
         parameter.size = factor*60;
-        font = fontGenerator.generateFont(parameter); // font size 12 pixels
+        font = fontGenerator.generateFont(parameter);
         generateTextures();
 
         resizeFactor = resizeFactor(mainMenuBtnImage.getWidth());
