@@ -457,7 +457,6 @@ public class GSGameHelper extends GameHelper implements RoomUpdateListener, Real
         if (mRoomId != null) {
             System.out.println("HEHE: LEFT ROOM" + mRoomID);
             Games.RealTimeMultiplayer.leave(getApiClient(), this, mRoomId);
-            this.game.getGsm().pop();
             mRoomId = null;
         }
     }

@@ -25,7 +25,8 @@ public class RestartState extends State{
     private boolean touched = false, submitted = false;
     public BitmapFont font;
     //Resize variables
-    private float graphicsX, graphicsY,
+    private float resizeFactor,
+            graphicsX, graphicsY,
             mainMenuBtnX, mainMenuBtnY;
 
     private int score;
@@ -44,9 +45,10 @@ public class RestartState extends State{
         font = fontGenerator.generateFont(parameter); // font size 12 pixels
         generateTextures();
 
+        resizeFactor = resizeFactor(mainMenuBtnImage.getWidth());
 
-        mainMenuBtnX = mainMenuBtnImage.getWidth()*3;
-        mainMenuBtnY = mainMenuBtnImage.getHeight()*3;
+        mainMenuBtnX = mainMenuBtnImage.getWidth()*resizeFactor;
+        mainMenuBtnY = mainMenuBtnImage.getHeight()*resizeFactor;
         mainMenuBtn = new CustomButton((graphicsX/ 2) - (mainMenuBtnX/2), graphicsY/2 - mainMenuBtnY/2, mainMenuBtnX, mainMenuBtnY);
         mainMenuBtn.setImage(mainMenuBtnImage);
 
@@ -115,5 +117,9 @@ public class RestartState extends State{
     public void generateTextures(){
         background = new Texture("restartScreen.png");
         mainMenuBtnImage = new Texture("mainMenuBtn.png");
+    }
+
+    private float resizeFactor(float x){
+        return (float)0.33*Gdx.graphics.getWidth()/x;
     }
 }
