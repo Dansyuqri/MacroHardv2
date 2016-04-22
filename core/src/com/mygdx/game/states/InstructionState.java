@@ -12,6 +12,9 @@ import com.mygdx.game.customEnum.StateType;
  * Created by Syuqri on 3/19/2016.
  */
 public class InstructionState extends State{
+    /**
+     * This allows the players to see the instructions and learn more about the game
+     */
     private static String[] instructionPages = {"pageOne.png","pageTwo.png","pageThree.png","pageSeven.png","pageFour.png","pageFive.png","pageSix.png","Credits.png"};
     private int pageIndex = 0;
     private final int maxIndex = instructionPages.length-1;
@@ -40,6 +43,7 @@ public class InstructionState extends State{
         if(Gdx.input.isTouched()){
             touched=true;
         }
+        //Cycles through the instruction pages
         if(!Gdx.input.isTouched() && touched){
             if(touchPos.x>graphicsX/2){
                 pageIndex++;

@@ -9,6 +9,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
  * Created by Syuqri on 21-Apr-16.
  */
 public class LoadingState extends State{
+    /**
+     * This allows for the loading screen to be implemented where necessary
+     */
     private Texture loadingScreenImage;
     private float graphicsX, graphicsY;
     private static volatile int timer = 0;
@@ -39,6 +42,8 @@ public class LoadingState extends State{
 
     @Override
     public void render(SpriteBatch sb) {
+
+        //This cycles through the loadingScreenImage array in order to animate the loading screen
         sb.begin();
         cam.update();
         sb.setProjectionMatrix(cam.combined);

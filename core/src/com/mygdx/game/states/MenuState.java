@@ -47,6 +47,7 @@ public class MenuState extends State{
 
         resizeFactor = resizeFactor(quickGameBtnImage.getWidth());
 
+        //Scales all the buttons according to screen size
         quickGameBtnX = quickGameBtnImage.getWidth()*resizeFactor;
         quickGameBtnY = quickGameBtnImage.getHeight()*resizeFactor;
         instructionBtnX = instructionBtnImage.getWidth()*resizeFactor;
@@ -58,6 +59,7 @@ public class MenuState extends State{
         leaderboardBtnX = leaderboardBtnImage.getWidth()*resizeFactor;
         leaderboardBtnY = leaderboardBtnImage.getHeight()*resizeFactor;
 
+        //Creates the buttons in which the x and y coordinates of the player's touch can be captured
         quickGameBtn = new CustomButton( (graphicsX/2),(graphicsY/2 + instructionBtnY/2 +bufferFromTop),quickGameBtnX,quickGameBtnY);
         quickGameBtn.setImage(quickGameBtnImage);
         instructionBtn = new CustomButton((graphicsX / 2), graphicsY / 2 - instructionBtnY/2, instructionBtnX, instructionBtnY);
@@ -78,6 +80,8 @@ public class MenuState extends State{
 
 
         if (startHost) {
+
+            //If the player is the host
             gsm.startMusic("MenuSelectionClick.wav", (float) 1);
             startHost = false;
             dispose();
@@ -85,6 +89,8 @@ public class MenuState extends State{
         }
 
         if(startNonHost){
+
+            //If the player is not the host
             gsm.startMusic("MenuSelectionClick.wav", (float) 1);
             startNonHost = false;
             dispose();
@@ -94,11 +100,12 @@ public class MenuState extends State{
             backButtonPressed = true;
         }
         if(!Gdx.input.isKeyPressed(Keys.BACK) && backButtonPressed){
+            //When touch released on the back key, only then will the game exit
             Gdx.app.exit();
             System.exit(0);
         }
         /****************************************************************************************
-         * This is a set of conditions to handle the highlighting of the buttons when pressed
+         * This is a set of conditions to handle the initial touch of the buttons
          * **************************************************************************************
          */
         if(Gdx.input.isTouched() && !touched){
@@ -129,14 +136,20 @@ public class MenuState extends State{
             }
         }
 
+        /****************************************************************************************
+         * This is a set of conditions to handle when the player has released the buttons
+         * **************************************************************************************
+         */
         else if(!Gdx.input.isTouched() && touched){
             if(instructionBtn.contains(touchPos.x,touchPos.y)){
+                //Goes into instruction state
                 gsm.startMusic("MenuSelectionClick.wav", (float) 1);
                 gsm.set(new InstructionState(gsm), StateType.NON_PLAY);
                 //dispose();
                 touched = false;
             }
             else if(quickGameBtn.contains(touchPos.x,touchPos.y)){
+                //Goes into the LoadingState while waiting for room to be created
                 gsm.startMusic("MenuSelectionClick.wav",(float)1);
                 if(MacroHardv2.actionResolver.isSignedIn()){
                     MacroHardv2.actionResolver.QuickGame();
@@ -148,6 +161,7 @@ public class MenuState extends State{
                 touched = false;
             }
             else if(sendInviteBtn.contains(touchPos.x,touchPos.y)){
+                //Goes into send invite page
                 gsm.startMusic("MenuSelectionClick.wav",(float)1);
                 MacroHardv2.actionResolver.Inviteplayers();
                 sendInviteBtnImage.dispose();
@@ -155,6 +169,7 @@ public class MenuState extends State{
                 touched = false;
             }
             else if(invitationBtn.contains(touchPos.x,touchPos.y)){
+                //goes into invitation page
                 gsm.startMusic("MenuSelectionClick.wav",(float)1);
                 MacroHardv2.actionResolver.Seeinvites();
                 invitationBtnImage.dispose();
@@ -162,6 +177,7 @@ public class MenuState extends State{
                 touched = false;
             }
             else if(leaderboardBtn.contains(touchPos.x,touchPos.y)){
+                //goes into leaderboard page
                 gsm.startMusic("MenuSelectionClick.wav", (float) 1);
                 MacroHardv2.actionResolver.getLeaderboardGPGS();
                 leaderboardBtnImage.dispose();

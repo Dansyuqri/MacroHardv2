@@ -18,6 +18,10 @@ import com.mygdx.game.objects.CustomButton;
  * Created by Syuqri on 3/23/2016.
  */
 public class RestartState extends State{
+    /**
+     * This state is used when the player has lost the game
+     * Displays the score the player has achieved and a main menu button
+     */
     private Texture background,  mainMenuBtnImage;
     private CustomButton mainMenuBtn;
 
@@ -49,6 +53,7 @@ public class RestartState extends State{
 
         resizeFactor = resizeFactor(mainMenuBtnImage.getWidth());
 
+        //Scales the main menu button according to the size of the screen
         mainMenuBtnX = mainMenuBtnImage.getWidth()*resizeFactor;
         mainMenuBtnY = mainMenuBtnImage.getHeight()*resizeFactor;
         mainMenuBtn = new CustomButton((graphicsX/ 2) - (mainMenuBtnX/2), graphicsY/2 - mainMenuBtnY/2, mainMenuBtnX, mainMenuBtnY);
@@ -75,6 +80,7 @@ public class RestartState extends State{
 
         else if(!Gdx.input.isTouched() && touched){
              if(mainMenuBtn.contains(touchPos.x,touchPos.y)){
+                 //When the player has released the button, then transit to the next state
                  gsm.startMusic("MenuSelectionClick.wav", (float) 1);
                  gsm.set(new MenuState(gsm), StateType.NON_PLAY);
                  dispose();
@@ -101,6 +107,8 @@ public class RestartState extends State{
         sb.setProjectionMatrix(cam.combined);
         sb.draw(background, 0, 0, graphicsX, graphicsY);
         font.setColor(Color.WHITE);
+
+        //Displays the score
         font.draw(sb, "Your Score: ", graphicsX / 2 - layoutScoreText.width / 2, graphicsY * 3 / 4);
         font.draw(sb, "" + score, graphicsX / 2 - layoutScore.width / 2, graphicsY * 3 / 4 - layoutScoreText.height - layoutScore.height/2);
         sb.draw(mainMenuBtnImage, (graphicsX / 2) - (mainMenuBtnX / 2), graphicsY / 2 - mainMenuBtnY / 2, mainMenuBtnX, mainMenuBtnY);

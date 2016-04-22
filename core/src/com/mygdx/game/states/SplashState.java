@@ -10,6 +10,10 @@ import com.mygdx.game.customEnum.StateType;
  * Created by Syuqri on 21-Apr-16.
  */
 public class SplashState extends State {
+    /**
+     * This state is solely to be used for the initial start up screen of the game
+     * This displays the company logo
+     */
     private Texture splashScreen;
     private float graphicsX, graphicsY;
     private static int timer = 0;
