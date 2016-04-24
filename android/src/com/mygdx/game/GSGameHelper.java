@@ -31,6 +31,13 @@ import java.util.List;
 /**
  * Created by Nayr on 10/3/2016.
  */
+
+/***
+ * This class is used to implement all the needed methods for networking. Depending on the logic of the game,
+ * some methods can be changed to suit it.
+ * It also includes all the listeners needed when creating a room, such as roomupdatelistener.
+ *E.g Quickgame, accept invites, see invitations box
+ */
 public class GSGameHelper extends GameHelper implements RoomUpdateListener, RealTimeMessageReceivedListener,RoomStatusUpdateListener,OnInvitationReceivedListener {
     //Constants
     final static String TAG = "MacroHard";

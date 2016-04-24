@@ -6,6 +6,10 @@ import com.mygdx.game.customEnum.MessageCode;
 /**
  * Created by Nayr on 30/3/2016.
  */
+
+/**
+ * The main purpose of this class is to send player's coordinates to other peers in the room.
+ */
 public class PlayerCoordinateSender {
     private PlayState game;
     PlayerCoordinateSender(PlayState game){
