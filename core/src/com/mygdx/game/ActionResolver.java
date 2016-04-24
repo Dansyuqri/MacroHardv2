@@ -6,7 +6,9 @@ import com.mygdx.game.MacroHardv2;
  * Created by Nayr on 12/3/2016.
  */
 
-//This interface is used to link between the GPS and libGDX
+/**
+ * This interface is used to link between the GPS and libGDX
+ */
 public interface ActionResolver {
     void SignIn();
     void SignOut();

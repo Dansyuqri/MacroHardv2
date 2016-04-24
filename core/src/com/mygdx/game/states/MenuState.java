@@ -13,8 +13,13 @@ import com.badlogic.gdx.Input.Keys;
 /**
  * Created by Syuqri on 3/7/2016.
  */
+
+/**
+ * This creates the main menu screen and buttons on it. The player can interact with the buttons
+ * with the methods implemented within this class
+ */
 public class MenuState extends State{
-    private Texture background,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, leaderboardBtnImage, loadingScreenImage;
+    private Texture background,instructionBtnImage,quickGameBtnImage, sendInviteBtnImage, invitationBtnImage, leaderboardBtnImage;
 
     private CustomButton instructionBtn, invitationBtn, sendInviteBtn, quickGameBtn, leaderboardBtn;
     private Vector3 touchPos = new Vector3(0,0,0);

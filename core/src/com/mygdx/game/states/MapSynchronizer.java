@@ -14,7 +14,10 @@ import static java.lang.Thread.sleep;
 /**
  * Created by hj on 5/4/16.
  */
-//The main purpose of this class is to syncrhonised the maps on both phones using various methods.
+
+/**
+ * The main purpose of this class is to syncrhonised the maps on both phones using various methods.
+ */
 public class MapSynchronizer extends Movable{
 
     private CountDownLatch HostL = new CountDownLatch(1);

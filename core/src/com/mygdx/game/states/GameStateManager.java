@@ -11,6 +11,10 @@ import java.util.Stack;
  * Created by Syuqri on 3/7/2016.
  */
 
+/**
+ * This class acts like a stack, in which it manages a stack of States, in order to run the entire
+ * game properly by pushing and popping the States in the stack
+ */
 public class GameStateManager {
     private AssetManager assetManager;
     private Stack<State> states;

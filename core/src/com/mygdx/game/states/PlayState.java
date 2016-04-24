@@ -50,6 +50,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by Syuqri on 3/7/2016.
  */
+
+/**
+ * This state allows for the game to run, and the player to play the game basically. It creates
+ * objects that can collide with players and initiates multiplayer messages to be sent through
+ * Google Play Server
+ */
 public abstract class PlayState extends State{
 
     //Synchronising

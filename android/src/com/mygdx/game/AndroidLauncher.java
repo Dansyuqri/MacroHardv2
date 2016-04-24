@@ -11,6 +11,9 @@ import com.google.example.games.basegameutils.GameHelper;
 
 import com.google.example.games.basegameutils.GameHelper.GameHelperListener;
 
+/**
+ * This class is run at the start of application launch
+ */
 public class AndroidLauncher extends AndroidApplication implements ActionResolver{
 	private GSGameHelper _gameHelper;
 

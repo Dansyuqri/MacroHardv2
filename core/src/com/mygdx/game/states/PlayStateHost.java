@@ -9,6 +9,9 @@ import java.util.Random;
 /**
  * Created by hj on 19/3/16.
  */
+/**
+ * This is for the player which is the host to start PlayState
+ */
 public class PlayStateHost extends PlayState {
 
     public PlayStateHost(GameStateManager gsm, int playerID){

@@ -8,10 +8,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 /**
  * Created by Syuqri on 21-Apr-16.
  */
+/**
+ * This allows for the loading screen to be implemented where necessary
+ */
 public class LoadingState extends State{
-    /**
-     * This allows for the loading screen to be implemented where necessary
-     */
+
     private Texture loadingScreenImage;
     private float graphicsX, graphicsY;
     private static volatile int timer = 0;

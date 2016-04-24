@@ -17,11 +17,12 @@ import com.mygdx.game.objects.CustomButton;
 /**
  * Created by Syuqri on 3/23/2016.
  */
+/**
+ * This state is used when the player has lost the game
+ * Displays the score the player has achieved and a main menu button to go back to main menu
+ */
 public class RestartState extends State{
-    /**
-     * This state is used when the player has lost the game
-     * Displays the score the player has achieved and a main menu button
-     */
+
     private Texture background,  mainMenuBtnImage;
     private CustomButton mainMenuBtn;
 

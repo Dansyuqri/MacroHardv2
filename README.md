@@ -1,6 +1,6 @@
 ## Introduction
 
-This is a project done during the **Elements of Software Construction** course. The project deliverables consist of a concurrent multiplayer game (set in Android) in which players are able to interact with each other in real time.
+This is a project done during the [**Elements of Software Construction**](http://people.sutd.edu.sg/~sunjun/teach/50-003-2016/) course. The project deliverables consist of a concurrent multiplayer game (set in Android) in which players are able to interact with each other in real time.
 At the end of the course, the game will potentially be pushed onto the Google Play Store.
 
 ## Project contents
@@ -54,6 +54,7 @@ After generating the library in the folder of your choice, AndroidLauncher will 
     - **Interface**
         - Collidable
     - **objects**
+        - ActivePowerIcon
         - Background
         - Boulder
         - CustomButton
@@ -64,22 +65,26 @@ After generating the library in the folder of your choice, AndroidLauncher will 
         - GameObject
         - Ghost
         - Hole
-        - Icon
+        - InnatePowerIcon
         - JoyStick
         - MagicCircle
         - Movable
         - Obstacle
         - Overlay
         - Player
+        - PlayerEffect
+        - Pointer
         - Power
         - Sand
         - SideWall
         - Spikes
         - Switch
+         -Troll
         - UI
     - **states**
         - GameStateManager
         - InstructionState
+        - LoadingState
         - MapMaker
         - MapSynchronizer
         - MenuState
@@ -88,9 +93,10 @@ After generating the library in the folder of your choice, AndroidLauncher will 
         - PlayStateHost
         - PlayStateNonHost
         - RestartState
+        - SplashState
         - State
     
-
+**Kindly refer to the individual classes for more information**
 
 ## Motivation
 
@@ -105,6 +111,8 @@ Request an invite to the Google Play Services game room list in order to play th
 Do change the directory of the storeFile found in the **build.gradle(Module: android)**
 
         storeFile file('C:/Users/User/Desktop/GDX/macrokey.jks')
+        
+**Android Emulator may not run the game if Google Play Services is not updated!**
 
 ## API Reference
 

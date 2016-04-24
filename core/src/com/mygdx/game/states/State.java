@@ -8,6 +8,10 @@ import com.badlogic.gdx.math.Vector3;
 /**
  * Created by Syuqri on 3/7/2016.
  */
+
+/**
+ * This abstract class allows the extended States to inherit the methods implemented
+ */
 public abstract class State{
     protected OrthographicCamera cam;
     protected Vector3 touch;
