@@ -104,6 +104,7 @@ This game was done as part of a project under the Elements of Software Construct
 
 ## Installation
 
+Please ensure your Android device's Version Release is at least 9.
 Simply pull the git repo and run the application either on an Android Emulator or your Android device.
 
 ##### Note 
